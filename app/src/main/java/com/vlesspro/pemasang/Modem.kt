@@ -43,6 +43,24 @@ object Modem {
         }
     }
 
+    fun muatNaik(data: ByteArray): Pair<Boolean, String> {
+        try {
+            val c = URL(url("/api/update/upload")).openConnection() as HttpURLConnection
+            c.connectTimeout = 5000
+            c.readTimeout = 360000
+            c.setRequestProperty("Authorization", "Basic " + Base64.encodeToString("admin:$pass".toByteArray(), Base64.NO_WRAP))
+            c.requestMethod = "POST"
+            c.doOutput = true
+            c.setFixedLengthStreamingMode(data.size)
+            c.outputStream.use { it.write(data) }
+            val kod = c.responseCode
+            val s = (if (kod < 400) c.inputStream else c.errorStream)?.bufferedReader()?.use { it.readText() }.orEmpty()
+            if (kod == 401) throw SalahKata()
+            val j = try { JSONObject(s) } catch (_: Exception) { JSONObject() }
+            return j.optBoolean("ok") to j.optString("msg").ifEmpty { "HTTP $kod" }
+        } catch (e: SalahKata) { throw e } catch (e: Exception) { throw TiadaSambungan(e.message ?: "Tiada sambungan") }
+    }
+
     fun obj(path: String, body: String? = null): JSONObject {
         val (_, s) = req(path, body)
         return try { JSONObject(s) } catch (_: Exception) { JSONObject() }

@@ -294,7 +294,7 @@ fun Utama2(pref: android.content.SharedPreferences, keluar: () -> Unit) {
                 }
             }
             Box(Modifier.weight(1f)) {
-                if (sub != null) Sub(sub!!, pref, keluar) { sub = null }
+                if (sub != null) Sub(sub!!, pref, keluar, { sub = it }) { sub = null }
                 else when (tab) {
                     0 -> Utama()
                     1 -> Profil()
@@ -391,7 +391,7 @@ fun Utama() {
             Text(if (s == null) "Menyambung ..." else if (on) "Anda disambung" else if (s.optString("mode") == "xlite") "VLESS Pro tidak aktif" else "Tiada sambungan",
                 fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = if (on) Wr.ac else Wr.tx)
             val ip = St.ipInfo
-            Text(if (on && ip != null) "${ip.optString("ip")} · ${ip.optString("country")} · ${ip.optInt("ms")} ms"
+            Text(if (on && ip != null) "${ip.optString("ip")} · ${ip.optString("country")}"
             else if (s != null && !on && s.optBoolean("xlite")) "XLITE sedang digunakan" else if (on) "Memeriksa IP ..." else "Sentuh butang untuk menyambung",
                 color = Wr.mu, fontSize = 14.sp)
         }
@@ -497,6 +497,7 @@ fun Cip(t: String, w: Color) {
 fun Profil() {
     var tambah by remember { mutableStateOf(false) }
     var padam by remember { mutableStateOf<Nod?>(null) }
+    var edit by remember { mutableStateOf<Pair<Nod, String>?>(null) }
     val ctx = LocalContext.current
 
     Box(Modifier.fillMaxSize()) {
@@ -535,7 +536,17 @@ fun Profil() {
                             Text(t, color = w, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                             Spacer(Modifier.width(8.dp))
                         }
-                        Text("✕", color = Wr.bad, fontSize = 18.sp, modifier = Modifier.clickable { padam = n }.padding(8.dp))
+                        Box {
+                            var m by remember { mutableStateOf(false) }
+                            Text("⋮", color = Wr.mu, fontSize = 22.sp, modifier = Modifier.clickable { m = true }.padding(horizontal = 10.dp, vertical = 4.dp))
+                            DropdownMenu(m, { m = false }) {
+                                DropdownMenuItem({ Text("Salin pautan") }, { m = false; bg {
+                                    val l = Modem.obj("/api/node/link?i=${n.i}").optString("link")
+                                    (ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(ClipData.newPlainText("pautan", l)); St.toast("Pautan disalin") } })
+                                DropdownMenuItem({ Text("Edit") }, { m = false; bg { edit = n to Modem.obj("/api/node/link?i=${n.i}").optString("link") } })
+                                DropdownMenuItem({ Text("Padam", color = Wr.bad) }, { m = false; padam = n })
+                            }
+                        }
                     }
                 }
             }
@@ -567,6 +578,13 @@ fun Profil() {
                 }) { Text("Tambah", color = Wr.ac) }
             },
             dismissButton = { TextButton(onClick = { tambah = false }) { Text("Batal", color = Wr.mu) } })
+    }
+    edit?.let { (nd, ln) ->
+        var t by remember { mutableStateOf(ln) }
+        AlertDialog(onDismissRequest = { edit = null }, containerColor = Wr.kad, title = { Text("Edit ${nd.nama}", color = Wr.tx) },
+            text = { OutlinedTextField(t, { t = it }, minLines = 4, maxLines = 8, modifier = Modifier.fillMaxWidth(), colors = medan()) },
+            confirmButton = { TextButton(onClick = { edit = null; bg { val (ok, m) = Modem.tindak("/api/node/edit", org.json.JSONObject().put("i", nd.i).put("link", t.trim()).toString()); St.toast(m.ifEmpty { if (ok) "Disimpan" else "Gagal" }); St.nod = Modem.nodes() } }) { Text("Simpan", color = Wr.ac) } },
+            dismissButton = { TextButton(onClick = { edit = null }) { Text("Batal", color = Wr.mu) } })
     }
     padam?.let { n ->
         AlertDialog(onDismissRequest = { padam = null }, containerColor = Wr.kad,
@@ -662,6 +680,11 @@ fun Baris(k: String, v: String) {
 fun Lagi(buka: (String) -> Unit) {
     val item = listOf(
         Triple("lesen", "Lesen", "Aktifkan dan semak"),
+        Triple("plus", "Feature Plus", "SQM, iklan, kuota, peranti"),
+        Triple("laluan", "Penghalaan", "Peraturan route"),
+        Triple("kumpulan", "Kumpulan", "Gabung beberapa profil"),
+        Triple("langganan", "Langganan", "Import pautan langganan"),
+        Triple("tetapan", "Tetapan", "DNS, mod, kata laluan"),
         Triple("kemas", "Kemas kini modem", "GitHub atau fail"),
         Triple("log", "Log", "Rekod sambungan"),
         Triple("sistem", "Sistem", "Maklumat modem"),
@@ -687,7 +710,7 @@ fun Lagi(buka: (String) -> Unit) {
 }
 
 @Composable
-fun Sub(id: String, pref: android.content.SharedPreferences, keluar: () -> Unit, tutup: () -> Unit) {
+fun Sub(id: String, pref: android.content.SharedPreferences, keluar: () -> Unit, ke: (String) -> Unit, tutup: () -> Unit) {
     val ctx = LocalContext.current
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -700,6 +723,17 @@ fun Sub(id: String, pref: android.content.SharedPreferences, keluar: () -> Unit,
                 "log" -> SubLog()
                 "sistem" -> SubSistem()
                 "apl" -> SubApl()
+                "plus" -> SubPlus(ke)
+                "sqm" -> SubSqm()
+                "adblock" -> SubAdblock()
+                "dev" -> SubPeranti()
+                "kuota" -> SubKuota()
+                "wan" -> SubWan()
+                "failover" -> SubFailover()
+                "laluan" -> SubLaluan()
+                "kumpulan" -> SubKumpulan()
+                "langganan" -> SubLangganan()
+                "tetapan" -> SubTetapan()
                 "pasang" -> {
                     var edisi by remember { mutableStateOf(if (Modem.ip == "192.168.1.1") Edisi.AW1000 else Edisi.B618) }
                     var ip by remember { mutableStateOf(Modem.ip.ifEmpty { edisi.ipLalai }) }
@@ -782,7 +816,7 @@ fun SubKemas() {
             Button(enabled = baru, onClick = { bg { val (ok, m) = Modem.kemasKini(false); St.toast(m.ifEmpty { if (ok) "Dimulakan" else "Gagal" }) } },
                 modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Wr.ac, contentColor = Color(0xFF03212B))) { Text("Kemas kini sekarang") }
         }
-        Text("Tiada internet pada modem? Gunakan fail .tgz melalui Lagi > Pasang / urus, atau sambung telefon ke modem dan pasang dari fail.", color = Wr.mu, fontSize = 12.sp)
+        KadFail()
     }
 }
 

@@ -1,0 +1,476 @@
+package com.vlesspro.pemasang
+
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
+
+@Composable
+fun Judul(t: String) = Text(t, fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
+
+@Composable
+fun Suis(t: String, on: Boolean, ubah: (Boolean) -> Unit) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(t, color = Wr.tx, modifier = Modifier.weight(1f))
+        Switch(on, ubah, colors = SwitchDefaults.colors(checkedTrackColor = Wr.ac, checkedThumbColor = Color(0xFF03212B)))
+    }
+}
+
+@Composable
+fun Btn(t: String, utama: Boolean = true, aktif: Boolean = true, klik: () -> Unit) {
+    Button(onClick = klik, enabled = aktif, modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = if (utama) Wr.ac else Wr.kad2, contentColor = if (utama) Color(0xFF03212B) else Wr.ac)) { Text(t, fontWeight = FontWeight.Bold) }
+}
+
+fun lapor(r: Pair<Boolean, String>) = St.toast(r.second.ifEmpty { if (r.first) "Siap" else "Gagal" })
+
+private fun JSONObject.post(path: String, o: JSONObject) = Modem.tindak(path, o.toString())
+
+@Composable
+fun <T> muat(sel: () -> T): MutableState<T?> {
+    val st = remember { mutableStateOf<T?>(null) }
+    LaunchedEffect(Unit) { withContext(Dispatchers.IO) { try { st.value = sel() } catch (_: Exception) {} } }
+    return st
+}
+
+// ───────────── Feature Plus hub ─────────────
+@Composable
+fun SubPlus(ke: (String) -> Unit) {
+    val it = listOf(
+        Triple("sqm", "SQM", "Had dan kawal lag"),
+        Triple("adblock", "Sekat iklan", "Senarai dan statistik"),
+        Triple("dev", "Peranti", "Siapa guna WiFi"),
+        Triple("kuota", "Kuota", "Had data bulanan"),
+        Triple("wan", "Tukar IP WAN", "Dapatkan IP baharu"),
+        Triple("failover", "Failover", "Tukar nod automatik"),
+    )
+    Halaman {
+        Judul("Feature Plus")
+        it.chunked(2).forEach { b ->
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                b.forEach { (id, t, d) -> Box(Modifier.weight(1f)) { KadWr(klik = { ke(id) }) {
+                    Text(t, color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 16.sp); Text(d, color = Wr.mu, fontSize = 12.sp) } } }
+                if (b.size == 1) Spacer(Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+@Composable
+fun SubSqm() {
+    val d = muat { Modem.obj("/api/sqm") }
+    var on by remember { mutableStateOf(false) }
+    var dn by remember { mutableStateOf("") }
+    var up by remember { mutableStateOf("") }
+    LaunchedEffect(d.value) { d.value?.optJSONObject("cfg")?.let { on = it.optBoolean("on"); dn = it.optDouble("down").toString(); up = it.optDouble("up").toString() } }
+    Halaman {
+        Judul("SQM")
+        val v = d.value
+        if (v != null && v.optBoolean("unsupported")) KadWr { Text("Ciri SQM belum disokong pada modem B618.", color = Wr.wn) }
+        else KadWr {
+            Text("Hadkan lebar jalur dan kurangkan lag. 0 = tiada had.", color = Wr.mu, fontSize = 13.sp)
+            Suis("Hidupkan SQM", on) { on = it }
+            OutlinedTextField(dn, { dn = it }, label = { Text("Muat turun (Mbit/s)") }, singleLine = true, modifier = Modifier.fillMaxWidth(), colors = medan(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(up, { up = it }, label = { Text("Muat naik (Mbit/s)") }, singleLine = true, modifier = Modifier.fillMaxWidth(), colors = medan(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
+            Spacer(Modifier.height(10.dp))
+            Btn("Simpan") { bg { lapor(Modem.tindak("/api/sqm", JSONObject().put("on", on).put("down", dn.toDoubleOrNull() ?: 0.0).put("up", up.toDoubleOrNull() ?: 0.0).toString())) } }
+            if (v != null) Text("Antara muka: ${v.optString("iface")} · ${if (v.optBoolean("active")) "aktif" else "tidak aktif"}", color = Wr.mu, fontSize = 12.sp)
+        }
+    }
+}
+
+@Composable
+fun SubAdblock() {
+    val d = muat { Modem.obj("/api/adblock") }
+    var on by remember { mutableStateOf(false) }
+    var sen by remember { mutableStateOf(setOf<String>()) }
+    var hitam by remember { mutableStateOf("") }
+    var putih by remember { mutableStateOf("") }
+    LaunchedEffect(d.value) {
+        d.value?.optJSONObject("cfg")?.let { c ->
+            on = c.optBoolean("on")
+            sen = (c.optJSONArray("lists") ?: JSONArray()).let { a -> (0 until a.length()).map { a.getString(it) }.toSet() }
+            hitam = (c.optJSONArray("black") ?: JSONArray()).let { a -> (0 until a.length()).joinToString("\n") { a.getString(it) } }
+            putih = (c.optJSONArray("white") ?: JSONArray()).let { a -> (0 until a.length()).joinToString("\n") { a.getString(it) } }
+        }
+    }
+    fun senarai(t: String) = JSONArray(t.split(Regex("[\\s,]+")).filter { it.isNotBlank() })
+    Halaman {
+        Judul("Sekat iklan")
+        val v = d.value
+        KadWr {
+            Suis("Hidupkan sekat iklan", on) { on = it }
+            val lists = v?.optJSONArray("lists")
+            if (lists != null) for (i in 0 until lists.length()) {
+                val l = lists.getJSONObject(i)
+                val id = l.optString("id")
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(id in sen, { c -> sen = if (c) sen + id else sen - id }, colors = CheckboxDefaults.colors(checkedColor = Wr.ac))
+                    Column { Text(l.optString("name"), color = Wr.tx, fontSize = 14.sp); Text("${l.optInt("n")} domain", color = Wr.mu, fontSize = 11.sp) }
+                }
+            }
+            OutlinedTextField(hitam, { hitam = it }, label = { Text("Senarai hitam tambahan") }, minLines = 2, modifier = Modifier.fillMaxWidth(), colors = medan())
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(putih, { putih = it }, label = { Text("Senarai putih (dikecualikan)") }, minLines = 2, modifier = Modifier.fillMaxWidth(), colors = medan())
+            Spacer(Modifier.height(10.dp))
+            Btn("Simpan") { bg { lapor(Modem.tindak("/api/adblock", JSONObject().put("on", on).put("lists", JSONArray(sen.toList())).put("black", senarai(hitam)).put("white", senarai(putih)).toString())) } }
+            Spacer(Modifier.height(8.dp))
+            Btn("Kemas kini senarai", false) { bg { lapor(Modem.tindak("/api/adblock/update")) } }
+        }
+        v?.let {
+            KadWr {
+                Baris("Domain disekat dalam senarai", it.optInt("total").toString())
+                val t = it.optJSONObject("stats")?.optJSONObject("today")
+                if (t != null) { Baris("Soalan hari ini", t.optInt("q").toString()); Baris("Disekat hari ini", t.optInt("b").toString()) }
+                val top = it.optJSONObject("stats")?.optJSONArray("top")
+                if (top != null && top.length() > 0) {
+                    Spacer(Modifier.height(6.dp)); Text("Paling banyak disekat", color = Wr.mu, fontSize = 12.sp)
+                    for (i in 0 until minOf(top.length(), 8)) { val o = top.getJSONObject(i); Baris(o.optString("d"), o.optInt("n").toString()) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SubPeranti() {
+    var senarai by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
+    var ubah by remember { mutableStateOf<JSONObject?>(null) }
+    fun muatSemula() = bg { val a = Modem.obj("/api/devices").optJSONArray("devs") ?: JSONArray(); senarai = (0 until a.length()).map { a.getJSONObject(it) } }
+    LaunchedEffect(Unit) { muatSemula() }
+    Halaman {
+        Judul("Peranti")
+        Text("${senarai.size} peranti disambung", color = Wr.mu)
+        senarai.forEach { o ->
+            KadWr(klik = { ubah = o }) {
+                Text(o.optString("name").ifEmpty { o.optString("host").ifEmpty { "(tanpa nama)" } }, color = Wr.tx, fontWeight = FontWeight.Bold)
+                Text("${o.optString("ip")} · ${o.optString("mac")}", color = Wr.mu, fontSize = 12.sp)
+            }
+        }
+    }
+    ubah?.let { o ->
+        var n by remember { mutableStateOf(o.optString("name")) }
+        AlertDialog(onDismissRequest = { ubah = null }, containerColor = Wr.kad, title = { Text("Namakan peranti", color = Wr.tx) },
+            text = { OutlinedTextField(n, { n = it }, singleLine = true, label = { Text(o.optString("mac")) }, colors = medan()) },
+            confirmButton = { TextButton(onClick = { ubah = null; bg { lapor(Modem.tindak("/api/devices/name", JSONObject().put("mac", o.optString("mac")).put("name", n).toString())); muatSemula() } }) { Text("Simpan", color = Wr.ac) } },
+            dismissButton = { TextButton(onClick = { ubah = null }) { Text("Batal", color = Wr.mu) } })
+    }
+}
+
+@Composable
+fun SubKuota() {
+    val d = muat { Modem.obj("/api/quota") }
+    var on by remember { mutableStateOf(false) }
+    var had by remember { mutableStateOf("") }
+    var tempoh by remember { mutableStateOf("month") }
+    var rday by remember { mutableStateOf("1") }
+    var potong by remember { mutableStateOf(false) }
+    LaunchedEffect(d.value) { d.value?.optJSONObject("cfg")?.let { on = it.optBoolean("on"); had = it.optDouble("limit").toString(); tempoh = it.optString("period").ifEmpty { "month" }; rday = it.optInt("rday", 1).toString(); potong = it.optBoolean("cut") } }
+    Halaman {
+        Judul("Kuota")
+        d.value?.let { v ->
+            KadWr {
+                val used = v.optDouble("used"); val lim = v.optJSONObject("cfg")?.optDouble("limit") ?: 0.0
+                Baris("Digunakan", "%.2f GB".format(used) + if (lim > 0) " / %.0f GB".format(lim) else "")
+                if (lim > 0) LinearProgressIndicator(progress = { (used / lim).toFloat().coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth().height(8.dp), color = Wr.ac, trackColor = Wr.garis)
+                Baris("Keadaan", when (v.optString("state")) { "full" -> "Habis"; "warn" -> "Hampir habis"; "ok" -> "Baik"; else -> "Mati" })
+            }
+        }
+        KadWr {
+            Suis("Hidupkan kuota", on) { on = it }
+            OutlinedTextField(had, { had = it }, label = { Text("Had (GB)") }, singleLine = true, modifier = Modifier.fillMaxWidth(), colors = medan(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(tempoh == "month", { tempoh = "month" }, label = { Text("Bulanan") })
+                FilterChip(tempoh == "day", { tempoh = "day" }, label = { Text("Harian") })
+            }
+            if (tempoh == "month") OutlinedTextField(rday, { rday = it }, label = { Text("Hari reset (1-28)") }, singleLine = true, modifier = Modifier.fillMaxWidth(), colors = medan(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+            Suis("Putuskan internet bila habis", potong) { potong = it }
+            Btn("Simpan") { bg { lapor(Modem.tindak("/api/quota", JSONObject().put("on", on).put("limit", had.toDoubleOrNull() ?: 0.0).put("period", tempoh).put("rday", rday.toIntOrNull() ?: 1).put("cut", potong).toString())) } }
+            Spacer(Modifier.height(8.dp))
+            Btn("Set semula pengiraan", false) { bg { lapor(Modem.tindak("/api/quota/reset")) } }
+        }
+    }
+}
+
+@Composable
+fun SubWan() {
+    var s by remember { mutableStateOf<JSONObject?>(null) }
+    LaunchedEffect(Unit) { while (true) { withContext(Dispatchers.IO) { try { s = Modem.obj("/api/wanip") } catch (_: Exception) {} }; delay(2500) } }
+    Halaman {
+        Judul("Tukar IP WAN")
+        KadWr {
+            val v = s
+            if (v != null && v.optBoolean("unsupported")) Text("Belum disokong pada modem B618.", color = Wr.wn)
+            else {
+                Baris("Keadaan", when (v?.optString("state")) { "running" -> "Sedang berjalan"; "done" -> "Siap"; "fail" -> "Gagal"; else -> "Sedia" })
+                v?.optString("step")?.takeIf { it.isNotEmpty() }?.let { Text(it, color = Wr.mu, fontSize = 12.sp) }
+                v?.optString("before")?.takeIf { it.isNotEmpty() }?.let { Baris("IP sebelum", it) }
+                v?.optString("after")?.takeIf { it.isNotEmpty() }?.let { Baris("IP selepas", it) }
+                v?.optString("msg")?.takeIf { it.isNotEmpty() }?.let { Text(it, color = Wr.mu, fontSize = 12.sp) }
+                Spacer(Modifier.height(10.dp))
+                Btn("Tukar IP sekarang", aktif = v?.optString("state") != "running") { bg { lapor(Modem.tindak("/api/wanip/run")) } }
+                Text("Internet terhenti seketika semasa IP ditukar.", color = Wr.mu, fontSize = 12.sp)
+            }
+        }
+    }
+}
+
+@Composable
+fun SubFailover() {
+    val d = muat { Modem.obj("/api/failover") }
+    var on by remember { mutableStateOf(false) }
+    LaunchedEffect(d.value) { on = d.value?.optJSONObject("cfg")?.optBoolean("on") ?: false }
+    Halaman {
+        Judul("Failover")
+        KadWr {
+            Text("Jika nod semasa gagal, tukar ke nod lain secara automatik.", color = Wr.mu, fontSize = 13.sp)
+            Suis("Hidupkan failover", on) { on = it }
+            Btn("Simpan") { bg { lapor(Modem.tindak("/api/failover", JSONObject().put("on", on).toString())) } }
+            d.value?.let { Baris("Nod semasa", it.optString("cur").ifEmpty { "-" }); Baris("Jumlah nod", it.optInt("n").toString()) }
+        }
+        val log = d.value?.optJSONArray("log")
+        if (log != null && log.length() > 0) KadWr {
+            Text("Rekod terkini", color = Wr.mu, fontSize = 12.sp)
+            for (i in 0 until minOf(log.length(), 8)) { val o = log.getJSONObject(i); Text(o.optString("msg").ifEmpty { o.toString() }, color = Wr.tx, fontSize = 12.sp) }
+        }
+    }
+}
+
+// ───────────── Penghalaan ─────────────
+@Composable
+fun SubLaluan() {
+    val d = muat { Modem.obj("/api/routes") }
+    var ds by remember { mutableStateOf("AsIs") }
+    var peraturan by remember { mutableStateOf<List<Triple<String, String, String>>>(emptyList()) }
+    var jenis by remember { mutableStateOf("domain") }
+    var nilai by remember { mutableStateOf("") }
+    var tindakan by remember { mutableStateOf("direct") }
+    var langsung by remember { mutableStateOf("") }
+    LaunchedEffect(d.value) {
+        d.value?.let { v ->
+            ds = v.optString("ds").ifEmpty { "AsIs" }
+            val a = v.optJSONArray("rules") ?: JSONArray()
+            peraturan = (0 until a.length()).map { val o = a.getJSONObject(it); Triple(o.optString("t"), o.optString("v"), o.optString("a")) }
+        }
+        withContext(Dispatchers.IO) { try { langsung = Modem.obj("/api/direct").optString("text") } catch (_: Exception) {} }
+    }
+    Halaman {
+        Judul("Penghalaan")
+        KadWr {
+            Text("Strategi domain", color = Wr.mu, fontSize = 12.sp)
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                listOf("AsIs", "IPIfNonMatch", "IPOnDemand").forEach { FilterChip(ds == it, { ds = it }, label = { Text(it, fontSize = 11.sp) }) }
+            }
+        }
+        KadWr {
+            Text("Peraturan (${peraturan.size})", color = Wr.tx, fontWeight = FontWeight.Bold)
+            peraturan.forEachIndexed { i, (t, v, a) ->
+                Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text("$t: $v", color = Wr.tx, fontSize = 13.sp, modifier = Modifier.weight(1f), maxLines = 1)
+                    Text(when (a) { "direct" -> "Terus"; "proxy" -> "Proksi"; else -> "Sekat" }, color = if (a == "block") Wr.bad else if (a == "proxy") Wr.ac else Wr.ok, fontSize = 12.sp)
+                }
+                TextButton(onClick = { peraturan = peraturan.filterIndexed { j, _ -> j != i } }, contentPadding = PaddingValues(0.dp)) { Text("Buang peraturan ini", color = Wr.mu, fontSize = 11.sp) }
+            }
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { listOf("domain", "keyword", "ip", "geosite", "geoip").forEach { FilterChip(jenis == it, { jenis = it }, label = { Text(it, fontSize = 11.sp) }) } }
+            OutlinedTextField(nilai, { nilai = it.trim() }, singleLine = true, label = { Text("Nilai (cth: google.com, cn, 10.0.0.0/8)") }, modifier = Modifier.fillMaxWidth(), colors = medan())
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { listOf("direct" to "Terus", "proxy" to "Proksi", "block" to "Sekat").forEach { (k, t) -> FilterChip(tindakan == k, { tindakan = k }, label = { Text(t) }) } }
+            Spacer(Modifier.height(6.dp))
+            Btn("Tambah peraturan", false, nilai.isNotEmpty()) { peraturan = peraturan + Triple(jenis, nilai, tindakan); nilai = "" }
+            Spacer(Modifier.height(8.dp))
+            Btn("Simpan penghalaan") {
+                val rs = JSONArray(); peraturan.forEach { (t, v, a) -> rs.put(JSONObject().put("t", t).put("v", v).put("a", a)) }
+                bg { lapor(Modem.tindak("/api/routes", JSONObject().put("ds", ds).put("rules", rs).toString())) }
+            }
+        }
+        KadWr {
+            Text("Domain/IP sambung terus (pintasan)", color = Wr.tx, fontWeight = FontWeight.Bold)
+            OutlinedTextField(langsung, { langsung = it }, minLines = 3, modifier = Modifier.fillMaxWidth(), colors = medan())
+            Spacer(Modifier.height(8.dp))
+            Btn("Simpan senarai terus", false) { bg { lapor(Modem.tindak("/api/direct", langsung)) } }
+        }
+    }
+}
+
+// ───────────── Kumpulan & Langganan ─────────────
+@Composable
+fun SubKumpulan() {
+    var gs by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
+    var baru by remember { mutableStateOf(false) }
+    fun m() = bg { val a = Modem.arr("/api/groups"); gs = (0 until a.length()).map { a.getJSONObject(it) }; St.nod = Modem.nodes() }
+    LaunchedEffect(Unit) { m() }
+    Halaman {
+        Judul("Kumpulan")
+        Text("Gabungkan beberapa profil. Pilih satu kumpulan untuk menukar secara automatik.", color = Wr.mu, fontSize = 13.sp)
+        gs.forEach { g ->
+            KadWr {
+                Text((if (g.optBoolean("sel")) "✓ " else "") + g.optString("name"), color = if (g.optBoolean("sel")) Wr.ac else Wr.tx, fontWeight = FontWeight.Bold)
+                val a = g.optJSONArray("members") ?: JSONArray()
+                Text((0 until a.length()).joinToString(", ") { a.getString(it) } + " · " + g.optString("strat"), color = Wr.mu, fontSize = 12.sp)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(onClick = { bg { lapor(Modem.tindak("/api/group/use", g.optInt("i").toString())); m() } }) { Text("Guna", color = Wr.ac) }
+                    TextButton(onClick = { bg { lapor(Modem.tindak("/api/group/del", g.optInt("i").toString())); m() } }) { Text("Padam", color = Wr.bad) }
+                }
+            }
+        }
+        Btn("Cipta kumpulan") { baru = true }
+    }
+    if (baru) {
+        var nama by remember { mutableStateOf("") }
+        var strat by remember { mutableStateOf("leastPing") }
+        var pilih by remember { mutableStateOf(setOf<String>()) }
+        AlertDialog(onDismissRequest = { baru = false }, containerColor = Wr.kad, title = { Text("Kumpulan baharu", color = Wr.tx) },
+            text = {
+                Column {
+                    OutlinedTextField(nama, { nama = it }, singleLine = true, label = { Text("Nama") }, colors = medan())
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) { listOf("leastPing" to "Ping", "random" to "Rawak", "roundRobin" to "Bergilir").forEach { (k, t) -> FilterChip(strat == k, { strat = k }, label = { Text(t, fontSize = 11.sp) }) } }
+                    St.nod.forEach { n -> Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(n.nama in pilih, { c -> pilih = if (c) pilih + n.nama else pilih - n.nama }); Text(n.nama, color = Wr.tx, fontSize = 13.sp) } }
+                }
+            },
+            confirmButton = {
+                TextButton(enabled = nama.isNotBlank() && pilih.size >= 2, onClick = {
+                    baru = false
+                    bg {
+                        val ids = St.nod.filter { it.nama in pilih }.map { Modem.obj("/api/node/link?i=${it.i}").optString("link") }.filter { it.isNotEmpty() }
+                        lapor(Modem.tindak("/api/group/add", JSONObject().put("name", nama).put("strat", strat).put("members", JSONArray(ids.map { idPautan(it) })).toString())); m()
+                    }
+                }) { Text("Cipta", color = Wr.ac) }
+            },
+            dismissButton = { TextButton(onClick = { baru = false }) { Text("Batal", color = Wr.mu) } })
+    }
+}
+
+/** Sama seperti nid() di modem: 4 bait pertama SHA-1 pautan (hex). */
+fun idPautan(l: String): String = java.security.MessageDigest.getInstance("SHA-1").digest(l.trim().toByteArray()).take(4).joinToString("") { "%02x".format(it) }
+
+@Composable
+fun SubLangganan() {
+    var ss by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
+    var baru by remember { mutableStateOf(false) }
+    fun m() = bg { val a = Modem.arr("/api/subs"); ss = (0 until a.length()).map { a.getJSONObject(it) }; St.nod = Modem.nodes() }
+    LaunchedEffect(Unit) { m() }
+    Halaman {
+        Judul("Langganan")
+        ss.forEach { s ->
+            KadWr {
+                Text(s.optString("name"), color = Wr.tx, fontWeight = FontWeight.Bold)
+                Text("${s.optInt("count")} profil", color = Wr.mu, fontSize = 12.sp)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(onClick = { St.toast("Mengemas kini ..."); bg { lapor(Modem.tindak("/api/sub/refresh", s.optInt("i").toString())); m() } }) { Text("Kemas kini", color = Wr.ac) }
+                    TextButton(onClick = { bg { lapor(Modem.tindak("/api/sub/del", s.optInt("i").toString())); m() } }) { Text("Padam", color = Wr.bad) }
+                }
+            }
+        }
+        Btn("Tambah langganan") { baru = true }
+    }
+    if (baru) {
+        var nama by remember { mutableStateOf("") }
+        var url by remember { mutableStateOf("") }
+        AlertDialog(onDismissRequest = { baru = false }, containerColor = Wr.kad, title = { Text("Langganan baharu", color = Wr.tx) },
+            text = { Column { OutlinedTextField(nama, { nama = it }, singleLine = true, label = { Text("Nama") }, colors = medan()); Spacer(Modifier.height(8.dp)); OutlinedTextField(url, { url = it.trim() }, label = { Text("URL langganan (http...)") }, colors = medan()) } },
+            confirmButton = { TextButton(enabled = url.startsWith("http"), onClick = { baru = false; St.toast("Mengimport ..."); bg { lapor(Modem.tindak("/api/sub/add", JSONObject().put("name", nama).put("url", url).toString())); m() } }) { Text("Tambah", color = Wr.ac) } },
+            dismissButton = { TextButton(onClick = { baru = false }) { Text("Batal", color = Wr.mu) } })
+    }
+}
+
+// ───────────── Tetapan ─────────────
+@Composable
+fun SubTetapan() {
+    val o = muat { Modem.obj("/api/opts") }
+    val st = muat { Modem.obj("/api/settings") }
+    var auto by remember { mutableStateOf(true) }
+    var dns by remember { mutableStateOf("") }
+    var ping by remember { mutableStateOf("") }
+    var reboot by remember { mutableStateOf("") }
+    var mod by remember { mutableStateOf("redirect") }
+    var kata by remember { mutableStateOf("") }
+    var hook by remember { mutableStateOf(false) }
+    val ctx = LocalContext.current
+    LaunchedEffect(o.value) { o.value?.let { auto = it.optBoolean("autorecon"); dns = it.optString("dns"); ping = it.optString("pingurl"); reboot = it.optString("reboot"); mod = it.optString("vpnmode").ifEmpty { "redirect" } } }
+    LaunchedEffect(st.value) { hook = st.value?.optBoolean("hook") ?: false }
+    Halaman {
+        Judul("Tetapan")
+        KadWr {
+            Suis("Sambung semula automatik", auto) { auto = it }
+            OutlinedTextField(dns, { dns = it.trim() }, singleLine = true, label = { Text("DNS (kosong = lalai, cth 1.1.1.1)") }, modifier = Modifier.fillMaxWidth(), colors = medan())
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(ping, { ping = it.trim() }, singleLine = true, label = { Text("URL ujian sambungan") }, modifier = Modifier.fillMaxWidth(), colors = medan())
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(reboot, { reboot = it.trim() }, singleLine = true, label = { Text("But semula harian (HH:MM, kosong = mati)") }, modifier = Modifier.fillMaxWidth(), colors = medan())
+            Text("Mod VPN", color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                listOf("redirect", "tproxy", "tun").forEach { m ->
+                    val ok = when (m) { "tproxy" -> o.value?.optBoolean("cap_tproxy") ?: false; "tun" -> o.value?.optBoolean("cap_tun") ?: false; else -> true }
+                    FilterChip(mod == m, { mod = m }, enabled = ok, label = { Text(m) })
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+            Btn("Simpan tetapan") { bg { lapor(Modem.tindak("/api/opts", JSONObject().put("autorecon", auto).put("dns", dns).put("qs", o.value?.optString("qs").orEmpty().ifEmpty { "UseIP" }).put("pingurl", ping).put("loglevel", o.value?.optString("loglevel").orEmpty().ifEmpty { "warning" }).put("reboot", reboot).put("vpnmode", mod).toString())) } }
+        }
+        KadWr {
+            Suis("Suis boot (mula automatik selepas modem hidup)", hook) { hook = it; bg { lapor(Modem.tindak("/api/hook", if (it) "on" else "off")) } }
+            st.value?.let { Baris("Versi VLESS Pro", "v" + it.optString("version")); Baris("Edisi", it.optString("edisi")); Baris("MAC", it.optString("mac")) }
+        }
+        KadWr {
+            Text("Tukar kata laluan panel", color = Wr.tx, fontWeight = FontWeight.Bold)
+            OutlinedTextField(kata, { kata = it }, singleLine = true, label = { Text("Kata laluan baharu (min 6)") }, modifier = Modifier.fillMaxWidth(), colors = medan())
+            Spacer(Modifier.height(8.dp))
+            Btn("Tukar", aktif = kata.length >= 6) {
+                val k = kata
+                bg { val r = Modem.tukarKata(k); lapor(r); if (r.first) { ctx.getSharedPreferences("vp", Context.MODE_PRIVATE).edit().putString("pass", k).apply(); kata = "" } }
+            }
+        }
+    }
+}
+
+// ───────────── Kemas kini modem dari fail .tgz ─────────────
+@Composable
+fun KadFail() {
+    val ctx = LocalContext.current
+    var teks by remember { mutableStateOf("") }
+    val pilih = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            teks = "Membaca fail ..."
+            bg {
+                val data = ctx.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: ByteArray(0)
+                if (data.isEmpty()) { teks = "Fail kosong"; return@bg }
+                teks = "Menghantar ${data.size / 1024} KB ke modem ..."
+                val r = Modem.muatNaik(data)
+                teks = r.second
+                St.toast(r.second)
+            }
+        }
+    }
+    KadWr {
+        Text("Pasang dari fail .tgz (tanpa internet)", color = Wr.tx, fontWeight = FontWeight.Bold)
+        Text("Pilih fail vlesspro-…-kemaskini.tgz yang sepadan dengan modem anda. Pakej disahkan tandatangannya oleh modem sebelum dipasang.", color = Wr.mu, fontSize = 12.sp)
+        Spacer(Modifier.height(8.dp))
+        Btn("Pilih fail .tgz") { pilih.launch(arrayOf("*/*")) }
+        if (teks.isNotEmpty()) Text(teks, color = Wr.ac, fontSize = 12.sp)
+    }
+}
