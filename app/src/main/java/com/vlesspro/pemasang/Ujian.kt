@@ -86,29 +86,38 @@ object Ujian {
         h += if (vless) Wr.ok to Bhs.t("VLESS Pro hidup.")
         else Wr.wn to Bhs.t("VLESS Pro tidak aktif. Trafik guna VPN asal atau SIM asal.")
 
-        var tel = ""
-        var ms = -1L
-        try {
-            val t0 = System.currentTimeMillis()
-            val c = URL("https://api.ipify.org").openConnection() as HttpURLConnection
-            c.connectTimeout = 6000
-            c.readTimeout = 6000
-            tel = c.inputStream.bufferedReader().use { it.readText() }.trim()
-            ms = System.currentTimeMillis() - t0
-        } catch (_: Exception) {}
+        // IP melalui WiFi modem (dipaksa) dan IP lalai telefon (yang digunakan apl lain).
+        fun ipLuar(n: Network?): Pair<String, Long> {
+            return try {
+                val t0 = System.currentTimeMillis()
+                val u = URL("https://api.ipify.org")
+                val c = (if (n != null) n.openConnection(u) else u.openConnection()) as HttpURLConnection
+                c.connectTimeout = 6000
+                c.readTimeout = 6000
+                val ip = c.inputStream.bufferedReader().use { it.readText() }.trim()
+                ip to (System.currentTimeMillis() - t0)
+            } catch (_: Exception) { "" to -1L }
+        }
+        val wf = Rangkaian.wifi(ctx)
+        val (ipWifi, msWifi) = if (wf != null) ipLuar(wf) else ("" to -1L)
+        val (ipLalai, msLalai) = ipLuar(null)
+        val tel = ipWifi.ifEmpty { ipLalai }
+        val ms = if (ipWifi.isNotEmpty()) msWifi else msLalai
         if (tel.isEmpty()) {
             h += Wr.bad to Bhs.t("Telefon tidak dapat capai internet.")
             return h
         }
-        h += Wr.tx to Bhs.f("IP telefon: {0} ({1} ms)", tel, ms)
+        h += Wr.tx to (if (ipWifi.isNotEmpty()) Bhs.f("IP melalui WiFi modem: {0} ({1} ms)", ipWifi, msWifi) else Bhs.f("IP telefon: {0} ({1} ms)", ipLalai, msLalai))
+        if (ipWifi.isNotEmpty() && ipLalai.isNotEmpty() && ipWifi != ipLalai)
+            h += Wr.bad to Bhs.f("Apl lain pada telefon guna IP {0}, bukan WiFi modem. Matikan data mudah alih.", ipLalai)
 
         val info = try { Modem.obj("/api/ip?force=1") } catch (_: Exception) { null }
         val ipM = info?.optString("ip").orEmpty()
         val neg = info?.optString("country").orEmpty()
         if (vless) {
             if (ipM.isEmpty()) h += Wr.wn to Bhs.t("IP keluar VLESS belum dapat disemak.")
-            else if (tel == ipM) h += Wr.ok to Bhs.f("Trafik telefon melalui VLESS Pro. IP keluar: {0} {1}", ipM, neg).trim()
-            else h += Wr.bad to Bhs.f("IP telefon berbeza daripada IP VLESS ({0}). Trafik telefon tidak melalui VLESS Pro.", ipM)
+            else if (tel == ipM) h += Wr.ok to Bhs.f("WiFi modem melalui VLESS Pro. IP keluar: {0} {1}", ipM, neg).trim()
+            else h += Wr.bad to Bhs.f("IP telefon berbeza daripada IP VLESS ({0}). Trafik ini tidak melalui VLESS Pro.", ipM)
         } else {
             h += Wr.tx to Bhs.t("Trafik guna sambungan asal, bukan VLESS Pro.")
         }

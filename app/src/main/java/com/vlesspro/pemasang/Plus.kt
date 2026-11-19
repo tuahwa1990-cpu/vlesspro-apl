@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -300,7 +301,7 @@ fun SubLaluan() {
                 TextButton(onClick = { peraturan = peraturan.filterIndexed { j, _ -> j != i } }, contentPadding = PaddingValues(0.dp)) { Text("Buang peraturan ini", color = Wr.mu, fontSize = 11.sp) }
             }
             Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { listOf("domain", "keyword", "ip", "geosite", "geoip").forEach { FilterChip(jenis == it, { jenis = it }, label = { Text(it, fontSize = 11.sp) }) } }
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) { listOf("domain", "keyword", "ip", "geosite", "geoip").forEach { FilterChip(jenis == it, { jenis = it }, label = { Text(it, fontSize = 11.sp) }) } }
             OutlinedTextField(nilai, { nilai = it.trim() }, singleLine = true, label = { Text("Nilai (cth: google.com, cn, 10.0.0.0/8)") }, modifier = Modifier.fillMaxWidth(), colors = medan())
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { listOf("direct" to "Terus", "proxy" to "Proksi", "block" to "Sekat").forEach { (k, t) -> FilterChip(tindakan == k, { tindakan = k }, label = { Text(t) }) } }
             Spacer(Modifier.height(6.dp))

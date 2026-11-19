@@ -894,7 +894,13 @@
   "Bar kemajuan untuk muat turun, penghantaran ke modem dan langkah pemasangan, termasuk kemas kini apl.": "Progress bars for downloads, sending to the modem and install steps, including app updates.",
   "Amaran jika telefon guna data mudah alih, dan pemasangan diikat kepada WiFi modem supaya tidak terputus.": "A warning if the phone is using mobile data, and installs are bound to the modem WiFi so they do not drop.",
   "Jika sambungan ke modem terputus, pemasangan cuba sekali lagi secara automatik.": "If the connection to the modem drops, the install automatically retries once.",
-  "Butang Uji sambungan di skrin utama: semak WiFi, status VLESS Pro, IP telefon dan sama ada trafik melalui VLESS Pro.": "A Test connection button on the home screen: checks WiFi, VLESS Pro status, phone IP and whether traffic goes through VLESS Pro."
+  "Butang Uji sambungan di skrin utama: semak WiFi, status VLESS Pro, IP telefon dan sama ada trafik melalui VLESS Pro.": "A Test connection button on the home screen: checks WiFi, VLESS Pro status, phone IP and whether traffic goes through VLESS Pro.",
+  "IP melalui WiFi modem: {0} ({1} ms)": "IP via modem WiFi: {0} ({1} ms)",
+  "Apl lain pada telefon guna IP {0}, bukan WiFi modem. Matikan data mudah alih.": "Other apps on the phone use IP {0}, not the modem WiFi. Turn off mobile data.",
+  "WiFi modem melalui VLESS Pro. IP keluar: {0} {1}": "The modem WiFi goes through VLESS Pro. Exit IP: {0} {1}",
+  "IP telefon berbeza daripada IP VLESS ({0}). Trafik ini tidak melalui VLESS Pro.": "The phone IP differs from the VLESS IP ({0}). This traffic is not going through VLESS Pro.",
+  "Uji sambungan kini menguji melalui WiFi modem secara khusus dan memberi amaran jika apl lain guna data mudah alih.": "Test connection now tests through the modem WiFi specifically and warns if other apps use mobile data.",
+  "Butang jenis peraturan laluan (domain, keyword, ip, geosite, geoip) tidak lagi terpotong.": "The routing rule type buttons (domain, keyword, ip, geosite, geoip) are no longer cut off."
  },
  "zh": {
   "Mod VPN": "VPN 模式",
