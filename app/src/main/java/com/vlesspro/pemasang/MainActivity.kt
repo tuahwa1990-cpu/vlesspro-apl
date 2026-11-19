@@ -14,7 +14,21 @@ import android.webkit.URLUtil
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
+import android.webkit.JavascriptInterface
 import android.widget.EditText
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
+import java.net.HttpURLConnection
+import java.net.URL
+import org.json.JSONObject
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -75,6 +89,12 @@ fun Utama() {
     var ralat by remember { mutableStateOf<String?>(null) }
     var kemas by remember { mutableStateOf<InfoApl?>(null) }
     var mengemas by remember { mutableStateOf(false) }
+    var mula by remember { mutableStateOf(true) }
+    var mencari by remember { mutableStateOf(false) }
+    var vlessHidup by remember { mutableStateOf<Boolean?>(null) }
+    var lesenTeks by remember { mutableStateOf("") }
+    var nodNama by remember { mutableStateOf("") }
+    val haptik = LocalHapticFeedback.current
     var pilihCb by remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
     val pilih = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         pilihCb?.onReceiveValue(if (uri != null) arrayOf(uri) else null); pilihCb = null
@@ -86,6 +106,30 @@ fun Utama() {
     val web = remember {
         WebView(ctx).apply {
             setBackgroundColor(0xFF111114.toInt())
+            addJavascriptInterface(object {
+                @JavascriptInterface fun s(t: String) {
+                    try {
+                        val j = JSONObject(t)
+                        vlessHidup = j.optBoolean("vless")
+                        nodNama = j.optString("node", "")
+                        val l = j.optJSONObject("lic")
+                        val st = l?.optString("state").orEmpty()
+                        val exp = l?.optString("exp").orEmpty()
+                        lesenTeks = when {
+                            st == "active" && (exp == "0" || exp.isEmpty()) -> "Lesen seumur hidup"
+                            st == "active" -> {
+                                val f = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.US)
+                                val d = f.parse(exp)
+                                val baki = if (d != null) ((d.time - System.currentTimeMillis()) / 86400000L + 1).toInt() else -1
+                                if (baki >= 0) "Lesen: $baki hari lagi" else "Lesen aktif"
+                            }
+                            st == "expired" -> "Lesen luput"
+                            st == "none" || st.isEmpty() -> "Belum ada lesen"
+                            else -> "Lesen: $st"
+                        }
+                    } catch (_: Exception) {}
+                }
+            }, "VPApp")
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.useWideViewPort = true
@@ -160,6 +204,33 @@ fun Utama() {
         }
     }
     DisposableEffect(Unit) { onDispose { web.destroy() } }
+    fun ada(h: String): Boolean = try {
+        val c = URL("http://$h:8990/api/status").openConnection() as HttpURLConnection
+        c.connectTimeout = 1500; c.readTimeout = 1500
+        c.responseCode > 0
+    } catch (_: Exception) { false }
+
+    // Cari modem: cuba IP tersimpan dahulu, kemudian dua IP lalai.
+    fun kesan(selesai: () -> Unit) {
+        mencari = true
+        Thread {
+            val calon = (listOf(ip) + Edisi.values().map { it.ipLalai }).distinct()
+            val jumpa = calon.firstOrNull { ada(it) }
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                if (jumpa != null) {
+                    val perluMuat = jumpa != ip || ralat != null
+                    ip = jumpa
+                    Edisi.values().firstOrNull { it.ipLalai == jumpa }?.let { edisi = it }
+                    simpan()
+                    ralat = null
+                    if (perluMuat) web.loadUrl(panelUrl())
+                }
+                mencari = false
+                selesai()
+            }
+        }.start()
+    }
+
     BackHandler(enabled = tab == 0 && web.canGoBack()) { web.goBack() }
 
     LaunchedEffect(Unit) {
@@ -169,6 +240,23 @@ fun Utama() {
                 if (t.code > Kemas.versiSemasa(ctx)) kemas = t
             } catch (_: Exception) {}
         }.start()
+    }
+
+    LaunchedEffect(Unit) {
+        val t0 = System.currentTimeMillis()
+        kesan {
+            Thread {
+                val sisa = 1300 - (System.currentTimeMillis() - t0)
+                if (sisa > 0) Thread.sleep(sisa)
+                android.os.Handler(android.os.Looper.getMainLooper()).post { mula = false }
+            }.start()
+        }
+    }
+    LaunchedEffect(tab, ralat) {
+        while (tab == 0 && ralat == null) {
+            web.evaluateJavascript("fetch('/api/status').then(function(r){return r.json()}).then(function(j){VPApp.s(JSON.stringify(j))}).catch(function(){})", null)
+            kotlinx.coroutines.delay(8000)
+        }
     }
 
     val warna = NavigationBarItemDefaults.colors(
@@ -197,27 +285,55 @@ fun Utama() {
                     }
                 }
                 NavigationBar(containerColor = Color(0xFF1B1B20)) {
-                    NavigationBarItem(selected = tab == 0, onClick = { tab = 0 }, colors = warna,
+                    NavigationBarItem(selected = tab == 0, onClick = { haptik.performHapticFeedback(HapticFeedbackType.TextHandleMove); tab = 0 }, colors = warna,
                         icon = { Icon(Icons.Filled.Home, null) }, label = { Text("VLESS Pro") })
-                    NavigationBarItem(selected = tab == 1, onClick = { tab = 1 }, colors = warna,
-                        icon = { Icon(Icons.Filled.Settings, null) }, label = { Text("Pemasang") })
+                    NavigationBarItem(selected = tab == 1, onClick = { haptik.performHapticFeedback(HapticFeedbackType.TextHandleMove); tab = 1 }, colors = warna,
+                        icon = { Icon(Icons.Filled.Settings, null) }, label = { Text("Urus") })
                 }
             }
         }
     ) { pad ->
         Box(Modifier.padding(pad).fillMaxSize()) {
             // Panel kekal hidup di belakang supaya sesi tidak hilang bila tukar tab.
-            AndroidView(modifier = Modifier.fillMaxSize(), factory = { (web.parent as? android.view.ViewGroup)?.removeView(web); web },
-                update = { it.visibility = if (tab == 0) android.view.View.VISIBLE else android.view.View.INVISIBLE })
+            Column(Modifier.fillMaxSize()) {
+                if (tab == 0 && ralat == null) {
+                    Row(Modifier.fillMaxWidth().background(Color(0xFF16161A)).padding(horizontal = 14.dp, vertical = 7.dp),
+                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Box(Modifier.size(9.dp).clip(RoundedCornerShape(50)).background(
+                            when (vlessHidup) { true -> Color(0xFF4ADE80); false -> Color(0xFFF59E0B); null -> Color(0xFF6B7280) }))
+                        Column(Modifier.weight(1f)) {
+                            Text("${edisi.nama} · $ip", color = Color(0xFFE9EBF2), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                            val ringkas = listOf(
+                                when (vlessHidup) { true -> if (nodNama.isNotEmpty()) "VLESS aktif: $nodNama" else "VLESS aktif"; false -> "VLESS tidak aktif"; null -> "Menyemak ..." },
+                                lesenTeks).filter { it.isNotEmpty() }.joinToString("  ·  ")
+                            Text(ringkas, color = Color(0xFF9AA0A6), fontSize = 11.sp, maxLines = 1)
+                        }
+                        TextButton(onClick = { haptik.performHapticFeedback(HapticFeedbackType.LongPress); web.reload() },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)) { Text("Muat semula", color = Color(0xFF4ADE80), fontSize = 12.sp) }
+                    }
+                }
+                AndroidView(modifier = Modifier.fillMaxWidth().weight(1f), factory = { (web.parent as? android.view.ViewGroup)?.removeView(web); web },
+                    update = { it.visibility = if (tab == 0) android.view.View.VISIBLE else android.view.View.INVISIBLE })
+            }
             if (tab == 0 && ralat != null) {
                 Column(Modifier.fillMaxSize().background(Color(0xFF111114)).padding(24.dp),
                     verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("VLESS Pro", color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Bold)
-                    Spacer(Modifier.height(12.dp))
-                    Text("Tidak dapat sambung ke modem ($ip).\nPastikan telefon disambung ke WiFi modem dan VLESS Pro sudah dipasang.",
-                        color = Color(0xFFC9D4E0), fontSize = 14.sp)
+                    Spacer(Modifier.height(10.dp))
+                    Text("Tidak dapat sambung ke modem ($ip).", color = Color(0xFFF87171), fontSize = 14.sp)
+                    Spacer(Modifier.height(14.dp))
+                    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color(0xFF1B1D29)).padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text("Semak senarai ini:", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                        Text("1. Telefon disambung ke WiFi modem (bukan data sim)", color = Color(0xFFC9D4E0), fontSize = 13.sp)
+                        Text("2. Modem sudah dihidupkan sepenuhnya", color = Color(0xFFC9D4E0), fontSize = 13.sp)
+                        Text("3. VLESS Pro sudah dipasang (tab Urus)", color = Color(0xFFC9D4E0), fontSize = 13.sp)
+                    }
                     Spacer(Modifier.height(16.dp))
                     Button(onClick = { ralat = null; web.loadUrl(panelUrl()) }, modifier = Modifier.fillMaxWidth()) { Text("Cuba lagi") }
+                    OutlinedButton(enabled = !mencari, onClick = { kesan { } }, modifier = Modifier.fillMaxWidth()) {
+                        Text(if (mencari) "Mencari modem ..." else "Cari modem automatik", color = Color.White)
+                    }
                     OutlinedButton(onClick = { tab = 1 }, modifier = Modifier.fillMaxWidth()) { Text("Pasang VLESS Pro / tukar modem", color = Color.White) }
                 }
             }
@@ -227,6 +343,24 @@ fun Utama() {
                     { ip = it; simpan() },
                     { _ -> simpan(); ralat = null; web.loadUrl(panelUrl()); tab = 0 })
             }
+            if (mula) Splash()
+        }
+    }
+}
+
+@Composable
+fun Splash() {
+    val t = rememberInfiniteTransition(label = "s")
+    val g by t.animateFloat(0f, 1000f, infiniteRepeatable(tween(2200, easing = LinearEasing)), label = "g")
+    Box(Modifier.fillMaxSize().background(Color(0xFF111114)).clickable(enabled = false) {}, contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("VLESS PRO", fontSize = 38.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 4.sp,
+                style = TextStyle(brush = Brush.linearGradient(
+                    listOf(Color(0xFF38BDF8), Color(0xFF4ADE80), Color(0xFFFACC15), Color(0xFFFB923C), Color(0xFFF472B6), Color(0xFF38BDF8)),
+                    start = androidx.compose.ui.geometry.Offset(g - 600f, 0f), end = androidx.compose.ui.geometry.Offset(g, 0f),
+                    tileMode = androidx.compose.ui.graphics.TileMode.Mirror)))
+            Spacer(Modifier.height(14.dp))
+            Text("Mencari modem anda ...", color = Color(0xFF9AA0A6), fontSize = 13.sp)
         }
     }
 }
