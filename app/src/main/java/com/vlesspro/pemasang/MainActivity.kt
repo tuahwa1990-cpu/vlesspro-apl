@@ -132,7 +132,7 @@ fun Pemasangan(edisi: Edisi, ip: String, ubahEdisi: (Edisi) -> Unit, ubahIp: (St
         if (sibuk) return
         sibuk = true; hasil = null; log.clear()
         Thread {
-            try { tugas() } catch (e: Exception) { log.add("GAGAL: ${e.message ?: e.javaClass.simpleName}") }
+            try { tugas() } catch (e: Exception) { log.add(Bhs.t("GAGAL") + ": ${e.message ?: e.javaClass.simpleName}") }
             sibuk = false
         }.start()
     }
@@ -150,7 +150,7 @@ fun Pemasangan(edisi: Edisi, ip: String, ubahEdisi: (Edisi) -> Unit, ubahIp: (St
         kemas?.let { k ->
             Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF4D6))) {
                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Versi apl baharu tersedia: ${k.name}", fontWeight = FontWeight.Bold)
+                    Text(Bhs.t("Versi apl baharu tersedia") + ": ${k.name}", fontWeight = FontWeight.Bold)
                     Button(onClick = {
                         kerja {
                             val m = Kemas.pasang(ctx, k) { log.add(it) }
@@ -177,7 +177,7 @@ fun Pemasangan(edisi: Edisi, ip: String, ubahEdisi: (Edisi) -> Unit, ubahIp: (St
                     visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), enabled = !sibuk)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(boot, { boot = it }, enabled = !sibuk)
-                    Text("Pasang suis boot (hidup sendiri selepas modem restart)", fontSize = 13.sp)
+                    Text("Pasang suis boot (hidup sendiri selepas modem dimulakan semula)", fontSize = 13.sp)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(web, { web = it }, enabled = !sibuk)
@@ -217,24 +217,24 @@ fun Pemasangan(edisi: Edisi, ip: String, ubahEdisi: (Edisi) -> Unit, ubahIp: (St
                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text("Siap dipasang", fontWeight = FontWeight.Bold)
                     if (h.id.isNotEmpty()) {
-                        Text("ID Peranti:  ${h.id}", fontFamily = FontFamily.Monospace)
+                        Text(Bhs.t("ID Peranti") + ":  ${h.id}", fontFamily = FontFamily.Monospace)
                         OutlinedButton(onClick = {
                             val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                             cm.setPrimaryClip(ClipData.newPlainText("ID", h.id))
                         }) { Text("Salin ID Peranti") }
                         Text("Hantar ID ini kepada penjual untuk mendapatkan kunci lesen.", fontSize = 12.sp)
                     }
-                    Text("Panel: http://${h.panel}   Kata laluan awal: admin", fontSize = 12.sp)
+                    Text(Bhs.t("Panel") + ": http://${h.panel}   " + Bhs.t("Kata laluan awal") + ": admin", fontSize = 12.sp)
                 }
             }
         }
 
         if (log.isNotEmpty()) {
             Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color(0xFF10151C)), shape = RoundedCornerShape(10.dp)) {
-                Text(log.joinToString("\n"), color = Color(0xFFC9D4E0), fontFamily = FontFamily.Monospace, fontSize = 11.sp, modifier = Modifier.padding(12.dp))
+                Text(Bhs.baris(log.joinToString("\n")), color = Color(0xFFC9D4E0), fontFamily = FontFamily.Monospace, fontSize = 11.sp, modifier = Modifier.padding(12.dp))
             }
         }
-        Text("Versi apl ${Kemas.versiSemasa(ctx)}", fontSize = 11.sp, color = Color.Gray)
+        Text(Bhs.t("Versi apl") + " ${Kemas.versiSemasa(ctx)}", fontSize = 11.sp, color = Color.Gray)
     }
     }
 }

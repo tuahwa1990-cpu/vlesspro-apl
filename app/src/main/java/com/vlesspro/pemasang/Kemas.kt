@@ -30,9 +30,9 @@ object Kemas {
 
     /** Muat turun APK, semak SHA-256, kemudian buka pemasang Android. Kembali mesej jika perlu kebenaran. */
     fun pasang(ctx: Context, info: InfoApl, log: (String) -> Unit): String? {
-        log("Memuat turun ${info.name} ...")
+        log(Bhs.f("Memuat turun {0} ...", info.name))
         val data = Pemasang.muat(BASE + info.apk)
-        if (!Pemasang.sha(data).equals(info.sha, ignoreCase = true)) throw RuntimeException("Semakan fail APK tidak sepadan. Dibatalkan.")
+        if (!Pemasang.sha(data).equals(info.sha, ignoreCase = true)) throw RuntimeException(Bhs.t("Semakan fail APK tidak sepadan. Dibatalkan."))
         val dir = File(ctx.cacheDir, "apk").also { it.mkdirs() }
         dir.listFiles()?.forEach { it.delete() }
         val f = File(dir, "kemas-kini.apk")

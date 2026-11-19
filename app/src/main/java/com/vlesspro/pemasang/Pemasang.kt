@@ -60,7 +60,7 @@ class Ssh(ip: String, user: String, pass: String) : AutoCloseable {
             "mkdir -p '$dir' && cat > '$path.tmp' && chmod $mode '$path.tmp' && { rm -f '$path'; mv '$path.tmp' '$path'; }",
             ByteArrayInputStream(data), 900
         )
-        if (kod != 0) throw RuntimeException("Gagal menghantar $path ke modem: $o")
+        if (kod != 0) throw RuntimeException(Bhs.f("Gagal menghantar {0} ke modem: {1}", path, o))
     }
 
     override fun close() {
@@ -77,7 +77,7 @@ object Pemasang {
         c.connectTimeout = 15000
         c.readTimeout = 60000
         c.instanceFollowRedirects = true
-        if (c.responseCode != 200) throw RuntimeException("Muat turun gagal (HTTP ${c.responseCode}): $url")
+        if (c.responseCode != 200) throw RuntimeException(Bhs.f("Muat turun gagal (HTTP {0}): {1}", c.responseCode, url))
         return c.inputStream.use { it.readBytes() }
     }
 
@@ -87,7 +87,7 @@ object Pemasang {
     private fun semak(sums: String, nama: String, data: ByteArray) {
         val dijangka = sums.lines().map { it.trim().split(Regex("\\s+")) }
             .firstOrNull { it.size >= 2 && it[1] == nama }?.get(0)
-        if (dijangka == null || dijangka != sha(data)) throw RuntimeException("Semakan fail $nama tidak sepadan. Dibatalkan.")
+        if (dijangka == null || dijangka != sha(data)) throw RuntimeException(Bhs.f("Semakan fail {0} tidak sepadan. Dibatalkan.", nama))
     }
 
     private fun xray(arkib: String): ByteArray {
@@ -99,18 +99,18 @@ object Pemasang {
                 e = z.nextEntry
             }
         }
-        throw RuntimeException("Fail xray tiada dalam zip.")
+        throw RuntimeException(Bhs.t("Fail xray tiada dalam zip."))
     }
 
     private fun cari(teks: String, corak: String): String? =
         Regex(corak).find(teks)?.groupValues?.get(1)
 
     fun pasang(edisi: Edisi, ip: String, user: String, pass: String, suisBoot: Boolean, web: Boolean, log: (String) -> Unit): Hasil {
-        log("Menyambung ke $ip ...")
+        log(Bhs.t("Menyambung ke") + " $ip ...")
         Ssh(ip, user, pass).use { ssh ->
             // Tanpa web: edisi apl sahaja (tiada halaman web langsung dalam program). Dengan web: edisi biasa.
             val ed = if (web) BASE else "$BASE/aplsahaja"
-            log(if (web) "Edisi: apl dan Chrome." else "Edisi: apl sahaja (tanpa antara muka web).")
+            log(Bhs.t(if (web) "Edisi: apl dan Chrome." else "Edisi: apl sahaja (tanpa antara muka web)."))
             val r = if (edisi == Edisi.B618) b618(ssh, ip, suisBoot, ed, log) else aw1000(ssh, ip, suisBoot, ed, log)
             if (r.ok && web) {
                 val h = if (edisi == Edisi.B618) "/online/vlesspro" else "/data/vlesspro"
@@ -122,12 +122,12 @@ object Pemasang {
 
     private fun b618(ssh: Ssh, ip: String, suisBoot: Boolean, ed: String, log: (String) -> Unit): Hasil {
         val h = "/online/vlesspro"
-        log("[1/4] Menyemak modem ...")
+        log(Bhs.t("[1/4] Menyemak modem ..."))
         val x = ssh.run("[ -f /online/xlite/bin/xray ] && echo ada; [ -d $h/etc ] && echo lama; [ -f $h/bin/xray ] && echo vx; true").second
         val lama = x.contains("lama")
         val tiadaXray = !x.contains("vx") // VLESS Pro sentiasa memakai xray sendiri, bukan xray VPN asal
-        log(if (lama) "Pemasangan sedia ada dijumpai: naik taraf (tetapan dan lesen dikekalkan)." else "Pemasangan baharu.")
-        log("[2/4] Memuat turun fail dari GitHub ...")
+        log(Bhs.t(if (lama) "Pemasangan sedia ada dijumpai: naik taraf (tetapan dan lesen dikekalkan)." else "Pemasangan baharu."))
+        log(Bhs.t("[2/4] Memuat turun fail dari GitHub ..."))
         val sums = String(muat("$ed/b618-sha256.txt"))
         val vp = muat("$ed/new/vp")
         val vpro = muat("$ed/new/vpro")
@@ -135,7 +135,7 @@ object Pemasang {
         semak(sums, "vpro", vpro)
         val inst = muat("$BASE/vlesspro/install.sh")
         val upg = muat("$BASE/upgrade.sh")
-        log("Fail disemak (SHA-256 sepadan). Menghantar ke modem ...")
+        log(Bhs.t("Fail disemak (SHA-256 sepadan). Menghantar ke modem ..."))
         if (lama) {
             ssh.put("$h/new/vp", vp)
             ssh.put("$h/new/vpro", vpro)
@@ -146,17 +146,17 @@ object Pemasang {
             ssh.put("$h/bin/vpro", vpro)
         }
         if (tiadaXray) {
-            log("Memasang Xray sendiri untuk VLESS Pro (sekitar 20 MB) ...")
+            log(Bhs.t("Memasang Xray sendiri untuk VLESS Pro (sekitar 20 MB) ..."))
             ssh.put("$h/bin/xray", xray("Xray-linux-arm32-v7a.zip"))
         }
-        log("[3/4] Memasang ...")
+        log(Bhs.t("[3/4] Memasang ..."))
         val o = ssh.run(if (lama) "sh $h/upgrade.sh" else "sh $h/install.sh", null, 180).second
-        log(o.trim())
+        log(Bhs.baris(o.trim()))
         if (suisBoot) {
-            log("Memasang suis boot ...")
-            log(ssh.run("$h/vp hook-install", null, 60).second.trim())
+            log(Bhs.t("Memasang suis boot ..."))
+            log(ssh.run("$h/vp hook-install", null, 60).second.trim().let { Bhs.baris(it) })
         }
-        log("[4/4] Siap.")
+        log(Bhs.t("[4/4] Siap."))
         val id = cari(o, "ID Peranti:\\s*([0-9A-Fa-f-]+)") ?: cari(ssh.run("$h/bin/vpro id", null, 30).second, "([0-9A-Fa-f]{4}(?:-[0-9A-Fa-f]{4}){4})").orEmpty()
         val panel = cari(o, "http://([0-9.]+:[0-9]+)") ?: "$ip:8990"
         return Hasil(true, id, panel)
@@ -164,30 +164,30 @@ object Pemasang {
 
     private fun aw1000(ssh: Ssh, ip: String, suisBoot: Boolean, ed: String, log: (String) -> Unit): Hasil {
         val h = "/data/vlesspro"
-        log("[1/4] Memuat turun pemasang dari GitHub ...")
+        log(Bhs.t("[1/4] Memuat turun pemasang dari GitHub ..."))
         val tgz = muat("$ed/aw1000/install.tgz")
         val sums = String(muat("$ed/aw1000-sha256.txt"))
         semak(sums, "install.tgz", tgz)
-        log("Fail disemak (SHA-256 sepadan).")
-        log("[2/4] Menghantar fail ke modem ...")
+        log(Bhs.t("Fail disemak (SHA-256 sepadan)."))
+        log(Bhs.t("[2/4] Menghantar fail ke modem ..."))
         val r = ssh.run(
             "[ -f $h/run/ui.pid ] && kill \$(cat $h/run/ui.pid) 2>/dev/null; rm -f $h/bin/vpro; mkdir -p /data && cd /data && tar xzf -",
             ByteArrayInputStream(tgz), 600
         )
-        if (r.first != 0) throw RuntimeException("Gagal membuka pakej pada modem: ${r.second}")
+        if (r.first != 0) throw RuntimeException(Bhs.f("Gagal membuka pakej pada modem: {0}", r.second))
         val x = ssh.run("[ -x $h/bin/xray ] || echo tiadaxray").second
         if (x.contains("tiadaxray")) {
-            log("Memasang Xray sendiri untuk VLESS Pro (sekitar 20 MB) ...")
+            log(Bhs.t("Memasang Xray sendiri untuk VLESS Pro (sekitar 20 MB) ..."))
             ssh.put("$h/bin/xray", xray("Xray-linux-arm64-v8a.zip"))
         }
-        log("[3/4] Memasang ...")
+        log(Bhs.t("[3/4] Memasang ..."))
         val o = ssh.run("sh $h/install.sh", null, 180).second
-        log(o.trim())
+        log(Bhs.baris(o.trim()))
         if (suisBoot) {
-            log("Memasang suis boot ...")
-            log(ssh.run("$h/vp hook-install", null, 60).second.trim())
+            log(Bhs.t("Memasang suis boot ..."))
+            log(ssh.run("$h/vp hook-install", null, 60).second.trim().let { Bhs.baris(it) })
         }
-        log("[4/4] Siap.")
+        log(Bhs.t("[4/4] Siap."))
         val id = cari(o, "ID Peranti:\\s*([0-9A-Fa-f-]+)").orEmpty()
         val panel = cari(o, "http://([0-9.]+:[0-9]+)") ?: "$ip:8990"
         return Hasil(true, id, panel)
@@ -195,36 +195,36 @@ object Pemasang {
 
     fun suisBoot(edisi: Edisi, ip: String, user: String, pass: String, log: (String) -> Unit) {
         val h = if (edisi == Edisi.B618) "/online/vlesspro" else "/data/vlesspro"
-        Ssh(ip, user, pass).use { log(it.run("$h/vp hook-install", null, 60).second.trim()) }
+        Ssh(ip, user, pass).use { log(it.run("$h/vp hook-install", null, 60).second.trim().let { Bhs.baris(it) }) }
     }
 
     fun status(edisi: Edisi, ip: String, user: String, pass: String, log: (String) -> Unit) {
         val h = if (edisi == Edisi.B618) "/online/vlesspro" else "/data/vlesspro"
         Ssh(ip, user, pass).use {
-            log(it.run("$h/vp status", null, 30).second.trim())
-            log(it.run("VP_HOME=$h $h/bin/vpro id", null, 30).second.trim())
+            log(it.run("$h/vp status", null, 30).second.trim().let { Bhs.baris(it) })
+            log(it.run("VP_HOME=$h $h/bin/vpro id", null, 30).second.trim().let { Bhs.baris(it) })
         }
     }
 
     // Aktifkan kunci lesen pada modem (vpro activate KEY) dan paparkan keadaan lesen.
     fun aktifkanLesen(edisi: Edisi, ip: String, user: String, pass: String, kunci: String, log: (String) -> Unit) {
         val k = kunci.trim().replace(Regex("\\s+"), "")
-        if (k.isEmpty()) { log("Kunci lesen kosong."); return }
-        if (!Regex("[A-Za-z0-9._~+/=-]{20,}").matches(k)) { log("Kunci lesen tidak sah (ada aksara pelik atau terlalu pendek). Salin semula kunci penuh."); return }
+        if (k.isEmpty()) { log(Bhs.t("Kunci lesen kosong.")); return }
+        if (!Regex("[A-Za-z0-9._~+/=-]{20,}").matches(k)) { log(Bhs.t("Kunci lesen tidak sah (ada aksara pelik atau terlalu pendek). Salin semula kunci penuh.")); return }
         val h = if (edisi == Edisi.B618) "/online/vlesspro" else "/data/vlesspro"
         Ssh(ip, user, pass).use {
             val o = it.run("VP_HOME=$h $h/bin/vpro activate '$k'", null, 30).second
             val m = o.lines().mapNotNull { l -> val p = l.split("=", limit = 2); if (p.size == 2) p[0].trim() to p[1].trim() else null }.toMap()
             val st = m["state"].orEmpty()
             val teks = when (st) {
-                "active" -> "LESEN AKTIF. Nama: ${m["name"].orEmpty()}, luput: ${m["exp"].orEmpty().ifEmpty { "-" }}"
-                "expired" -> "Lesen ini sudah luput. Minta kunci baharu."
-                "revoked" -> "Lesen ini telah dibatalkan."
-                "" -> "Tiada jawapan daripada modem. Pastikan VLESS Pro sudah dipasang.\n" + o.trim()
-                else -> "Lesen tidak diterima (keadaan: $st). Pastikan kunci dijana untuk ID peranti ini."
+                "active" -> Bhs.f("LESEN AKTIF. Nama: {0}, luput: {1}", m["name"].orEmpty(), m["exp"].orEmpty().ifEmpty { "-" })
+                "expired" -> Bhs.t("Lesen ini sudah luput. Minta kunci baharu.")
+                "revoked" -> Bhs.t("Lesen ini telah dibatalkan.")
+                "" -> Bhs.t("Tiada jawapan daripada modem. Pastikan VLESS Pro sudah dipasang.") + "\n" + o.trim()
+                else -> Bhs.f("Lesen tidak diterima (keadaan: {0}). Pastikan kunci dijana untuk ID peranti ini.", st)
             }
             log(teks)
-            log(o.trim())
+            log(Bhs.baris(o.trim()))
         }
     }
 }

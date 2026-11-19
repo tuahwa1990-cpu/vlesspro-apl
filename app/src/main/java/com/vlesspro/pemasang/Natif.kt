@@ -66,7 +66,7 @@ fun bg(blok: () -> Unit) {
     Thread {
         try { blok() } catch (e: SalahKata) { St.toast("Kata laluan salah") }
         catch (e: TiadaSambungan) { St.luar = true; St.toast("Tiada sambungan ke modem") }
-        catch (e: Exception) { St.toast("Ralat: ${e.message ?: e.javaClass.simpleName}") }
+        catch (e: Exception) { St.toast(Bhs.t("Ralat") + ": ${e.message ?: e.javaClass.simpleName}") }
     }.start()
 }
 
@@ -483,11 +483,11 @@ fun Utama() {
                 st == "active" -> {
                     val d = try { java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.US).parse(exp) } catch (_: Exception) { null }
                     val n = if (d != null) ((d.time - System.currentTimeMillis()) / 86400000L + 1).toInt() else -1
-                    if (n >= 0) Bhs.f("Lesen {0} hari", n) else "Lesen aktif"
+                    if (n == 1) Bhs.t("Lesen 1 hari") else if (n >= 0) Bhs.f("Lesen {0} hari", n) else "Lesen aktif"
                 }
                 st == "expired" -> "Lesen luput"
                 st == "none" || st.isEmpty() -> "Tiada lesen"
-                else -> "Lesen: $st"
+                else -> Bhs.t("Lesen") + ": $st"
             }
             Cip(lt, if (st == "active") Wr.ok else Wr.bad)
             Cip(if (s?.optString("mode") == "vless") "VLESS Pro" else "VPN asal", Wr.ac2)
@@ -710,7 +710,7 @@ fun Lagi(buka: (String) -> Unit) {
     val item = listOf(
         Triple("lesen", "Lesen", "Aktifkan dan semak"),
         Triple("plus", "Feature Plus", "SQM, iklan, kuota, peranti"),
-        Triple("laluan", "Penghalaan", "Peraturan route"),
+        Triple("laluan", "Penghalaan", "Peraturan laluan"),
         Triple("kumpulan", "Kumpulan", "Gabung beberapa profil"),
         Triple("langganan", "Langganan", "Import pautan langganan"),
         Triple("tetapan", "Tetapan", "DNS, mod, kata laluan"),
@@ -819,7 +819,7 @@ fun SubLesen() {
                 bg {
                     val j = Modem.aktifLesen(k)
                     l = j
-                    St.toast(if (j.optString("state") == "active") "Lesen diaktifkan" else "Lesen ditolak (${j.optString("state")})")
+                    St.toast(if (j.optString("state") == "active") "Lesen diaktifkan" else Bhs.t("Lesen ditolak") + " (${j.optString("state")})")
                 }
             }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Wr.ac, contentColor = Wr.on)) { Text("Aktifkan") }
         }
@@ -853,7 +853,7 @@ fun SubSistem() {
                 Baris("Edisi", it.optString("edisi"))
                 Baris("Seni bina", it.optString("arch"))
                 val up = it.optString("uptime").toDoubleOrNull()?.toLong() ?: 0L
-                Baris("Hidup sejak", "${up / 86400} hari ${up % 86400 / 3600} jam")
+                Baris("Hidup sejak", Bhs.f("{0} hari {1} jam", up / 86400, up % 86400 / 3600))
                 Baris("Beban", it.optString("load").split(" ").take(3).joinToString(" "))
                 Baris("Memori bebas", fB(it.optDouble("memfree") * 1024) + " / " + fB(it.optDouble("memtot") * 1024))
                 Baris("Simpanan bebas", fB(it.optDouble("diskfree")) + " / " + fB(it.optDouble("disktot")))
@@ -898,7 +898,7 @@ fun SubApl() {
         val k = info ?: return
         sibuk = true
         bg {
-            try { val m = Kemas.pasang(ctx, k) { teks = it }; teks = m ?: "Apl dikemas kini. Pemasang Android dibuka." } finally { sibuk = false }
+            try { val m = Kemas.pasang(ctx, k) { teks = it }; teks = m ?: Bhs.t("Fail sedia. Pemasang Android dibuka.") } finally { sibuk = false }
         }
     }
     Halaman {
@@ -920,7 +920,7 @@ fun SubApl() {
             }
             info?.let { k ->
                 if (k.title.isNotEmpty()) { Spacer(Modifier.height(12.dp)); Text(k.title, color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 17.sp) }
-                k.items.forEach { Text("•  $it", color = Wr.tx, fontSize = 14.sp, modifier = Modifier.padding(top = 5.dp)) }
+                k.items.forEach { Text("•  " + Bhs.t(it), color = Wr.tx, fontSize = 14.sp, modifier = Modifier.padding(top = 5.dp)) }
                 if (k.history.length() > 0) {
                     Text(if (semua) "Sembunyikan" else "Tunjuk semua apa yang baharu", color = Wr.ac, fontWeight = FontWeight.Bold,
                         modifier = Modifier.clickable { semua = !semua }.padding(vertical = 10.dp))
@@ -929,7 +929,7 @@ fun SubApl() {
                         Text("v" + o.optString("version") + " · " + o.optString("date"), color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
                         Text(o.optString("title"), color = Wr.tx, fontWeight = FontWeight.Bold)
                         val its = o.optJSONArray("items") ?: org.json.JSONArray()
-                        for (j in 0 until its.length()) Text("•  " + its.getString(j), color = Wr.mu, fontSize = 13.sp)
+                        for (j in 0 until its.length()) Text("•  " + Bhs.t(its.getString(j)), color = Wr.mu, fontSize = 13.sp)
                     }
                 }
             }
@@ -949,9 +949,9 @@ fun SubApl() {
             Text(Bhs.t("Semakan terakhir") + ": " + when {
                 cek == 0L -> Bhs.t("belum pernah")
                 now - cek < 90 -> Bhs.t("baru sahaja")
-                now - cek < 5400 -> "${(now - cek) / 60} " + Bhs.t("minit lalu")
-                now - cek < 172800 -> "${(now - cek) / 3600} " + Bhs.t("jam lalu")
-                else -> "${(now - cek) / 86400} " + Bhs.t("hari lalu") }, color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+                now - cek < 5400 -> Bhs.f("{0} minit lalu", (now - cek) / 60)
+                now - cek < 172800 -> Bhs.f("{0} jam lalu", (now - cek) / 3600)
+                else -> Bhs.f("{0} hari lalu", (now - cek) / 86400) }, color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
         }
         KadWr {
             Suis("Semak apabila apl dibuka", auto) { auto = it; pref.edit().putBoolean("autoapl", it).apply() }

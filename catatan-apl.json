@@ -1,10 +1,20 @@
 {
- "title": "Butang Kembali dalam Feature Plus",
+ "title": "Semakan bahasa Melayu dan English",
  "items": [
-  "Dalam Feature Plus, butang Kembali kini kembali ke senarai Feature Plus, bukan terus ke menu Lagi.",
-  "Berlaku untuk SQM, Sekat iklan, Peranti, Kuota, Tukar IP WAN dan Failover."
+  "Nota keluaran, log Pemasang dan mesej kini diterjemah sepenuhnya apabila bahasa English dipilih.",
+  "Beberapa istilah Melayu diseragamkan (laluan, tetapkan semula, dimulakan semula) dan terjemahan English yang tidak sepadan dibetulkan.",
+  "Masa lalu dan bilangan hari lesen dipaparkan dengan betul dalam English (contoh 1 day)."
  ],
  "history": [
+  {
+   "version": "1.0.25",
+   "date": "2026-11-20",
+   "title": "Butang Kembali dalam Feature Plus",
+   "items": [
+    "Dalam Feature Plus, butang Kembali kini kembali ke senarai Feature Plus, bukan terus ke menu Lagi.",
+    "Berlaku untuk SQM, Sekat iklan, Peranti, Kuota, Tukar IP WAN dan Failover."
+   ]
+  },
   {
    "version": "1.0.24",
    "date": "2026-11-20",

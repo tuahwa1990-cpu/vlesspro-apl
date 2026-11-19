@@ -46,6 +46,21 @@ object Bhs {
         return s
     }
 
+    /** Terjemah output berbilang baris (log Pemasang dan skrip modem): baris penuh, atau awalan sebelum ": ", atau corak khas. */
+    fun baris(s: String): String = s.lines().joinToString("\n") { l ->
+        if (kod == "ms" || l.isBlank()) return@joinToString l
+        val d = t(l)
+        if (d != l) return@joinToString d
+        Regex("^Belum ada lesen aktif \\(status: (.*)\\)\\. Tampal kunci (?:lesen )?di UI: Tetapan > Lesen\\.$").find(l)?.let { return@joinToString f("Belum ada lesen aktif (status: {0}). Tampal kunci lesen di UI: Tetapan > Lesen.", it.groupValues[1]) }
+        Regex("^Buka di telefon: (\\S+)\\s+\\(kata laluan awal: admin\\)$").find(l)?.let { return@joinToString f("Buka di telefon: {0}  (kata laluan awal: admin)", it.groupValues[1]) }
+        Regex("^VPN asal tidak diubah\\. Mod semasa: (.*)$").find(l)?.let { return@joinToString f("VPN asal tidak diubah. Mod semasa: {0}", it.groupValues[1]) }
+        Regex("^OK: dipasang \\(salinan asal: (.*)\\)$").find(l)?.let { return@joinToString f("OK: dipasang (salinan asal: {0})", it.groupValues[1]) }
+        Regex("^VPN asal: ada \\((.*)\\)$").find(l)?.let { return@joinToString f("VPN asal: ada ({0})", it.groupValues[1]) }
+        val i = l.indexOf(": ")
+        if (i > 0) { val p = l.substring(0, i + 1); val tp = t(p); if (tp != p) return@joinToString tp + l.substring(i + 1) }
+        l
+    }
+
     /** Rentetan dengan tempat letak {0}, {1}. */
     fun f(kunci: String, vararg a: Any): String {
         var r = t(kunci)

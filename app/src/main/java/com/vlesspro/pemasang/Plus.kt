@@ -99,7 +99,7 @@ fun SubSqm() {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
             Spacer(Modifier.height(10.dp))
             Btn("Simpan") { bg { lapor(Modem.tindak("/api/sqm", JSONObject().put("on", on).put("down", dn.toDoubleOrNull() ?: 0.0).put("up", up.toDoubleOrNull() ?: 0.0).toString())) } }
-            if (v != null) Text("Antara muka: ${v.optString("iface")} · ${if (v.optBoolean("active")) "aktif" else "tidak aktif"}", color = Wr.mu, fontSize = 12.sp)
+            if (v != null) Text(Bhs.t("Antara muka") + ": ${v.optString("iface")} · " + Bhs.t(if (v.optBoolean("active")) "aktif" else "tidak aktif"), color = Wr.mu, fontSize = 12.sp)
         }
     }
 }
@@ -131,7 +131,7 @@ fun SubAdblock() {
                 val id = l.optString("id")
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(id in sen, { c -> sen = if (c) sen + id else sen - id }, colors = CheckboxDefaults.colors(checkedColor = Wr.ac))
-                    Column { Text(l.optString("name"), color = Wr.tx, fontSize = 14.sp); Text("${l.optInt("n")} domain", color = Wr.mu, fontSize = 11.sp) }
+                    Column { Text(l.optString("name"), color = Wr.tx, fontSize = 14.sp); Text(Bhs.f("{0} domain", l.optInt("n")), color = Wr.mu, fontSize = 11.sp) }
                 }
             }
             OutlinedTextField(hitam, { hitam = it }, label = { Text("Senarai hitam tambahan") }, minLines = 2, modifier = Modifier.fillMaxWidth(), colors = medan())
@@ -165,7 +165,7 @@ fun SubPeranti() {
     LaunchedEffect(Unit) { muatSemula() }
     Halaman {
         Judul("Peranti")
-        Text("${senarai.size} peranti disambung", color = Wr.mu)
+        Text(Bhs.f("{0} peranti disambung", senarai.size), color = Wr.mu)
         senarai.forEach { o ->
             KadWr(klik = { ubah = o }) {
                 Text(o.optString("name").ifEmpty { o.optString("host").ifEmpty { "(tanpa nama)" } }, color = Wr.tx, fontWeight = FontWeight.Bold)
@@ -210,12 +210,12 @@ fun SubKuota() {
                 FilterChip(tempoh == "month", { tempoh = "month" }, label = { Text("Bulanan") })
                 FilterChip(tempoh == "day", { tempoh = "day" }, label = { Text("Harian") })
             }
-            if (tempoh == "month") OutlinedTextField(rday, { rday = it }, label = { Text("Hari reset (1-28)") }, singleLine = true, modifier = Modifier.fillMaxWidth(), colors = medan(),
+            if (tempoh == "month") OutlinedTextField(rday, { rday = it }, label = { Text("Hari tetapan semula (1-28)") }, singleLine = true, modifier = Modifier.fillMaxWidth(), colors = medan(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
             Suis("Putuskan internet bila habis", potong) { potong = it }
             Btn("Simpan") { bg { lapor(Modem.tindak("/api/quota", JSONObject().put("on", on).put("limit", had.toDoubleOrNull() ?: 0.0).put("period", tempoh).put("rday", rday.toIntOrNull() ?: 1).put("cut", potong).toString())) } }
             Spacer(Modifier.height(8.dp))
-            Btn("Set semula pengiraan", false) { bg { lapor(Modem.tindak("/api/quota/reset")) } }
+            Btn("Tetapkan semula pengiraan", false) { bg { lapor(Modem.tindak("/api/quota/reset")) } }
         }
     }
 }
@@ -291,7 +291,7 @@ fun SubLaluan() {
             }
         }
         KadWr {
-            Text("Peraturan (${peraturan.size})", color = Wr.tx, fontWeight = FontWeight.Bold)
+            Text(Bhs.t("Peraturan") + " (${peraturan.size})", color = Wr.tx, fontWeight = FontWeight.Bold)
             peraturan.forEachIndexed { i, (t, v, a) ->
                 Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("$t: $v", color = Wr.tx, fontSize = 13.sp, modifier = Modifier.weight(1f), maxLines = 1)
@@ -383,7 +383,7 @@ fun SubLangganan() {
         ss.forEach { s ->
             KadWr {
                 Text(s.optString("name"), color = Wr.tx, fontWeight = FontWeight.Bold)
-                Text("${s.optInt("count")} profil", color = Wr.mu, fontSize = 12.sp)
+                Text(Bhs.f("{0} profil", s.optInt("count")), color = Wr.mu, fontSize = 12.sp)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(onClick = { St.toast("Mengemas kini ..."); bg { lapor(Modem.tindak("/api/sub/refresh", s.optInt("i").toString())); m() } }) { Text("Kemas kini", color = Wr.ac) }
                     TextButton(onClick = { bg { lapor(Modem.tindak("/api/sub/del", s.optInt("i").toString())); m() } }) { Text("Padam", color = Wr.bad) }
@@ -614,7 +614,7 @@ fun SubKemas() {
                 Spacer(Modifier.height(12.dp))
                 Text(info.optString("title"), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 17.sp)
                 val it = info.optJSONArray("items") ?: JSONArray()
-                for (i in 0 until it.length()) Text("•  " + it.getString(i), color = Wr.tx, fontSize = 14.sp, modifier = Modifier.padding(top = 5.dp))
+                for (i in 0 until it.length()) Text("•  " + Bhs.t(it.getString(i)), color = Wr.tx, fontSize = 14.sp, modifier = Modifier.padding(top = 5.dp))
                 val h = info.optJSONArray("history")
                 if (h != null && h.length() > 0) {
                     Text(if (semua) "Sembunyikan" else "Tunjuk semua apa yang baharu", color = Wr.ac, fontWeight = FontWeight.Bold,
@@ -624,7 +624,7 @@ fun SubKemas() {
                         Text("v" + o.optString("version") + " · " + o.optString("date"), color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
                         Text(o.optString("title"), color = Wr.tx, fontWeight = FontWeight.Bold)
                         val its = o.optJSONArray("items") ?: JSONArray()
-                        for (k in 0 until its.length()) Text("•  " + its.getString(k), color = Wr.mu, fontSize = 13.sp)
+                        for (k in 0 until its.length()) Text("•  " + Bhs.t(its.getString(k)), color = Wr.mu, fontSize = 13.sp)
                     }
                 }
             }
@@ -647,9 +647,9 @@ fun SubKemas() {
             Text(Bhs.t("Semakan terakhir") + ": " + when {
                 at == 0L -> Bhs.t("belum pernah")
                 now - at < 90 -> Bhs.t("baru sahaja")
-                now - at < 5400 -> "${(now - at) / 60} " + Bhs.t("minit lalu")
-                now - at < 172800 -> "${(now - at) / 3600} " + Bhs.t("jam lalu")
-                else -> "${(now - at) / 86400} " + Bhs.t("hari lalu") }, color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+                now - at < 5400 -> Bhs.f("{0} minit lalu", (now - at) / 60)
+                now - at < 172800 -> Bhs.f("{0} jam lalu", (now - at) / 3600)
+                else -> Bhs.f("{0} hari lalu", (now - at) / 86400) }, color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
         }
         KadWr {
             Text("KEMAS KINI AUTOMATIK", color = Wr.mu, fontSize = 11.sp, letterSpacing = 1.sp)
