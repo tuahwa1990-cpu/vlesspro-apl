@@ -77,6 +77,9 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// Paksa tinggi halaman panel mengikut tetingkap sebenar (elak kandungan terpotong).
+const val BETUL_TINGGI = "try{var h=window.innerHeight;document.documentElement.style.height=h+'px';document.body.style.height=h+'px';window.dispatchEvent(new Event('resize'))}catch(e){}"
+
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun Utama() {
@@ -90,6 +93,8 @@ fun Utama() {
     var kemas by remember { mutableStateOf<InfoApl?>(null) }
     var mengemas by remember { mutableStateOf(false) }
     var mula by remember { mutableStateOf(true) }
+    var tinggiWv by remember { mutableIntStateOf(0) }
+    var diag by remember { mutableStateOf("") }
     var mencari by remember { mutableStateOf(false) }
     var vlessHidup by remember { mutableStateOf<Boolean?>(null) }
     var lesenTeks by remember { mutableStateOf("") }
@@ -107,6 +112,7 @@ fun Utama() {
         WebView(ctx).apply {
             setBackgroundColor(0xFF111114.toInt())
             addJavascriptInterface(object {
+                @JavascriptInterface fun d(t: String) { diag = t }
                 @JavascriptInterface fun s(t: String) {
                     try {
                         val j = JSONObject(t)
@@ -132,11 +138,15 @@ fun Utama() {
             }, "VPApp")
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
-            settings.useWideViewPort = true
-            settings.loadWithOverviewMode = true
+            settings.useWideViewPort = false
+            settings.loadWithOverviewMode = false
+            setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
             settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             webViewClient = object : WebViewClient() {
                 override fun onPageStarted(v: WebView, u: String?, f: android.graphics.Bitmap?) { ralat = null }
+                override fun onPageFinished(v: WebView, u: String?) {
+                    v.evaluateJavascript(BETUL_TINGGI, null)
+                }
                 override fun onReceivedError(v: WebView, r: WebResourceRequest, e: WebResourceError) {
                     if (r.isForMainFrame) ralat = e.description?.toString() ?: "ralat"
                 }
@@ -198,7 +208,9 @@ fun Utama() {
             // Muat panel hanya selepas WebView ada saiz sebenar; jika dimuat sebelum itu, tinggi paparan
             // (height:100% dalam CSS panel) tersalah kira dan kandungan terpotong.
             var dimuat = false
-            addOnLayoutChangeListener { v, l, t, r, b, _, _, _, _ ->
+            addOnLayoutChangeListener { v, l, t, r, b, ot, ob, _, _ ->
+                tinggiWv = b - t
+                if (dimuat && (b - t) != 0 && (b - t) != 0 && ((b - t) != ob - ot)) (v as WebView).evaluateJavascript(BETUL_TINGGI, null)
                 if (!dimuat && b - t > 200 && r - l > 200) { dimuat = true; v.post { (v as WebView).loadUrl(panelUrl()) } }
             }
         }
@@ -254,6 +266,7 @@ fun Utama() {
     }
     LaunchedEffect(tab, ralat) {
         while (tab == 0 && ralat == null) {
+            web.evaluateJavascript("try{var m=document.querySelector('main');VPApp.d('wv=$tinggiWv'+'px vh='+innerHeight+' app='+document.getElementById('app').offsetHeight+' main='+(m?m.clientHeight:-1)+' dpr='+devicePixelRatio)}catch(e){}", null)
             web.evaluateJavascript("fetch('/api/status').then(function(r){return r.json()}).then(function(j){VPApp.s(JSON.stringify(j))}).catch(function(){})", null)
             kotlinx.coroutines.delay(8000)
         }
@@ -307,6 +320,7 @@ fun Utama() {
                                 when (vlessHidup) { true -> if (nodNama.isNotEmpty()) "VLESS aktif: $nodNama" else "VLESS aktif"; false -> "VLESS tidak aktif"; null -> "Menyemak ..." },
                                 lesenTeks).filter { it.isNotEmpty() }.joinToString("  ·  ")
                             Text(ringkas, color = Color(0xFF9AA0A6), fontSize = 11.sp, maxLines = 1)
+                            if (diag.isNotEmpty()) Text(diag, color = Color(0xFF6B7280), fontSize = 9.sp, maxLines = 1)
                         }
                         TextButton(onClick = { haptik.performHapticFeedback(HapticFeedbackType.LongPress); web.reload() },
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)) { Text("Muat semula", color = Color(0xFF4ADE80), fontSize = 12.sp) }
