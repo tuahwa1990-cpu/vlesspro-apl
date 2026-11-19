@@ -125,7 +125,7 @@ object Pemasang {
         log("[1/4] Menyemak modem ...")
         val x = ssh.run("[ -f /online/xlite/bin/xray ] && echo ada; [ -d $h/etc ] && echo lama; [ -f $h/bin/xray ] && echo vx; true").second
         val lama = x.contains("lama")
-        val tiadaXray = !(x.contains("ada") || x.contains("vx"))
+        val tiadaXray = !x.contains("vx") // VLESS Pro sentiasa memakai xray sendiri, bukan xray VPN asal
         log(if (lama) "Pemasangan sedia ada dijumpai: naik taraf (tetapan dan lesen dikekalkan)." else "Pemasangan baharu.")
         log("[2/4] Memuat turun fail dari GitHub ...")
         val sums = String(muat("$ed/b618-sha256.txt"))
@@ -146,7 +146,7 @@ object Pemasang {
             ssh.put("$h/bin/vpro", vpro)
         }
         if (tiadaXray) {
-            log("VPN asal tiada: memuat turun Xray (sekitar 15 MB) ...")
+            log("Memasang Xray sendiri untuk VLESS Pro (sekitar 20 MB) ...")
             ssh.put("$h/bin/xray", xray("Xray-linux-arm32-v7a.zip"))
         }
         log("[3/4] Memasang ...")
@@ -175,9 +175,9 @@ object Pemasang {
             ByteArrayInputStream(tgz), 600
         )
         if (r.first != 0) throw RuntimeException("Gagal membuka pakej pada modem: ${r.second}")
-        val x = ssh.run("[ -x $h/bin/xray ] || [ -x /opt/xlite/bin/xray ] || echo tiadaxray").second
+        val x = ssh.run("[ -x $h/bin/xray ] || echo tiadaxray").second
         if (x.contains("tiadaxray")) {
-            log("Xray tiada pada modem: memuat turun Xray (sekitar 15 MB) ...")
+            log("Memasang Xray sendiri untuk VLESS Pro (sekitar 20 MB) ...")
             ssh.put("$h/bin/xray", xray("Xray-linux-arm64-v8a.zip"))
         }
         log("[3/4] Memasang ...")

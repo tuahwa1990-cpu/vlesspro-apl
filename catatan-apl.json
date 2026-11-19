@@ -1,10 +1,19 @@
 {
- "title": "Sokongan edisi apl sahaja",
+ "title": "Xray sendiri untuk VLESS Pro",
  "items": [
-  "Menyokong edisi VLESS Pro apl sahaja (tanpa antara muka web). Suis web disorokkan pada edisi itu.",
-  "Pemasang: nyahtanda \"Pasang antara muka web\" untuk memasang edisi apl sahaja yang tiada UI web langsung pada modem."
+  "Pemasang kini memasang Xray sendiri untuk VLESS Pro, jadi VLESS Pro berfungsi walaupun modem tiada VPN asal.",
+  "Pemasangan baharu dan naik taraf sama-sama memastikan Xray VLESS Pro ada pada modem."
  ],
  "history": [
+  {
+   "version": "1.0.22",
+   "date": "2026-11-20",
+   "title": "Sokongan edisi apl sahaja",
+   "items": [
+    "Menyokong edisi VLESS Pro apl sahaja (tanpa antara muka web). Suis web disorokkan pada edisi itu.",
+    "Pemasang: nyahtanda \"Pasang antara muka web\" untuk memasang edisi apl sahaja yang tiada UI web langsung pada modem."
+   ]
+  },
   {
    "version": "1.0.20",
    "date": "2026-11-20",
