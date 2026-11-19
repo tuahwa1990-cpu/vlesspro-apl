@@ -900,7 +900,8 @@
   "WiFi modem melalui VLESS Pro. IP keluar: {0} {1}": "The modem WiFi goes through VLESS Pro. Exit IP: {0} {1}",
   "IP telefon berbeza daripada IP VLESS ({0}). Trafik ini tidak melalui VLESS Pro.": "The phone IP differs from the VLESS IP ({0}). This traffic is not going through VLESS Pro.",
   "Uji sambungan kini menguji melalui WiFi modem secara khusus dan memberi amaran jika apl lain guna data mudah alih.": "Test connection now tests through the modem WiFi specifically and warns if other apps use mobile data.",
-  "Butang jenis peraturan laluan (domain, keyword, ip, geosite, geoip) tidak lagi terpotong.": "The routing rule type buttons (domain, keyword, ip, geosite, geoip) are no longer cut off."
+  "Butang jenis peraturan laluan (domain, keyword, ip, geosite, geoip) tidak lagi terpotong.": "The routing rule type buttons (domain, keyword, ip, geosite, geoip) are no longer cut off.",
+  "Semakan kemas kini apl kini cuba semula sehingga 3 kali jika sambungan terputus (contohnya semasa VLESS Pro hidup), tanpa perlu diputuskan dahulu.": "App update checks now retry up to 3 times if the connection drops (for example while VLESS Pro is on), without needing to disconnect first."
  },
  "zh": {
   "Mod VPN": "VPN 模式",

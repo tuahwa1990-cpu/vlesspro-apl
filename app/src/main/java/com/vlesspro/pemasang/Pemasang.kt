@@ -95,8 +95,21 @@ object Pemasang {
     fun mulaKemajuan(jenis: String, nama: String, nisbah: Float) { kJenis = jenis; kNama = nama; kNisbah = nisbah }
     fun tamatKemajuan() { kNisbah = -1f }
 
+    /** Muat turun dengan cuba semula (sehingga 3 kali) jika sambungan terputus, contohnya semasa VLESS bertukar laluan. */
     fun muat(url: String): ByteArray {
+        var salah: Exception? = null
+        for (cuba in 1..3) {
+            try { return muat1(url) } catch (e: java.io.IOException) {
+                salah = e
+                if (cuba < 3) Thread.sleep(1500L * cuba)
+            }
+        }
+        throw salah ?: RuntimeException("muat turun gagal")
+    }
+
+    private fun muat1(url: String): ByteArray {
         val c = URL(url).openConnection() as HttpURLConnection
+        c.setRequestProperty("Connection", "close") // elak guna semula sambungan lama yang sudah ditutup
         c.connectTimeout = 15000
         c.readTimeout = 60000
         c.instanceFollowRedirects = true

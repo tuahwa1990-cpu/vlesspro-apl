@@ -6,7 +6,8 @@
   "Jika sambungan ke modem terputus, pemasangan cuba sekali lagi secara automatik.",
   "Butang Uji sambungan di skrin utama: semak WiFi, status VLESS Pro, IP telefon dan sama ada trafik melalui VLESS Pro.",
   "Uji sambungan kini menguji melalui WiFi modem secara khusus dan memberi amaran jika apl lain guna data mudah alih.",
-  "Butang jenis peraturan laluan (domain, keyword, ip, geosite, geoip) tidak lagi terpotong."
+  "Butang jenis peraturan laluan (domain, keyword, ip, geosite, geoip) tidak lagi terpotong.",
+  "Semakan kemas kini apl kini cuba semula sehingga 3 kali jika sambungan terputus (contohnya semasa VLESS Pro hidup), tanpa perlu diputuskan dahulu."
  ],
  "history": [
   {
