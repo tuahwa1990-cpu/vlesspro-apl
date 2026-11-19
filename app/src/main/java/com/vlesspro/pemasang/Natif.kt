@@ -1,0 +1,867 @@
+package com.vlesspro.pemasang
+
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import java.util.Calendar
+
+object Wr {
+    val bg = Color(0xFF080B1A)
+    val kad = Color(0xFF121935)
+    val kad2 = Color(0xFF182046)
+    val garis = Color(0xFF222C55)
+    val ac = Color(0xFF22D3EE)
+    val ac2 = Color(0xFFA78BFA)
+    val tx = Color(0xFFEAF0FF)
+    val mu = Color(0xFF8591B8)
+    val bad = Color(0xFFF87171)
+    val wn = Color(0xFFF59E0B)
+    val ok = Color(0xFF4ADE80)
+    val grad = Brush.linearGradient(listOf(Color(0xFF22D3EE), Color(0xFFA78BFA)))
+}
+
+fun bg(blok: () -> Unit) {
+    Thread {
+        try { blok() } catch (e: SalahKata) { St.toast("Kata laluan salah") }
+        catch (e: TiadaSambungan) { St.luar = true; St.toast("Tiada sambungan ke modem") }
+        catch (e: Exception) { St.toast("Ralat: ${e.message ?: e.javaClass.simpleName}") }
+    }.start()
+}
+
+fun fB(n: Double): String {
+    var v = n
+    val u = arrayOf("B", "KB", "MB", "GB", "TB")
+    var i = 0
+    while (v >= 1024 && i < 4) { v /= 1024; i++ }
+    return (if (i == 0) "%.0f".format(v) else if (v >= 100) "%.0f".format(v) else "%.1f".format(v)) + " " + u[i]
+}
+
+@Composable
+fun KadWr(modifier: Modifier = Modifier, klik: (() -> Unit)? = null, isi: @Composable ColumnScope.() -> Unit) {
+    val m = modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp))
+        .background(Brush.linearGradient(listOf(Wr.kad2, Wr.kad)))
+        .border(1.dp, Wr.garis, RoundedCornerShape(24.dp))
+    Column((if (klik != null) m.clickable { klik() } else m).padding(16.dp), content = isi)
+}
+
+@Composable
+fun IkonKuasa(warna: Color, saiz: Int = 34) {
+    Canvas(Modifier.size(saiz.dp)) {
+        val w = this.size.width
+        val st = Stroke(width = w * 0.1f, cap = StrokeCap.Round)
+        drawArc(warna, -55f, 290f, false, topLeft = Offset(w * 0.17f, w * 0.2f), size = Size(w * 0.66f, w * 0.66f), style = st)
+        drawLine(warna, Offset(w * 0.5f, w * 0.1f), Offset(w * 0.5f, w * 0.5f), strokeWidth = w * 0.1f, cap = StrokeCap.Round)
+    }
+}
+
+@Composable
+fun IkonDenyut(warna: Color) {
+    Canvas(Modifier.size(24.dp)) {
+        val w = this.size.width
+        val p = Path().apply {
+            moveTo(0f, w * 0.55f); lineTo(w * 0.28f, w * 0.55f); lineTo(w * 0.4f, w * 0.2f)
+            lineTo(w * 0.6f, w * 0.85f); lineTo(w * 0.72f, w * 0.55f); lineTo(w, w * 0.55f)
+        }
+        drawPath(p, warna, style = Stroke(width = w * 0.09f, cap = StrokeCap.Round))
+    }
+}
+
+@Composable
+fun IkonSenarai(warna: Color) {
+    Canvas(Modifier.size(24.dp)) {
+        val w = this.size.width
+        for (i in 0..2) {
+            val y = w * (0.22f + 0.28f * i)
+            drawCircle(warna, w * 0.06f, Offset(w * 0.14f, y))
+            drawLine(warna, Offset(w * 0.3f, y), Offset(w * 0.92f, y), strokeWidth = w * 0.09f, cap = StrokeCap.Round)
+        }
+    }
+}
+
+@Composable
+fun IkonRumah(warna: Color) {
+    Canvas(Modifier.size(24.dp)) {
+        val w = this.size.width
+        val p = Path().apply {
+            moveTo(w * 0.1f, w * 0.48f); lineTo(w * 0.5f, w * 0.12f); lineTo(w * 0.9f, w * 0.48f)
+            moveTo(w * 0.22f, w * 0.42f); lineTo(w * 0.22f, w * 0.88f); lineTo(w * 0.78f, w * 0.88f); lineTo(w * 0.78f, w * 0.42f)
+        }
+        drawPath(p, warna, style = Stroke(width = w * 0.09f, cap = StrokeCap.Round))
+    }
+}
+
+@Composable
+fun IkonGrid(warna: Color) {
+    Canvas(Modifier.size(24.dp)) {
+        val w = this.size.width
+        for (x in 0..1) for (y in 0..1)
+            drawRoundRect(warna, Offset(w * (0.12f + 0.42f * x), w * (0.12f + 0.42f * y)), Size(w * 0.34f, w * 0.34f),
+                androidx.compose.ui.geometry.CornerRadius(w * 0.08f), style = Stroke(width = w * 0.09f))
+    }
+}
+
+// ───────────────────────── Akar apl ─────────────────────────
+
+@Composable
+fun AppNatif() {
+    val ctx = LocalContext.current
+    val pref = remember { ctx.getSharedPreferences("vp", Context.MODE_PRIVATE) }
+    var tahap by remember { mutableStateOf("mula") } // mula | setup | utama | pasang
+    var ralatSetup by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        val ip = pref.getString("ip", null)
+        val ps = pref.getString("pass", null)
+        if (ip == null || ps == null) { delay(900); tahap = "setup"; return@LaunchedEffect }
+        Modem.ip = ip; Modem.pass = ps
+        val t0 = System.currentTimeMillis()
+        val ok = withContext(Dispatchers.IO) {
+            try { Modem.log(ip, ps); 1 } catch (_: SalahKata) { 2 } catch (_: TiadaSambungan) { 0 }
+        }
+        val sisa = 1100 - (System.currentTimeMillis() - t0)
+        if (sisa > 0) delay(sisa)
+        when (ok) {
+            2 -> { ralatSetup = "Kata laluan panel telah berubah. Masukkan semula."; tahap = "setup" }
+            else -> { St.luar = ok == 0; tahap = "utama" }
+        }
+    }
+
+    Box(Modifier.fillMaxSize().background(Wr.bg)) {
+        when (tahap) {
+            "mula" -> Splash()
+            "setup" -> Setup(pref, ralatSetup, { tahap = "utama" }, { tahap = "pasang" })
+            "pasang" -> Column(Modifier.fillMaxSize()) {
+                var edisi by remember { mutableStateOf(Edisi.B618) }
+                var ip by remember { mutableStateOf(edisi.ipLalai) }
+                Box(Modifier.weight(1f)) {
+                    Pemasangan(edisi, ip, { e -> edisi = e; ip = e.ipLalai }, { ip = it }, { tahap = "setup" })
+                }
+            }
+            else -> Utama2(pref) { tahap = "setup"; ralatSetup = "" }
+        }
+        if (St.mesej.isNotEmpty()) {
+            LaunchedEffect(St.mesej) { delay(2600); St.mesej = "" }
+            Box(Modifier.align(Alignment.BottomCenter).padding(bottom = 110.dp).clip(RoundedCornerShape(16.dp))
+                .background(Color(0xFF2B3566)).padding(horizontal = 18.dp, vertical = 11.dp)) {
+                Text(St.mesej, color = Wr.tx, fontSize = 14.sp)
+            }
+        }
+    }
+}
+
+@Composable
+fun Setup(pref: android.content.SharedPreferences, ralat0: String, siap: () -> Unit, pasang: () -> Unit) {
+    var ip by remember { mutableStateOf(pref.getString("ip", "192.168.8.1") ?: "192.168.8.1") }
+    var ps by remember { mutableStateOf("") }
+    var baru by remember { mutableStateOf("") }
+    var ralat by remember { mutableStateOf(ralat0) }
+    var sibuk by remember { mutableStateOf(false) }
+    var tukar by remember { mutableStateOf(false) }
+
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Spacer(Modifier.height(24.dp))
+        Text("VLESS PRO", fontSize = 36.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 4.sp, style = TextStyle(brush = Wr.grad))
+        Text("Sambung ke modem anda", color = Wr.mu, fontSize = 15.sp)
+        Spacer(Modifier.height(8.dp))
+        KadWr {
+            OutlinedTextField(ip, { ip = it.trim() }, label = { Text("Alamat IP modem") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri), colors = medan())
+            Spacer(Modifier.height(10.dp))
+            OutlinedButton(onClick = {
+                sibuk = true; ralat = "Mencari modem ..."
+                bg {
+                    val h = Modem.kesan(listOf("192.168.8.1", "192.168.1.1"))
+                    if (h != null) { ip = h; ralat = "Modem dijumpai: $h" } else ralat = "Modem tidak dijumpai. Sambung telefon ke WiFi modem."
+                    sibuk = false
+                }
+            }, enabled = !sibuk, modifier = Modifier.fillMaxWidth()) { Text("Cari modem automatik", color = Wr.ac) }
+            Spacer(Modifier.height(10.dp))
+            OutlinedTextField(ps, { ps = it }, label = { Text("Kata laluan panel (awal: admin)") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation(), colors = medan())
+            if (tukar) {
+                Spacer(Modifier.height(10.dp))
+                Text("Pemasangan baharu: tetapkan kata laluan anda sendiri (min 6 aksara).", color = Wr.wn, fontSize = 13.sp)
+                OutlinedTextField(baru, { baru = it }, label = { Text("Kata laluan baharu") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = PasswordVisualTransformation(), colors = medan())
+            }
+        }
+        if (ralat.isNotEmpty()) Text(ralat, color = if (ralat.startsWith("Modem dijumpai")) Wr.ok else Wr.wn, fontSize = 13.sp)
+        Button(onClick = {
+            sibuk = true; ralat = "Menyambung ..."
+            bg {
+                try {
+                    val s = Modem.log(ip, if (tukar) "admin" else ps.ifEmpty { "admin" })
+                    if (s.optBoolean("mustchange")) {
+                        if (!tukar) { tukar = true; ralat = "Tetapkan kata laluan baharu di bawah, kemudian tekan Sambung." }
+                        else {
+                            val (ok, m) = Modem.tukarKata(baru)
+                            if (!ok) ralat = m.ifEmpty { "Gagal menukar kata laluan" }
+                            else { pref.edit().putString("ip", ip).putString("pass", Modem.pass).apply(); St.luar = false; siap() }
+                        }
+                    } else {
+                        pref.edit().putString("ip", ip).putString("pass", Modem.pass).apply(); St.luar = false; siap()
+                    }
+                } catch (_: SalahKata) { ralat = "Kata laluan salah." }
+                catch (e: TiadaSambungan) { ralat = "Tidak dapat sambung ke $ip. Pastikan WiFi modem dan VLESS Pro sudah dipasang." }
+                sibuk = false
+            }
+        }, enabled = !sibuk && ip.isNotEmpty(), modifier = Modifier.fillMaxWidth().height(52.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Wr.ac, contentColor = Color(0xFF03212B))) {
+            Text(if (sibuk) "Sila tunggu ..." else "Sambung", fontWeight = FontWeight.Bold)
+        }
+        TextButton(onClick = pasang, modifier = Modifier.fillMaxWidth()) {
+            Text("VLESS Pro belum dipasang pada modem? Pasang sekarang", color = Wr.ac2)
+        }
+    }
+}
+
+@Composable
+fun medan() = OutlinedTextFieldDefaults.colors(
+    focusedTextColor = Wr.tx, unfocusedTextColor = Wr.tx, focusedBorderColor = Wr.ac, unfocusedBorderColor = Wr.garis,
+    focusedLabelColor = Wr.ac, unfocusedLabelColor = Wr.mu, cursorColor = Wr.ac)
+
+// ───────────────────────── Skrin utama ─────────────────────────
+
+@Composable
+fun Utama2(pref: android.content.SharedPreferences, keluar: () -> Unit) {
+    var tab by remember { mutableIntStateOf(0) }
+    var sub by remember { mutableStateOf<String?>(null) }
+    var sahJom by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        var n = 0
+        while (true) {
+            withContext(Dispatchers.IO) {
+                try {
+                    val s = Modem.status()
+                    St.status = s
+                    St.jamOfset = s.optLong("now") - System.currentTimeMillis() / 1000
+                    St.luar = false
+                    if (n % 4 == 0 && s.optBoolean("vless")) St.ipInfo = Modem.ipInfo().takeIf { it.optBoolean("ok") }
+                    if (n % 4 == 0 || St.nod.isEmpty()) St.nod = Modem.nodes()
+                } catch (_: SalahKata) { St.toast("Kata laluan telah berubah") }
+                catch (_: Exception) { St.luar = true }
+            }
+            n++
+            delay(3000)
+        }
+    }
+    BackHandler(enabled = sub != null) { sub = null }
+    BackHandler(enabled = sub == null && tab != 0) { tab = 0 }
+
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize()) {
+            if (St.luar) {
+                Row(Modifier.fillMaxWidth().background(Color(0xFF3A2A12)).padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Text("Tiada sambungan ke modem. Sambung telefon ke WiFi modem.", color = Wr.wn, fontSize = 12.sp, modifier = Modifier.weight(1f))
+                    TextButton(onClick = keluar) { Text("Tukar", color = Wr.tx, fontSize = 12.sp) }
+                }
+            }
+            Box(Modifier.weight(1f)) {
+                if (sub != null) Sub(sub!!, pref, keluar) { sub = null }
+                else when (tab) {
+                    0 -> Utama()
+                    1 -> Profil()
+                    2 -> Statistik()
+                    else -> Lagi { sub = it }
+                }
+            }
+        }
+        if (sub == null) BarBawah(tab, { tab = it }, Modifier.align(Alignment.BottomCenter))
+    }
+}
+
+@Composable
+fun BarBawah(tab: Int, pilih: (Int) -> Unit, modifier: Modifier) {
+    val on = St.on()
+    val busy = St.sibuk
+    Box(modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp)) {
+        Row(Modifier.fillMaxWidth().height(66.dp).clip(RoundedCornerShape(33.dp)).background(Color(0xE60E1328))
+            .border(1.dp, Wr.garis, RoundedCornerShape(33.dp)).padding(horizontal = 6.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            @Composable fun item(i: Int, nama: String, ikon: @Composable (Color) -> Unit) {
+                val a = tab == i
+                Column(Modifier.weight(1f).fillMaxHeight().clip(RoundedCornerShape(28.dp)).clickable { pilih(i) },
+                    horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                    ikon(if (a) Wr.ac else Wr.mu)
+                    Text(nama, fontSize = 11.sp, color = if (a) Wr.ac else Wr.mu, fontWeight = if (a) FontWeight.Bold else FontWeight.Normal)
+                }
+            }
+            item(0, "Utama") { IkonRumah(it) }
+            item(1, "Profil") { IkonSenarai(it) }
+            Spacer(Modifier.width(72.dp))
+            item(2, "Statistik") { IkonDenyut(it) }
+            item(3, "Lagi") { IkonGrid(it) }
+        }
+        Box(Modifier.align(Alignment.TopCenter).offset(y = (-16).dp).size(66.dp).clip(CircleShape)
+            .background(if (on) Wr.grad else Brush.linearGradient(listOf(Color(0xFF3B4470), Color(0xFF232A4A))))
+            .border(3.dp, Wr.bg, CircleShape).clickable(enabled = !busy) { pindahMod() },
+            contentAlignment = Alignment.Center) {
+            IkonKuasa(if (on) Color(0xFF03212B) else Color(0xFFCFD5E8), 30)
+        }
+    }
+}
+
+// ───────────────────────── Utama ─────────────────────────
+
+private var sahPending: (() -> Unit)? = null
+
+fun pindahMod() {
+    val s = St.status ?: return
+    if (s.optBoolean("locked")) { St.toast("Aktifkan lesen dahulu (Lagi > Lesen)"); return }
+    val hidup = St.on()
+    St.sibuk = true
+    bg {
+        try {
+            val (ok, m) = Modem.mod(!hidup)
+            St.toast(m.ifEmpty { if (ok) "Diproses" else "Gagal" })
+            var n = 0
+            while (n < 22) {
+                Thread.sleep(3000)
+                val st = Modem.status()
+                St.status = st
+                val siap = if (!hidup) st.optString("mode") == "vless" && st.optBoolean("vless") else st.optString("mode") == "xlite"
+                if (siap) break
+                n++
+            }
+            St.ipInfo = null
+        } finally {
+            St.sibuk = false
+        }
+    }
+}
+
+@Composable
+fun Utama() {
+    val s = St.status
+    val on = St.on()
+    val sibuk = St.sibuk
+    var sahkan by remember { mutableStateOf(false) }
+    var kini by remember { mutableLongStateOf(System.currentTimeMillis() / 1000) }
+    LaunchedEffect(Unit) { while (true) { kini = System.currentTimeMillis() / 1000; delay(1000) } }
+
+    val tr = rememberInfiniteTransition(label = "u")
+    val putar by tr.animateFloat(0f, 360f, infiniteRepeatable(tween(if (sibuk) 900 else 3200, easing = LinearEasing)), label = "p")
+    val nafas by tr.animateFloat(0.85f, 1f, infiniteRepeatable(tween(2200, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "n")
+
+    val jam = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+    val sapa = if (jam < 11) "Selamat pagi" else if (jam < 15) "Selamat tengah hari" else if (jam < 19) "Selamat petang" else "Selamat malam"
+
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 130.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Text("VLESS PRO", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 3.sp, style = TextStyle(brush = Wr.grad))
+        Column {
+            Text(sapa, color = Wr.mu, fontSize = 14.sp)
+            Text(if (s == null) "Menyambung ..." else if (on) "Anda disambung" else if (s.optString("mode") == "xlite") "VLESS Pro tidak aktif" else "Tiada sambungan",
+                fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = if (on) Wr.ac else Wr.tx)
+            val ip = St.ipInfo
+            Text(if (on && ip != null) "${ip.optString("ip")} · ${ip.optString("country")} · ${ip.optInt("ms")} ms"
+            else if (s != null && !on && s.optBoolean("xlite")) "XLITE sedang digunakan" else if (on) "Memeriksa IP ..." else "Sentuh butang untuk menyambung",
+                color = Wr.mu, fontSize = 14.sp)
+        }
+
+        Box(Modifier.fillMaxWidth().height(260.dp), contentAlignment = Alignment.Center) {
+            Canvas(Modifier.size(250.dp)) {
+                val w = size.width
+                drawCircle(Wr.garis, w / 2 - 6f, style = Stroke(2f))
+                if (on || sibuk) {
+                    drawArc(Brush.sweepGradient(listOf(Color.Transparent, Wr.ac, Wr.ac2, Color.Transparent)), putar, 200f, false,
+                        topLeft = Offset(6f, 6f), size = Size(w - 12f, w - 12f), style = Stroke(9f, cap = StrokeCap.Round))
+                }
+            }
+            Box(Modifier.size(172.dp).clip(CircleShape)
+                .background(if (on) Brush.radialGradient(listOf(Color(0xFF7DE7F7), Wr.ac, Wr.ac2)) else Brush.radialGradient(listOf(Color(0xFF4A5380), Color(0xFF232A4A))))
+                .clickable(enabled = !sibuk && s != null) { sahkan = true }
+                .padding(if (on) 0.dp else 0.dp), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    IkonKuasa(if (on) Color(0xFF03212B) else Color(0xFFCFD5E8), 56)
+                    Spacer(Modifier.height(6.dp))
+                    Text(if (sibuk) "Sila tunggu" else if (on) "Putuskan" else "Sambung", fontWeight = FontWeight.ExtraBold, fontSize = 17.sp,
+                        color = if (on) Color(0xFF03212B) else Color(0xFFCFD5E8))
+                }
+            }
+        }
+
+        val since = s?.optLong("since") ?: 0L
+        val saat = if (on && since > 0) (kini + St.jamOfset - since).coerceAtLeast(0) else 0L
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+            Row(Modifier.clip(RoundedCornerShape(50)).background(Wr.kad).border(1.dp, Wr.garis, RoundedCornerShape(50)).padding(horizontal = 18.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(8.dp).clip(CircleShape).background(if (on) Wr.ac else Wr.mu))
+                Spacer(Modifier.width(10.dp))
+                Text("%02d:%02d:%02d".format(saat / 3600, saat % 3600 / 60, saat % 60), color = if (on) Wr.ac else Wr.mu,
+                    fontFamily = FontFamily.Monospace, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.width(8.dp))
+                Text("SESI", color = Wr.mu, fontSize = 11.sp, letterSpacing = 2.sp)
+            }
+        }
+
+        KadWr {
+            Row(Modifier.fillMaxWidth()) {
+                Column(Modifier.weight(1f)) {
+                    Text("MUAT TURUN", color = Wr.mu, fontSize = 11.sp, letterSpacing = 1.sp)
+                    Text(if (on) fB(s?.optDouble("rx") ?: 0.0) + "/s" else "-", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
+                }
+                Column(Modifier.weight(1f)) {
+                    Text("MUAT NAIK", color = Wr.mu, fontSize = 11.sp, letterSpacing = 1.sp)
+                    Text(if (on) fB(s?.optDouble("tx") ?: 0.0) + "/s" else "-", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
+                }
+            }
+        }
+
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            val l = s?.optJSONObject("lic")
+            val st = l?.optString("state").orEmpty()
+            val exp = l?.optString("exp").orEmpty()
+            val lt = when {
+                s == null -> "..."
+                st == "active" && (exp == "0" || exp.isEmpty()) -> "Lesen kekal"
+                st == "active" -> {
+                    val d = try { java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.US).parse(exp) } catch (_: Exception) { null }
+                    val n = if (d != null) ((d.time - System.currentTimeMillis()) / 86400000L + 1).toInt() else -1
+                    if (n >= 0) "Lesen $n hari" else "Lesen aktif"
+                }
+                st == "expired" -> "Lesen luput"
+                st == "none" || st.isEmpty() -> "Tiada lesen"
+                else -> "Lesen: $st"
+            }
+            Cip(lt, if (st == "active") Wr.ok else Wr.bad)
+            Cip(if (s?.optString("mode") == "vless") "VLESS Pro" else "XLITE", Wr.ac2)
+            val nama = s?.optString("node").orEmpty()
+            if (nama.isNotEmpty()) Cip(nama, Wr.ac)
+        }
+    }
+
+    if (sahkan) {
+        AlertDialog(onDismissRequest = { sahkan = false }, containerColor = Wr.kad,
+            title = { Text(if (on) "Putuskan sambungan?" else "Sambung VLESS Pro?", color = Wr.tx) },
+            text = {
+                val hx = s?.optBoolean("hasx", true) ?: true
+                Text(if (on) (if (hx) "VLESS Pro diputuskan dan XLITE dipulihkan. Internet terhenti seketika." else "VLESS Pro diputuskan. Sambungan kembali tanpa proksi.")
+                else (if (hx) "XLITE dihentikan sementara. Internet terhenti seketika." else "Internet terhenti seketika."), color = Wr.mu)
+            },
+            confirmButton = { TextButton(onClick = { sahkan = false; pindahMod() }) { Text(if (on) "Putuskan" else "Sambung", color = if (on) Wr.bad else Wr.ac) } },
+            dismissButton = { TextButton(onClick = { sahkan = false }) { Text("Batal", color = Wr.mu) } })
+    }
+}
+
+@Composable
+fun Cip(t: String, w: Color) {
+    Row(Modifier.clip(RoundedCornerShape(50)).background(Wr.kad).border(1.dp, Wr.garis, RoundedCornerShape(50)).padding(horizontal = 12.dp, vertical = 7.dp),
+        verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(7.dp).clip(CircleShape).background(w))
+        Spacer(Modifier.width(7.dp))
+        Text(t, color = Wr.tx, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
+    }
+}
+
+// ───────────────────────── Profil ─────────────────────────
+
+@Composable
+fun Profil() {
+    var tambah by remember { mutableStateOf(false) }
+    var padam by remember { mutableStateOf<Nod?>(null) }
+    val ctx = LocalContext.current
+
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 140.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("Profil", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedButton(onClick = {
+                    St.toast("Menguji semua profil ...")
+                    bg { val r = Modem.ping(); St.ping = r.mapIndexed { i, v -> i to v }.toMap(); St.toast("Ujian siap") }
+                }, border = androidx.compose.foundation.BorderStroke(1.dp, Wr.ac)) { Text("Uji semua", color = Wr.ac) }
+                Spacer(Modifier.weight(1f))
+                Text("${St.nod.size} profil", color = Wr.mu, fontSize = 13.sp)
+            }
+            if (St.nod.isEmpty()) {
+                KadWr { Text("Belum ada profil. Tekan + untuk menambah pautan vless://, vmess://, trojan://, ss:// atau WireGuard.", color = Wr.mu) }
+            }
+            St.nod.forEach { n ->
+                val ms = St.ping[n.i]
+                KadWr(klik = {
+                    if (!n.pilih) bg { val (ok, m) = Modem.pilihNod(n.i); St.toast(m.ifEmpty { if (ok) "Dipilih" else "Gagal" }); St.nod = Modem.nodes() }
+                }) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(44.dp).clip(CircleShape).background(if (n.pilih) Wr.grad else Brush.linearGradient(listOf(Wr.garis, Wr.garis))),
+                            contentAlignment = Alignment.Center) {
+                            Text(if (n.pilih) "✓" else n.nama.take(1).uppercase(), color = if (n.pilih) Color(0xFF03212B) else Wr.tx, fontWeight = FontWeight.ExtraBold)
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(n.nama, color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 16.sp, maxLines = 1)
+                            Text("${n.host}:${n.port} · ${n.net} · ${n.sec}", color = Wr.mu, fontSize = 12.sp, maxLines = 1)
+                        }
+                        if (ms != null) {
+                            val t = if (ms > 0) "$ms ms" else if (ms == -2) "UDP" else "Tamat"
+                            val w = if (ms in 1..250) Wr.ok else if (ms > 250) Wr.wn else if (ms == -2) Wr.mu else Wr.bad
+                            Text(t, color = w, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            Spacer(Modifier.width(8.dp))
+                        }
+                        Text("✕", color = Wr.bad, fontSize = 18.sp, modifier = Modifier.clickable { padam = n }.padding(8.dp))
+                    }
+                }
+            }
+        }
+        Box(Modifier.align(Alignment.BottomEnd).padding(end = 22.dp, bottom = 112.dp).size(58.dp).clip(RoundedCornerShape(20.dp)).background(Wr.grad)
+            .clickable { tambah = true }, contentAlignment = Alignment.Center) {
+            Text("+", fontSize = 32.sp, color = Color(0xFF03212B), fontWeight = FontWeight.Bold)
+        }
+    }
+
+    if (tambah) {
+        var teks by remember { mutableStateOf("") }
+        AlertDialog(onDismissRequest = { tambah = false }, containerColor = Wr.kad,
+            title = { Text("Tambah profil", color = Wr.tx) },
+            text = {
+                Column {
+                    OutlinedTextField(teks, { teks = it }, minLines = 4, maxLines = 8, modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Tampal pautan (satu baris setiap profil)") }, colors = medan())
+                    TextButton(onClick = {
+                        val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        teks = cm.primaryClip?.getItemAt(0)?.text?.toString().orEmpty()
+                    }) { Text("Tampal dari papan klip", color = Wr.ac) }
+                }
+            },
+            confirmButton = {
+                TextButton(enabled = teks.isNotBlank(), onClick = {
+                    val t = teks; tambah = false
+                    bg { val (ok, m) = Modem.tambahNod(t); St.toast(m.ifEmpty { if (ok) "Ditambah" else "Gagal" }); St.nod = Modem.nodes() }
+                }) { Text("Tambah", color = Wr.ac) }
+            },
+            dismissButton = { TextButton(onClick = { tambah = false }) { Text("Batal", color = Wr.mu) } })
+    }
+    padam?.let { n ->
+        AlertDialog(onDismissRequest = { padam = null }, containerColor = Wr.kad,
+            title = { Text("Padam profil?", color = Wr.tx) }, text = { Text(n.nama, color = Wr.mu) },
+            confirmButton = {
+                TextButton(onClick = {
+                    padam = null
+                    bg { val (ok, m) = Modem.padamNod(n.i); St.toast(m.ifEmpty { if (ok) "Dipadam" else "Gagal" }); St.nod = Modem.nodes() }
+                }) { Text("Padam", color = Wr.bad) }
+            },
+            dismissButton = { TextButton(onClick = { padam = null }) { Text("Batal", color = Wr.mu) } })
+    }
+}
+
+// ───────────────────────── Statistik ─────────────────────────
+
+@Composable
+fun Statistik() {
+    var live by remember { mutableStateOf<List<Pair<Double, Double>>>(emptyList()) }
+    var ov by remember { mutableStateOf<org.json.JSONObject?>(null) }
+    LaunchedEffect(Unit) {
+        var n = 0
+        while (true) {
+            withContext(Dispatchers.IO) {
+                try {
+                    val g = Modem.graphs()
+                    val a = g.optJSONArray("live") ?: g.optJSONArray("speed")
+                    if (a != null) live = (0 until a.length()).map { val p = a.optJSONArray(it); (p?.optDouble(0) ?: 0.0) to (p?.optDouble(1) ?: 0.0) }
+                    if (n % 5 == 0) ov = Modem.overview()
+                } catch (_: Exception) {}
+            }
+            n++
+            delay(3000)
+        }
+    }
+    val s = St.status
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 130.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Text("Statistik", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
+        KadWr {
+            Text("Kelajuan (3 minit terakhir)", color = Wr.mu, fontSize = 12.sp, letterSpacing = 1.sp)
+            Spacer(Modifier.height(8.dp))
+            val mx = (live.maxOfOrNull { maxOf(it.first, it.second) } ?: 0.0).coerceAtLeast(20 * 1024.0)
+            Canvas(Modifier.fillMaxWidth().height(150.dp)) {
+                val w = size.width; val h = size.height
+                fun garis(sel: (Pair<Double, Double>) -> Double, c: Color) {
+                    if (live.size < 2) return
+                    val p = Path()
+                    live.forEachIndexed { i, v ->
+                        val x = w * i / (live.size - 1)
+                        val y = h - (sel(v) / mx * (h - 8f)).toFloat() - 4f
+                        if (i == 0) p.moveTo(x, y) else p.lineTo(x, y)
+                    }
+                    drawPath(p, c, style = Stroke(5f, cap = StrokeCap.Round))
+                }
+                drawLine(Wr.garis, Offset(0f, h - 1f), Offset(w, h - 1f), 2f)
+                garis({ it.first }, Wr.ac)
+                garis({ it.second }, Wr.ac2)
+            }
+            Spacer(Modifier.height(6.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text("● Muat turun", color = Wr.ac, fontSize = 12.sp)
+                Text("● Muat naik", color = Wr.ac2, fontSize = 12.sp)
+                Spacer(Modifier.weight(1f))
+                Text("puncak " + fB(mx) + "/s", color = Wr.mu, fontSize = 12.sp)
+            }
+        }
+        KadWr {
+            Baris("Muat turun semasa", fB(s?.optDouble("rx") ?: 0.0) + "/s")
+            Baris("Muat naik semasa", fB(s?.optDouble("tx") ?: 0.0) + "/s")
+            ov?.let {
+                Baris("IP WAN", it.optString("wanip").ifEmpty { "-" })
+                Baris("Get laluan", it.optString("gw").ifEmpty { "-" })
+                val tot = it.optDouble("memtot"); val fr = it.optDouble("memfree")
+                if (tot > 0) Baris("Memori bebas", fB(fr * 1024) + " / " + fB(tot * 1024))
+                Baris("Sambungan gagal (1 jam)", it.optInt("drops1h").toString())
+            }
+        }
+    }
+}
+
+@Composable
+fun Baris(k: String, v: String) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 7.dp)) {
+        Text(k, color = Wr.mu, fontSize = 14.sp, modifier = Modifier.weight(1f))
+        Text(v, color = Wr.tx, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+// ───────────────────────── Lagi ─────────────────────────
+
+@Composable
+fun Lagi(buka: (String) -> Unit) {
+    val item = listOf(
+        Triple("lesen", "Lesen", "Aktifkan dan semak"),
+        Triple("kemas", "Kemas kini modem", "GitHub atau fail"),
+        Triple("log", "Log", "Rekod sambungan"),
+        Triple("sistem", "Sistem", "Maklumat modem"),
+        Triple("pasang", "Pasang / urus", "Pemasang SSH"),
+        Triple("apl", "Kemas kini apl", "Versi apl ini"),
+    )
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 130.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text("Lagi", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
+        item.chunked(2).forEach { baris ->
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                baris.forEach { (id, t, d) ->
+                    Box(Modifier.weight(1f)) { KadWr(klik = { buka(id) }) {
+                        Text(t, color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text(d, color = Wr.mu, fontSize = 12.sp)
+                    } }
+                }
+                if (baris.size == 1) Spacer(Modifier.weight(1f))
+            }
+        }
+        KadWr(klik = { buka("keluar") }) { Text("Tukar modem / kata laluan", color = Wr.bad, fontWeight = FontWeight.Bold) }
+    }
+}
+
+@Composable
+fun Sub(id: String, pref: android.content.SharedPreferences, keluar: () -> Unit, tutup: () -> Unit) {
+    val ctx = LocalContext.current
+    Column(Modifier.fillMaxSize()) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            TextButton(onClick = tutup) { Text("‹ Kembali", color = Wr.ac, fontSize = 16.sp) }
+        }
+        Box(Modifier.weight(1f)) {
+            when (id) {
+                "lesen" -> SubLesen()
+                "kemas" -> SubKemas()
+                "log" -> SubLog()
+                "sistem" -> SubSistem()
+                "apl" -> SubApl()
+                "pasang" -> {
+                    var edisi by remember { mutableStateOf(if (Modem.ip == "192.168.1.1") Edisi.AW1000 else Edisi.B618) }
+                    var ip by remember { mutableStateOf(Modem.ip.ifEmpty { edisi.ipLalai }) }
+                    Pemasangan(edisi, ip, { e -> edisi = e; ip = e.ipLalai }, { ip = it }, { tutup() })
+                }
+                "keluar" -> {
+                    LaunchedEffect(Unit) { pref.edit().remove("pass").apply(); keluar() }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Halaman(isi: @Composable ColumnScope.() -> Unit) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 40.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp), content = isi)
+}
+
+@Composable
+fun SubLesen() {
+    var l by remember { mutableStateOf<org.json.JSONObject?>(null) }
+    var kunci by remember { mutableStateOf("") }
+    val ctx = LocalContext.current
+    LaunchedEffect(Unit) { withContext(Dispatchers.IO) { try { l = Modem.lic() } catch (_: Exception) {} } }
+    Halaman {
+        Text("Lesen", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
+        KadWr {
+            val st = l?.optString("state").orEmpty()
+            Baris("Keadaan", when (st) { "active" -> "Aktif"; "expired" -> "Luput"; "none", "" -> "Belum ada"; else -> st })
+            l?.optString("name")?.takeIf { it.isNotEmpty() }?.let { Baris("Nama", it) }
+            l?.optString("exp")?.takeIf { it.isNotEmpty() }?.let { Baris("Luput", if (it == "0") "Seumur hidup" else it) }
+            val id = l?.optString("id").orEmpty()
+            Baris("ID Peranti", id.ifEmpty { "-" })
+            if (id.isNotEmpty()) OutlinedButton(onClick = {
+                val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                cm.setPrimaryClip(ClipData.newPlainText("ID", id)); St.toast("ID disalin")
+            }) { Text("Salin ID Peranti", color = Wr.ac) }
+        }
+        KadWr {
+            Text("Aktifkan lesen", color = Wr.tx, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(kunci, { kunci = it }, minLines = 2, maxLines = 5, modifier = Modifier.fillMaxWidth(), label = { Text("Tampal kunci lesen") }, colors = medan())
+            Spacer(Modifier.height(10.dp))
+            Button(enabled = kunci.isNotBlank(), onClick = {
+                val k = kunci
+                bg {
+                    val j = Modem.aktifLesen(k)
+                    l = j
+                    St.toast(if (j.optString("state") == "active") "Lesen diaktifkan" else "Lesen ditolak (${j.optString("state")})")
+                }
+            }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Wr.ac, contentColor = Color(0xFF03212B))) { Text("Aktifkan") }
+        }
+    }
+}
+
+@Composable
+fun SubKemas() {
+    var u by remember { mutableStateOf<org.json.JSONObject?>(null) }
+    var st by remember { mutableStateOf("") }
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) { try { u = Modem.update(false) } catch (_: Exception) {} }
+        while (true) {
+            withContext(Dispatchers.IO) { try { st = Modem.keadaKemasKini().let { it.optString("msg").ifEmpty { it.optString("st") } } } catch (_: Exception) {} }
+            delay(2500)
+        }
+    }
+    Halaman {
+        Text("Kemas kini modem", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
+        KadWr {
+            Baris("Versi dipasang", "v" + u?.optString("cur").orEmpty())
+            Baris("Versi terkini", "v" + u?.optString("latest").orEmpty().ifEmpty { "-" })
+            val baru = u?.optBoolean("newer") ?: false
+            Text(if (baru) "Versi baharu tersedia." else "Anda menggunakan versi terkini.", color = if (baru) Wr.wn else Wr.ok, fontSize = 14.sp)
+            if (st.isNotEmpty()) Text(st, color = Wr.mu, fontSize = 12.sp)
+            Spacer(Modifier.height(10.dp))
+            Button(onClick = { bg { u = Modem.update(true); St.toast("Semakan siap") } }, modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Wr.kad2, contentColor = Wr.ac)) { Text("Semak sekarang") }
+            Spacer(Modifier.height(8.dp))
+            Button(enabled = baru, onClick = { bg { val (ok, m) = Modem.kemasKini(false); St.toast(m.ifEmpty { if (ok) "Dimulakan" else "Gagal" }) } },
+                modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Wr.ac, contentColor = Color(0xFF03212B))) { Text("Kemas kini sekarang") }
+        }
+        Text("Tiada internet pada modem? Gunakan fail .tgz melalui Lagi > Pasang / urus, atau sambung telefon ke modem dan pasang dari fail.", color = Wr.mu, fontSize = 12.sp)
+    }
+}
+
+@Composable
+fun SubLog() {
+    var t by remember { mutableStateOf("Memuatkan ...") }
+    fun muat() = bg { t = Modem.log().ifEmpty { "(kosong)" } }
+    LaunchedEffect(Unit) { muat() }
+    Halaman {
+        Text("Log", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = { muat() }) { Text("Muat semula", color = Wr.ac) }
+            OutlinedButton(onClick = { bg { Modem.kosongLog(); t = "(kosong)"; St.toast("Log dikosongkan") } }) { Text("Kosongkan", color = Wr.bad) }
+        }
+        KadWr { Text(t, color = Wr.mu, fontFamily = FontFamily.Monospace, fontSize = 11.sp) }
+    }
+}
+
+@Composable
+fun SubSistem() {
+    var s by remember { mutableStateOf<org.json.JSONObject?>(null) }
+    var sah by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) { withContext(Dispatchers.IO) { try { s = Modem.system() } catch (_: Exception) {} } }
+    Halaman {
+        Text("Sistem", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
+        KadWr {
+            s?.let {
+                Baris("Edisi", it.optString("edisi"))
+                Baris("Seni bina", it.optString("arch"))
+                val up = it.optString("uptime").toDoubleOrNull()?.toLong() ?: 0L
+                Baris("Hidup sejak", "${up / 86400} hari ${up % 86400 / 3600} jam")
+                Baris("Beban", it.optString("load").split(" ").take(3).joinToString(" "))
+                Baris("Memori bebas", fB(it.optDouble("memfree") * 1024) + " / " + fB(it.optDouble("memtot") * 1024))
+                Baris("Simpanan bebas", fB(it.optDouble("diskfree")) + " / " + fB(it.optDouble("disktot")))
+                Baris("Xray", if (it.optBoolean("xray")) "Berjalan" else "Berhenti")
+            } ?: Text("Memuatkan ...", color = Wr.mu)
+        }
+        OutlinedButton(onClick = { sah = "restart" }, modifier = Modifier.fillMaxWidth()) { Text("Mulakan semula VLESS Pro", color = Wr.wn) }
+        OutlinedButton(onClick = { sah = "reboot" }, modifier = Modifier.fillMaxWidth()) { Text("But semula modem", color = Wr.bad) }
+    }
+    sah?.let { k ->
+        AlertDialog(onDismissRequest = { sah = null }, containerColor = Wr.kad,
+            title = { Text(if (k == "reboot") "But semula modem?" else "Mulakan semula VLESS Pro?", color = Wr.tx) },
+            text = { Text("Internet terhenti seketika.", color = Wr.mu) },
+            confirmButton = { TextButton(onClick = { sah = null; bg { val (_, m) = if (k == "reboot") Modem.reboot() else Modem.mulaSemula(); St.toast(m.ifEmpty { "Dihantar" }) } }) { Text("Teruskan", color = Wr.ac) } },
+            dismissButton = { TextButton(onClick = { sah = null }) { Text("Batal", color = Wr.mu) } })
+    }
+}
+
+@Composable
+fun SubApl() {
+    val ctx = LocalContext.current
+    var info by remember { mutableStateOf<InfoApl?>(null) }
+    var teks by remember { mutableStateOf("Menyemak ...") }
+    var sibuk by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            try {
+                val t = Kemas.terkini()
+                if (t.code > Kemas.versiSemasa(ctx)) { info = t; teks = "Versi baharu: ${t.name}" } else teks = "Anda menggunakan versi apl terkini."
+            } catch (e: Exception) { teks = "Tidak dapat menyemak: ${e.message}" }
+        }
+    }
+    Halaman {
+        Text("Kemas kini apl", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
+        KadWr {
+            Baris("Versi apl", "${Kemas.versiSemasa(ctx)}")
+            Text(teks, color = if (info != null) Wr.wn else Wr.mu, fontSize = 14.sp)
+            info?.let { k ->
+                Spacer(Modifier.height(10.dp))
+                Button(enabled = !sibuk, onClick = {
+                    sibuk = true
+                    bg {
+                        try { val m = Kemas.pasang(ctx, k) { teks = it }; if (m != null) teks = m } finally { sibuk = false }
+                    }
+                }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Wr.ac, contentColor = Color(0xFF03212B))) {
+                    Text(if (sibuk) "Sila tunggu ..." else "Kemas kini apl sekarang")
+                }
+            }
+        }
+    }
+}
