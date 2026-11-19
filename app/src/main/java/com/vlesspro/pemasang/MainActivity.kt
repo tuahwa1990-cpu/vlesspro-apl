@@ -79,6 +79,7 @@ fun Pemasangan(edisi: Edisi, ip: String, ubahEdisi: (Edisi) -> Unit, ubahIp: (St
     var sibuk by remember { mutableStateOf(false) }
     var hasil by remember { mutableStateOf<Hasil?>(null) }
     var kemas by remember { mutableStateOf<InfoApl?>(null) }
+    var kunci by remember { mutableStateOf("") }
     val log = remember { mutableStateListOf<String>() }
 
     LaunchedEffect(Unit) {
@@ -153,6 +154,16 @@ fun Pemasangan(edisi: Edisi, ip: String, ubahEdisi: (Edisi) -> Unit, ubahIp: (St
                 enabled = !sibuk && ip.isNotEmpty(), modifier = Modifier.weight(1f)) { Text("Semak status") }
             OutlinedButton(onClick = { kerja { Pemasang.suisBoot(edisi, ip, user, pass) { log.add(it) } } },
                 enabled = !sibuk && ip.isNotEmpty(), modifier = Modifier.weight(1f)) { Text("Pasang suis boot") }
+        }
+        Card(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Aktifkan lesen", fontWeight = FontWeight.Bold)
+                OutlinedTextField(value = kunci, onValueChange = { kunci = it }, label = { Text("Tampal kunci lesen") },
+                    modifier = Modifier.fillMaxWidth(), minLines = 2, maxLines = 4)
+                Button(onClick = { kerja { Pemasang.aktifkanLesen(edisi, ip, user, pass, kunci) { log.add(it) } } },
+                    enabled = !sibuk && ip.isNotEmpty() && kunci.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Aktifkan lesen") }
+                Text("Kunci diberi oleh penjual berdasarkan ID Peranti anda. Percubaan 3 hari pun diaktifkan di sini.", fontSize = 12.sp, color = Color.Gray)
+            }
         }
         OutlinedButton(onClick = { bukaPanel(hasil?.panel ?: "$ip:8990") }, modifier = Modifier.fillMaxWidth()) {
             Text("Buka panel VLESS Pro dalam apl")

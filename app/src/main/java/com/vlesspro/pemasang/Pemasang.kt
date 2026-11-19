@@ -197,4 +197,26 @@ object Pemasang {
             log(it.run("VP_HOME=$h $h/bin/vpro id", null, 30).second.trim())
         }
     }
+
+    // Aktifkan kunci lesen pada modem (vpro activate KEY) dan paparkan keadaan lesen.
+    fun aktifkanLesen(edisi: Edisi, ip: String, user: String, pass: String, kunci: String, log: (String) -> Unit) {
+        val k = kunci.trim().replace(Regex("\\s+"), "")
+        if (k.isEmpty()) { log("Kunci lesen kosong."); return }
+        if (!Regex("[A-Za-z0-9._~+/=-]{20,}").matches(k)) { log("Kunci lesen tidak sah (ada aksara pelik atau terlalu pendek). Salin semula kunci penuh."); return }
+        val h = if (edisi == Edisi.B618) "/online/vlesspro" else "/data/vlesspro"
+        Ssh(ip, user, pass).use {
+            val o = it.run("VP_HOME=$h $h/bin/vpro activate '$k'", null, 30).second
+            val m = o.lines().mapNotNull { l -> val p = l.split("=", limit = 2); if (p.size == 2) p[0].trim() to p[1].trim() else null }.toMap()
+            val st = m["state"].orEmpty()
+            val teks = when (st) {
+                "active" -> "LESEN AKTIF. Nama: ${m["name"].orEmpty()}, luput: ${m["exp"].orEmpty().ifEmpty { "-" }}"
+                "expired" -> "Lesen ini sudah luput. Minta kunci baharu."
+                "revoked" -> "Lesen ini telah dibatalkan."
+                "" -> "Tiada jawapan daripada modem. Pastikan VLESS Pro sudah dipasang.\n" + o.trim()
+                else -> "Lesen tidak diterima (keadaan: $st). Pastikan kunci dijana untuk ID peranti ini."
+            }
+            log(teks)
+            log(o.trim())
+        }
+    }
 }
