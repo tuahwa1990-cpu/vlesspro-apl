@@ -495,6 +495,8 @@ fun Utama() {
             if (nama.isNotEmpty()) Cip(nama, Wr.ac)
             if (on && St.vpnMod.isNotEmpty()) Cip(Bhs.f("Mod {0}", St.vpnMod), Wr.wn)
         }
+
+        KadUjian()
     }
 
     if (sahkan) {

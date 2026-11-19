@@ -3,6 +3,9 @@ package com.vlesspro.pemasang
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -17,6 +20,18 @@ enum class Edisi(val nama: String, val ipLalai: String) {
 }
 
 class Hasil(val ok: Boolean, val id: String = "", val panel: String = "")
+
+/** Aliran data yang melaporkan kemajuan penghantaran ke modem. */
+class Kira(private val d: ByteArray, nama: String) : ByteArrayInputStream(d) {
+    private val nm = nama
+    init { Pemasang.mulaKemajuan("hantar", nm, 0f) }
+    override fun read(b: ByteArray, off: Int, len: Int): Int {
+        val n = super.read(b, off, len)
+        Pemasang.mulaKemajuan("hantar", nm, if (d.isEmpty()) 1f else pos.toFloat() / d.size)
+        return n
+    }
+    override fun close() { Pemasang.tamatKemajuan(); super.close() }
+}
 
 class Ssh(ip: String, user: String, pass: String) : AutoCloseable {
     private val s: Session
@@ -58,7 +73,7 @@ class Ssh(ip: String, user: String, pass: String) : AutoCloseable {
         val dir = path.substringBeforeLast('/')
         val (kod, o) = run(
             "mkdir -p '$dir' && cat > '$path.tmp' && chmod $mode '$path.tmp' && { rm -f '$path'; mv '$path.tmp' '$path'; }",
-            ByteArrayInputStream(data), 900
+            Kira(data, path.substringAfterLast('/')), 900
         )
         if (kod != 0) throw RuntimeException(Bhs.f("Gagal menghantar {0} ke modem: {1}", path, o))
     }
@@ -72,13 +87,36 @@ object Pemasang {
     private const val BASE = "https://raw.githubusercontent.com/tuahwa1990-cpu/vless-pro-b618/main"
     private const val XRAY = "https://github.com/XTLS/Xray-core/releases/download/v26.3.27/"
 
+    /** Kemajuan semasa: jenis ("muat"/"hantar"), nama fail, nisbah 0..1 (-2 jika tidak diketahui), -1 jika tiada. */
+    var kJenis by mutableStateOf("")
+    var kNama by mutableStateOf("")
+    var kNisbah by mutableStateOf(-1f)
+
+    fun mulaKemajuan(jenis: String, nama: String, nisbah: Float) { kJenis = jenis; kNama = nama; kNisbah = nisbah }
+    fun tamatKemajuan() { kNisbah = -1f }
+
     fun muat(url: String): ByteArray {
         val c = URL(url).openConnection() as HttpURLConnection
         c.connectTimeout = 15000
         c.readTimeout = 60000
         c.instanceFollowRedirects = true
         if (c.responseCode != 200) throw RuntimeException(Bhs.f("Muat turun gagal (HTTP {0}): {1}", c.responseCode, url))
-        return c.inputStream.use { it.readBytes() }
+        val jum = c.contentLengthLong
+        val nama = url.substringAfterLast('/').substringBefore('?')
+        val out = ByteArrayOutputStream()
+        try {
+            mulaKemajuan("muat", nama, if (jum > 0) 0f else -2f)
+            c.inputStream.use { i ->
+                val b = ByteArray(32768)
+                while (true) {
+                    val n = i.read(b)
+                    if (n < 0) break
+                    out.write(b, 0, n)
+                    if (jum > 0) kNisbah = (out.size().toFloat() / jum).coerceAtMost(1f)
+                }
+            }
+        } finally { tamatKemajuan() }
+        return out.toByteArray()
     }
 
     fun sha(b: ByteArray): String =
@@ -172,7 +210,7 @@ object Pemasang {
         log(Bhs.t("[2/4] Menghantar fail ke modem ..."))
         val r = ssh.run(
             "[ -f $h/run/ui.pid ] && kill \$(cat $h/run/ui.pid) 2>/dev/null; rm -f $h/bin/vpro; mkdir -p /data && cd /data && tar xzf -",
-            ByteArrayInputStream(tgz), 600
+            Kira(tgz, "install.tgz"), 600
         )
         if (r.first != 0) throw RuntimeException(Bhs.f("Gagal membuka pakej pada modem: {0}", r.second))
         val x = ssh.run("[ -x $h/bin/xray ] || echo tiadaxray").second

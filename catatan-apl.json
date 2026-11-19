@@ -1,11 +1,22 @@
 {
- "title": "Semakan bahasa Melayu dan English",
+ "title": "Kemajuan pemasangan dan Uji sambungan",
  "items": [
-  "Nota keluaran, log Pemasang dan mesej kini diterjemah sepenuhnya apabila bahasa English dipilih.",
-  "Beberapa istilah Melayu diseragamkan (laluan, tetapkan semula, dimulakan semula) dan terjemahan English yang tidak sepadan dibetulkan.",
-  "Masa lalu dan bilangan hari lesen dipaparkan dengan betul dalam English (contoh 1 day)."
+  "Bar kemajuan untuk muat turun, penghantaran ke modem dan langkah pemasangan, termasuk kemas kini apl.",
+  "Amaran jika telefon guna data mudah alih, dan pemasangan diikat kepada WiFi modem supaya tidak terputus.",
+  "Jika sambungan ke modem terputus, pemasangan cuba sekali lagi secara automatik.",
+  "Butang Uji sambungan di skrin utama: semak WiFi, status VLESS Pro, IP telefon dan sama ada trafik melalui VLESS Pro."
  ],
  "history": [
+  {
+   "version": "1.0.26",
+   "date": "2026-11-20",
+   "title": "Semakan bahasa Melayu dan English",
+   "items": [
+    "Nota keluaran, log Pemasang dan mesej kini diterjemah sepenuhnya apabila bahasa English dipilih.",
+    "Beberapa istilah Melayu diseragamkan (laluan, tetapkan semula, dimulakan semula) dan terjemahan English yang tidak sepadan dibetulkan.",
+    "Masa lalu dan bilangan hari lesen dipaparkan dengan betul dalam English (contoh 1 day)."
+   ]
+  },
   {
    "version": "1.0.25",
    "date": "2026-11-20",

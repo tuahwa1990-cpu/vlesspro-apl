@@ -128,11 +128,33 @@ fun Pemasangan(edisi: Edisi, ip: String, ubahEdisi: (Edisi) -> Unit, ubahIp: (St
         }.start()
     }
 
-    fun kerja(tugas: () -> Unit) {
+    var rangkaian by remember { mutableStateOf("wifi") }
+    LaunchedEffect(Unit) { while (true) { rangkaian = Rangkaian.jenis(ctx); kotlinx.coroutines.delay(3000) } }
+
+    fun kerja(ikat: Boolean = true, tugas: () -> Unit) {
         if (sibuk) return
         sibuk = true; hasil = null; log.clear()
         Thread {
-            try { tugas() } catch (e: Exception) { log.add(Bhs.t("GAGAL") + ": ${e.message ?: e.javaClass.simpleName}") }
+            try {
+                if (ikat) {
+                    if (Rangkaian.wifi(ctx) == null) {
+                        log.add(Bhs.t("Telefon belum disambung ke WiFi modem. Menunggu WiFi (sehingga 20 saat) ..."))
+                        if (!Rangkaian.tungguWifi(ctx, 20))
+                            throw RuntimeException(Bhs.t("Telefon tidak disambung ke WiFi modem. Sambung WiFi modem dan matikan data mudah alih, kemudian cuba lagi."))
+                    }
+                    Rangkaian.ikat(ctx)
+                }
+                try { tugas() } catch (e: Exception) {
+                    if (!ikat || !Rangkaian.putus(e)) throw e
+                    log.add(Bhs.t("Sambungan terputus. Menunggu WiFi modem dan mencuba sekali lagi ..."))
+                    if (!Rangkaian.tungguWifi(ctx, 30)) throw e
+                    Rangkaian.ikat(ctx)
+                    Thread.sleep(2000)
+                    tugas()
+                }
+            } catch (e: Exception) { log.add(Bhs.t("GAGAL") + ": ${e.message ?: e.javaClass.simpleName}") }
+            Rangkaian.lepas(ctx)
+            Pemasang.tamatKemajuan()
             sibuk = false
         }.start()
     }
@@ -147,12 +169,20 @@ fun Pemasangan(edisi: Edisi, ip: String, ubahEdisi: (Edisi) -> Unit, ubahIp: (St
         Text("VLESS Pro Pemasang", fontSize = 22.sp, fontWeight = FontWeight.Bold)
         Text("Pasang, kemas kini dan urus VLESS Pro pada modem anda terus dari telefon, tanpa Termux.", fontSize = 13.sp, color = Color.DarkGray)
 
+        if (rangkaian != "wifi") {
+            Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color(0xFFFFE4E1))) {
+                Text(Bhs.t(if (rangkaian == "data") "Telefon sedang guna data mudah alih. Sambung ke WiFi modem dan matikan data mudah alih sebelum memasang."
+                    else "Telefon tiada sambungan WiFi. Sambung ke WiFi modem sebelum memasang."),
+                    Modifier.padding(14.dp), fontSize = 13.sp, color = Color(0xFF7A1C12))
+            }
+        }
+
         kemas?.let { k ->
             Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF4D6))) {
                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(Bhs.t("Versi apl baharu tersedia") + ": ${k.name}", fontWeight = FontWeight.Bold)
                     Button(onClick = {
-                        kerja {
+                        kerja(ikat = false) {
                             val m = Kemas.pasang(ctx, k) { log.add(it) }
                             if (m != null) log.add(m)
                         }
@@ -225,6 +255,28 @@ fun Pemasangan(edisi: Edisi, ip: String, ubahEdisi: (Edisi) -> Unit, ubahIp: (St
                         Text("Hantar ID ini kepada penjual untuk mendapatkan kunci lesen.", fontSize = 12.sp)
                     }
                     Text(Bhs.t("Panel") + ": http://${h.panel}   " + Bhs.t("Kata laluan awal") + ": admin", fontSize = 12.sp)
+                }
+            }
+        }
+
+        if (sibuk) {
+            val langkah = log.mapNotNull { Regex("^\\[(\\d)/4\\]").find(it)?.groupValues?.get(1)?.toIntOrNull() }.lastOrNull()
+            val nis = Pemasang.kNisbah
+            Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (langkah != null) {
+                        Text(Bhs.f("Langkah {0} daripada 4", langkah), fontSize = 12.sp, color = Color.Gray)
+                        LinearProgressIndicator(progress = { langkah / 4f }, modifier = Modifier.fillMaxWidth())
+                    }
+                    if (nis != -1f) {
+                        val nm = Pemasang.kNama
+                        Text(if (nis < 0f) Bhs.f(if (Pemasang.kJenis == "hantar") "Menghantar {0} ke modem ..." else "Memuat turun {0} ...", nm)
+                            else Bhs.f(if (Pemasang.kJenis == "hantar") "Menghantar {0} ke modem: {1}%" else "Memuat turun {0}: {1}%", nm, (nis * 100).toInt()), fontSize = 13.sp)
+                        if (nis < 0f) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                        else LinearProgressIndicator(progress = { nis }, modifier = Modifier.fillMaxWidth())
+                    } else if (langkah == null) {
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    }
                 }
             }
         }
