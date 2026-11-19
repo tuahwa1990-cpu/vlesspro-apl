@@ -9,6 +9,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -274,6 +275,7 @@ fun Utama2(pref: android.content.SharedPreferences, keluar: () -> Unit) {
                     St.luar = false
                     if (n % 4 == 0 && s.optBoolean("vless")) St.ipInfo = Modem.ipInfo().takeIf { it.optBoolean("ok") }
                     if (n % 4 == 0 || St.nod.isEmpty()) St.nod = Modem.nodes()
+                    if (n % 4 == 0) St.vpnMod = Modem.obj("/api/opts").optString("vpnmode_eff")
                 } catch (_: SalahKata) { St.toast("Kata laluan telah berubah") }
                 catch (_: Exception) { St.luar = true }
             }
@@ -445,7 +447,7 @@ fun Utama() {
             }
         }
 
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             val l = s?.optJSONObject("lic")
             val st = l?.optString("state").orEmpty()
             val exp = l?.optString("exp").orEmpty()
@@ -465,6 +467,7 @@ fun Utama() {
             Cip(if (s?.optString("mode") == "vless") "VLESS Pro" else "XLITE", Wr.ac2)
             val nama = s?.optString("node").orEmpty()
             if (nama.isNotEmpty()) Cip(nama, Wr.ac)
+            if (on && St.vpnMod.isNotEmpty()) Cip("Mod " + St.vpnMod, Wr.wn)
         }
     }
 

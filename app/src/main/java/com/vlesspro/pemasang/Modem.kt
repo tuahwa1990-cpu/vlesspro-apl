@@ -147,6 +147,7 @@ object St {
     var sibuk by mutableStateOf(false)
     var luar by mutableStateOf(false)
     var mesej by mutableStateOf("")
+    var vpnMod by mutableStateOf("")
     var jamOfset = 0L
 
     fun toast(m: String) { mesej = m }
