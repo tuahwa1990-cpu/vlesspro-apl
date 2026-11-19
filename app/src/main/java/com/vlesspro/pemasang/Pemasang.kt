@@ -72,7 +72,7 @@ object Pemasang {
     private const val BASE = "https://raw.githubusercontent.com/tuahwa1990-cpu/vless-pro-b618/main"
     private const val XRAY = "https://github.com/XTLS/Xray-core/releases/download/v26.3.27/"
 
-    private fun muat(url: String): ByteArray {
+    fun muat(url: String): ByteArray {
         val c = URL(url).openConnection() as HttpURLConnection
         c.connectTimeout = 15000
         c.readTimeout = 60000
@@ -81,7 +81,7 @@ object Pemasang {
         return c.inputStream.use { it.readBytes() }
     }
 
-    private fun sha(b: ByteArray): String =
+    fun sha(b: ByteArray): String =
         MessageDigest.getInstance("SHA-256").digest(b).joinToString("") { "%02x".format(it) }
 
     private fun semak(sums: String, nama: String, data: ByteArray) {
