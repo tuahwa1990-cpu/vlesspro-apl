@@ -302,7 +302,7 @@ fun Utama2(pref: android.content.SharedPreferences, keluar: () -> Unit) {
         }
     }
     LaunchedEffect(St.perluLog) { if (St.perluLog) { St.perluLog = false; pref.edit().remove("pass").apply(); keluar() } }
-    BackHandler(enabled = sub != null) { sub = null }
+    BackHandler(enabled = sub != null) { sub = indukSub(sub) }
     BackHandler(enabled = sub == null && tab != 0) { tab = 0 }
 
     Box(Modifier.fillMaxSize()) {
@@ -322,7 +322,7 @@ fun Utama2(pref: android.content.SharedPreferences, keluar: () -> Unit) {
                 }
             }
             Box(Modifier.weight(1f)) {
-                if (sub != null) Sub(sub!!, pref, keluar, { sub = it }) { sub = null }
+                if (sub != null) Sub(sub!!, pref, keluar, { sub = it }) { sub = indukSub(sub) }
                 else when (tab) {
                     0 -> Utama()
                     1 -> Profil()
@@ -739,6 +739,9 @@ fun Lagi(buka: (String) -> Unit) {
         KadWr(klik = { buka("keluar") }) { Text("Tukar modem / kata laluan", color = Wr.bad, fontWeight = FontWeight.Bold) }
     }
 }
+
+// Halaman dalam Feature Plus kembali ke senarai Feature Plus; yang lain kembali ke Lagi.
+fun indukSub(id: String?): String? = if (id in setOf("sqm", "adblock", "dev", "kuota", "wan", "failover")) "plus" else null
 
 @Composable
 fun Sub(id: String, pref: android.content.SharedPreferences, keluar: () -> Unit, ke: (String) -> Unit, tutup: () -> Unit) {

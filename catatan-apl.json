@@ -1,10 +1,19 @@
 {
- "title": "Skrin Pemasang lebih jelas",
+ "title": "Butang Kembali dalam Feature Plus",
  "items": [
-  "Tulisan pada skrin Pemasang kini jelas dibaca pada semua tema telefon.",
-  "Pemasang memasang Xray sendiri untuk VLESS Pro pada pemasangan baharu."
+  "Dalam Feature Plus, butang Kembali kini kembali ke senarai Feature Plus, bukan terus ke menu Lagi.",
+  "Berlaku untuk SQM, Sekat iklan, Peranti, Kuota, Tukar IP WAN dan Failover."
  ],
  "history": [
+  {
+   "version": "1.0.24",
+   "date": "2026-11-20",
+   "title": "Skrin Pemasang lebih jelas",
+   "items": [
+    "Tulisan pada skrin Pemasang kini jelas dibaca pada semua tema telefon.",
+    "Pemasang memasang Xray sendiri untuk VLESS Pro pada pemasangan baharu."
+   ]
+  },
   {
    "version": "1.0.23",
    "date": "2026-11-20",
