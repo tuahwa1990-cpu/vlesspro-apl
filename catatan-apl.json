@@ -1,10 +1,20 @@
 {
- "title": "Istilah diseragamkan",
+ "title": "Pilih apl sahaja atau apl dan Chrome",
  "items": [
-  "Sambungan lama kini dipanggil \"VPN asal\" dalam seluruh apl.",
-  "Tarikh dan lesen dipaparkan mengikut waktu Malaysia."
+  "Semasa memasang, pilih apl sahaja atau apl bersama antara muka web (Chrome).",
+  "Lagi > Tetapan: suis Antara muka web (Chrome) untuk hidup atau matikan bila-bila masa.",
+  "VLESS Pro berfungsi seperti biasa dalam kedua-dua pilihan."
  ],
  "history": [
+  {
+   "version": "1.0.19",
+   "date": "2026-11-20",
+   "title": "Istilah diseragamkan",
+   "items": [
+    "Sambungan lama kini dipanggil \"VPN asal\" dalam seluruh apl.",
+    "Tarikh dan lesen dipaparkan mengikut waktu Malaysia."
+   ]
+  },
   {
    "version": "1.0.18",
    "date": "2026-11-20",

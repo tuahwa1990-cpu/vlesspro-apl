@@ -112,6 +112,7 @@ fun Pemasangan(edisi: Edisi, ip: String, ubahEdisi: (Edisi) -> Unit, ubahIp: (St
     var user by remember { mutableStateOf("root") }
     var pass by remember { mutableStateOf("") }
     var boot by remember { mutableStateOf(true) }
+    var web by remember { mutableStateOf(true) }
     var sibuk by remember { mutableStateOf(false) }
     var hasil by remember { mutableStateOf<Hasil?>(null) }
     var kemas by remember { mutableStateOf<InfoApl?>(null) }
@@ -176,12 +177,16 @@ fun Pemasangan(edisi: Edisi, ip: String, ubahEdisi: (Edisi) -> Unit, ubahIp: (St
                     Checkbox(boot, { boot = it }, enabled = !sibuk)
                     Text("Pasang suis boot (hidup sendiri selepas modem restart)", fontSize = 13.sp)
                 }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(web, { web = it }, enabled = !sibuk)
+                    Text("Pasang antara muka web (Chrome) juga. Nyahtanda untuk apl sahaja.", fontSize = 13.sp)
+                }
                 Text("Telefon mesti disambung ke WiFi modem dan SSH modem dihidupkan.", fontSize = 12.sp, color = Color.Gray)
             }
         }
 
         Button(onClick = {
-            kerja { hasil = Pemasang.pasang(edisi, ip, user, pass, boot) { log.add(it) } }
+            kerja { hasil = Pemasang.pasang(edisi, ip, user, pass, boot, web) { log.add(it) } }
         }, enabled = !sibuk && ip.isNotEmpty(), modifier = Modifier.fillMaxWidth().height(50.dp)) {
             Text(if (sibuk) "Sedang berjalan ..." else "Pasang / Kemas kini VLESS Pro")
         }

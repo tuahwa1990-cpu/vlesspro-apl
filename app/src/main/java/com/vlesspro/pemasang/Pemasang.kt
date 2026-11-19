@@ -105,10 +105,16 @@ object Pemasang {
     private fun cari(teks: String, corak: String): String? =
         Regex(corak).find(teks)?.groupValues?.get(1)
 
-    fun pasang(edisi: Edisi, ip: String, user: String, pass: String, suisBoot: Boolean, log: (String) -> Unit): Hasil {
+    fun pasang(edisi: Edisi, ip: String, user: String, pass: String, suisBoot: Boolean, web: Boolean, log: (String) -> Unit): Hasil {
         log("Menyambung ke $ip ...")
         Ssh(ip, user, pass).use { ssh ->
-            return if (edisi == Edisi.B618) b618(ssh, ip, suisBoot, log) else aw1000(ssh, ip, suisBoot, log)
+            val r = if (edisi == Edisi.B618) b618(ssh, ip, suisBoot, log) else aw1000(ssh, ip, suisBoot, log)
+            if (r.ok) {
+                val h = if (edisi == Edisi.B618) "/online/vlesspro" else "/data/vlesspro"
+                ssh.run("mkdir -p $h/etc; " + (if (web) "rm -f $h/etc/noweb" else "echo 1 > $h/etc/noweb"), null, 30)
+                log(if (web) "Antara muka web (Chrome) dihidupkan." else "Mod apl sahaja: antara muka web dimatikan. VLESS Pro berfungsi melalui apl.")
+            }
+            return r
         }
     }
 

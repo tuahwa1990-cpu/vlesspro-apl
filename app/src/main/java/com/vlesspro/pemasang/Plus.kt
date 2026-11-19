@@ -414,9 +414,10 @@ fun SubTetapan() {
     var mod by remember { mutableStateOf("redirect") }
     var kata by remember { mutableStateOf("") }
     var hook by remember { mutableStateOf(false) }
+    var web by remember { mutableStateOf(true) }
     val ctx = LocalContext.current
     LaunchedEffect(o.value) { o.value?.let { auto = it.optBoolean("autorecon"); dns = it.optString("dns"); ping = it.optString("pingurl"); reboot = it.optString("reboot"); mod = it.optString("vpnmode").ifEmpty { "redirect" } } }
-    LaunchedEffect(st.value) { hook = st.value?.optBoolean("hook") ?: false }
+    LaunchedEffect(st.value) { hook = st.value?.optBoolean("hook") ?: false; web = st.value?.optBoolean("web", true) ?: true }
     Halaman {
         Judul("Tetapan")
         KadWr {
@@ -438,6 +439,8 @@ fun SubTetapan() {
         }
         KadWr {
             Suis("Suis boot (mula automatik selepas modem hidup)", hook) { hook = it; bg { lapor(Modem.tindak("/api/hook", if (it) "on" else "off")) } }
+            Suis("Antara muka web (Chrome)", web) { web = it; bg { lapor(Modem.tindak("/api/web", if (it) "on" else "off")) } }
+            Text("Matikan jika mahu guna apl sahaja. Apl dan VLESS Pro terus berfungsi seperti biasa.", color = Wr.mu, fontSize = 12.sp)
             st.value?.let { Baris("Versi VLESS Pro", "v" + it.optString("version")); Baris("Edisi", it.optString("edisi")); Baris("MAC", it.optString("mac")) }
         }
         KadWr {
