@@ -1,11 +1,19 @@
 {
- "title": "Pilih apl sahaja atau apl dan Chrome",
+ "title": "Sokongan edisi apl sahaja",
  "items": [
-  "Semasa memasang, pilih apl sahaja atau apl bersama antara muka web (Chrome).",
-  "Lagi > Tetapan: suis Antara muka web (Chrome) untuk hidup atau matikan bila-bila masa.",
-  "VLESS Pro berfungsi seperti biasa dalam kedua-dua pilihan."
+  "Menyokong edisi VLESS Pro apl sahaja (tanpa antara muka web). Suis web disorokkan pada edisi itu."
  ],
  "history": [
+  {
+   "version": "1.0.20",
+   "date": "2026-11-20",
+   "title": "Pilih apl sahaja atau apl dan Chrome",
+   "items": [
+    "Semasa memasang, pilih apl sahaja atau apl bersama antara muka web (Chrome).",
+    "Lagi > Tetapan: suis Antara muka web (Chrome) untuk hidup atau matikan bila-bila masa.",
+    "VLESS Pro berfungsi seperti biasa dalam kedua-dua pilihan."
+   ]
+  },
   {
    "version": "1.0.19",
    "date": "2026-11-20",

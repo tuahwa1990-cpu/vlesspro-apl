@@ -439,8 +439,10 @@ fun SubTetapan() {
         }
         KadWr {
             Suis("Suis boot (mula automatik selepas modem hidup)", hook) { hook = it; bg { lapor(Modem.tindak("/api/hook", if (it) "on" else "off")) } }
-            Suis("Antara muka web (Chrome)", web) { web = it; bg { lapor(Modem.tindak("/api/web", if (it) "on" else "off")) } }
-            Text("Matikan jika mahu guna apl sahaja. Apl dan VLESS Pro terus berfungsi seperti biasa.", color = Wr.mu, fontSize = 12.sp)
+            if (st.value?.optBoolean("webtetap") != true) {
+                Suis("Antara muka web (Chrome)", web) { web = it; bg { lapor(Modem.tindak("/api/web", if (it) "on" else "off")) } }
+                Text("Matikan jika mahu guna apl sahaja. Apl dan VLESS Pro terus berfungsi seperti biasa.", color = Wr.mu, fontSize = 12.sp)
+            }
             st.value?.let { Baris("Versi VLESS Pro", "v" + it.optString("version")); Baris("Edisi", it.optString("edisi")); Baris("MAC", it.optString("mac")) }
         }
         KadWr {
