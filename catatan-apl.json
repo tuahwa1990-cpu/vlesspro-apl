@@ -1,7 +1,8 @@
 {
  "title": "Sokongan edisi apl sahaja",
  "items": [
-  "Menyokong edisi VLESS Pro apl sahaja (tanpa antara muka web). Suis web disorokkan pada edisi itu."
+  "Menyokong edisi VLESS Pro apl sahaja (tanpa antara muka web). Suis web disorokkan pada edisi itu.",
+  "Pemasang: nyahtanda \"Pasang antara muka web\" untuk memasang edisi apl sahaja yang tiada UI web langsung pada modem."
  ],
  "history": [
   {

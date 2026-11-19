@@ -108,17 +108,19 @@ object Pemasang {
     fun pasang(edisi: Edisi, ip: String, user: String, pass: String, suisBoot: Boolean, web: Boolean, log: (String) -> Unit): Hasil {
         log("Menyambung ke $ip ...")
         Ssh(ip, user, pass).use { ssh ->
-            val r = if (edisi == Edisi.B618) b618(ssh, ip, suisBoot, log) else aw1000(ssh, ip, suisBoot, log)
-            if (r.ok) {
+            // Tanpa web: edisi apl sahaja (tiada halaman web langsung dalam program). Dengan web: edisi biasa.
+            val ed = if (web) BASE else "$BASE/aplsahaja"
+            log(if (web) "Edisi: apl dan Chrome." else "Edisi: apl sahaja (tanpa antara muka web).")
+            val r = if (edisi == Edisi.B618) b618(ssh, ip, suisBoot, ed, log) else aw1000(ssh, ip, suisBoot, ed, log)
+            if (r.ok && web) {
                 val h = if (edisi == Edisi.B618) "/online/vlesspro" else "/data/vlesspro"
-                ssh.run("mkdir -p $h/etc; " + (if (web) "rm -f $h/etc/noweb" else "echo 1 > $h/etc/noweb"), null, 30)
-                log(if (web) "Antara muka web (Chrome) dihidupkan." else "Mod apl sahaja: antara muka web dimatikan. VLESS Pro berfungsi melalui apl.")
+                ssh.run("rm -f $h/etc/noweb", null, 30)
             }
             return r
         }
     }
 
-    private fun b618(ssh: Ssh, ip: String, suisBoot: Boolean, log: (String) -> Unit): Hasil {
+    private fun b618(ssh: Ssh, ip: String, suisBoot: Boolean, ed: String, log: (String) -> Unit): Hasil {
         val h = "/online/vlesspro"
         log("[1/4] Menyemak modem ...")
         val x = ssh.run("[ -f /online/xlite/bin/xray ] && echo ada; [ -d $h/etc ] && echo lama; [ -f $h/bin/xray ] && echo vx; true").second
@@ -126,9 +128,9 @@ object Pemasang {
         val tiadaXray = !(x.contains("ada") || x.contains("vx"))
         log(if (lama) "Pemasangan sedia ada dijumpai: naik taraf (tetapan dan lesen dikekalkan)." else "Pemasangan baharu.")
         log("[2/4] Memuat turun fail dari GitHub ...")
-        val sums = String(muat("$BASE/b618-sha256.txt"))
-        val vp = muat("$BASE/new/vp")
-        val vpro = muat("$BASE/new/vpro")
+        val sums = String(muat("$ed/b618-sha256.txt"))
+        val vp = muat("$ed/new/vp")
+        val vpro = muat("$ed/new/vpro")
         semak(sums, "vp", vp)
         semak(sums, "vpro", vpro)
         val inst = muat("$BASE/vlesspro/install.sh")
@@ -160,11 +162,11 @@ object Pemasang {
         return Hasil(true, id, panel)
     }
 
-    private fun aw1000(ssh: Ssh, ip: String, suisBoot: Boolean, log: (String) -> Unit): Hasil {
+    private fun aw1000(ssh: Ssh, ip: String, suisBoot: Boolean, ed: String, log: (String) -> Unit): Hasil {
         val h = "/data/vlesspro"
         log("[1/4] Memuat turun pemasang dari GitHub ...")
-        val tgz = muat("$BASE/aw1000/install.tgz")
-        val sums = String(muat("$BASE/aw1000-sha256.txt"))
+        val tgz = muat("$ed/aw1000/install.tgz")
+        val sums = String(muat("$ed/aw1000-sha256.txt"))
         semak(sums, "install.tgz", tgz)
         log("Fail disemak (SHA-256 sepadan).")
         log("[2/4] Menghantar fail ke modem ...")
