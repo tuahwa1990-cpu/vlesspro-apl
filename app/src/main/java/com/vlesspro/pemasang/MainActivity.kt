@@ -78,6 +78,8 @@ class MainActivity : ComponentActivity() {
 }
 
 // Paksa tinggi halaman panel mengikut tetingkap sebenar (elak kandungan terpotong).
+// Bar status apl dimatikan: maklumat sama kini dipaparkan oleh panel dalam mod apl.
+const val BAR_STATUS = false
 const val BETUL_TINGGI = "try{var h=window.innerHeight;document.documentElement.style.height=h+'px';document.body.style.height=h+'px';window.dispatchEvent(new Event('resize'))}catch(e){}"
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -137,6 +139,7 @@ fun Utama() {
                 }
             }, "VPApp")
             settings.javaScriptEnabled = true
+            settings.userAgentString = settings.userAgentString + " VLESSProApp/1.0"
             settings.domStorageEnabled = true
             settings.useWideViewPort = false
             settings.loadWithOverviewMode = false
@@ -264,14 +267,6 @@ fun Utama() {
             }.start()
         }
     }
-    LaunchedEffect(tab, ralat) {
-        while (tab == 0 && ralat == null) {
-            web.evaluateJavascript("try{var m=document.querySelector('main');VPApp.d('wv=$tinggiWv'+'px vh='+innerHeight+' app='+document.getElementById('app').offsetHeight+' main='+(m?m.clientHeight:-1)+' dpr='+devicePixelRatio)}catch(e){}", null)
-            web.evaluateJavascript("fetch('/api/status').then(function(r){return r.json()}).then(function(j){VPApp.s(JSON.stringify(j))}).catch(function(){})", null)
-            kotlinx.coroutines.delay(8000)
-        }
-    }
-
     val warna = NavigationBarItemDefaults.colors(
         selectedIconColor = Color.White, selectedTextColor = Color.White, indicatorColor = Color(0xFF2E6F4E),
         unselectedIconColor = Color(0xFF9AA0A6), unselectedTextColor = Color(0xFF9AA0A6))
@@ -309,7 +304,7 @@ fun Utama() {
         Box(Modifier.padding(pad).fillMaxSize()) {
             // Panel kekal hidup di belakang supaya sesi tidak hilang bila tukar tab.
             Column(Modifier.fillMaxSize()) {
-                if (tab == 0 && ralat == null) {
+                if (BAR_STATUS && tab == 0 && ralat == null) {
                     Row(Modifier.fillMaxWidth().background(Color(0xFF16161A)).padding(horizontal = 14.dp, vertical = 7.dp),
                         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         Box(Modifier.size(9.dp).clip(RoundedCornerShape(50)).background(
