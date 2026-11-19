@@ -57,7 +57,7 @@ class Ssh(ip: String, user: String, pass: String) : AutoCloseable {
     fun put(path: String, data: ByteArray, mode: String = "755") {
         val dir = path.substringBeforeLast('/')
         val (kod, o) = run(
-            "mkdir -p '$dir' && cat > '$path.tmp' && chmod $mode '$path.tmp' && mv -f '$path.tmp' '$path'",
+            "mkdir -p '$dir' && cat > '$path.tmp' && chmod $mode '$path.tmp' && { rm -f '$path'; mv '$path.tmp' '$path'; }",
             ByteArrayInputStream(data), 900
         )
         if (kod != 0) throw RuntimeException("Gagal menghantar $path ke modem: $o")
