@@ -151,7 +151,12 @@ fun Utama() {
                     Toast.makeText(ctx, "Muat turun gagal: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
-            loadUrl(panelUrl())
+            // Muat panel hanya selepas WebView ada saiz sebenar; jika dimuat sebelum itu, tinggi paparan
+            // (height:100% dalam CSS panel) tersalah kira dan kandungan terpotong.
+            var dimuat = false
+            addOnLayoutChangeListener { v, l, t, r, b, _, _, _, _ ->
+                if (!dimuat && b - t > 200 && r - l > 200) { dimuat = true; v.post { (v as WebView).loadUrl(panelUrl()) } }
+            }
         }
     }
     DisposableEffect(Unit) { onDispose { web.destroy() } }
