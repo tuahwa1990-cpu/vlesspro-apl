@@ -57,6 +57,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -71,8 +72,19 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         window.statusBarColor = 0xFF080B1A.toInt()
         window.navigationBarColor = 0xFF080B1A.toInt()
+        Bhs.muat(this)
+        Temas.muat(this)
         setContent {
-            MaterialTheme(colorScheme = darkColorScheme(primary = Color(0xFF22D3EE))) { AppNatif() }
+            val cs = if (Wr.terang) lightColorScheme(primary = Wr.ac) else darkColorScheme(primary = Wr.ac)
+            LaunchedEffect(Wr.id) {
+                window.statusBarColor = Wr.bg.toArgb()
+                window.navigationBarColor = Wr.bg.toArgb()
+                androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).apply {
+                    isAppearanceLightStatusBars = Wr.terang
+                    isAppearanceLightNavigationBars = Wr.terang
+                }
+            }
+            MaterialTheme(colorScheme = cs) { AppNatif() }
         }
     }
 }

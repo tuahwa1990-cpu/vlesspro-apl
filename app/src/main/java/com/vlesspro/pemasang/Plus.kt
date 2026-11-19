@@ -30,14 +30,14 @@ fun Judul(t: String) = Text(t, fontSize = 30.sp, fontWeight = FontWeight.ExtraBo
 fun Suis(t: String, on: Boolean, ubah: (Boolean) -> Unit) {
     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(t, color = Wr.tx, modifier = Modifier.weight(1f))
-        Switch(on, ubah, colors = SwitchDefaults.colors(checkedTrackColor = Wr.ac, checkedThumbColor = Color(0xFF03212B)))
+        Switch(on, ubah, colors = SwitchDefaults.colors(checkedTrackColor = Wr.ac, checkedThumbColor = Wr.on))
     }
 }
 
 @Composable
 fun Btn(t: String, utama: Boolean = true, aktif: Boolean = true, klik: () -> Unit) {
     Button(onClick = klik, enabled = aktif, modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(containerColor = if (utama) Wr.ac else Wr.kad2, contentColor = if (utama) Color(0xFF03212B) else Wr.ac)) { Text(t, fontWeight = FontWeight.Bold) }
+        colors = ButtonDefaults.buttonColors(containerColor = if (utama) Wr.ac else Wr.kad2, contentColor = if (utama) Wr.on else Wr.ac)) { Text(t, fontWeight = FontWeight.Bold) }
 }
 
 fun lapor(r: Pair<Boolean, String>) = St.toast(r.second.ifEmpty { if (r.first) "Siap" else "Gagal" })
@@ -457,6 +457,13 @@ fun KadFail() {
         if (uri != null) {
             teks = "Membaca fail ..."
             bg {
+                val nama = ctx.contentResolver.query(uri, null, null, null, null)?.use { c ->
+                    val i = c.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                    if (i >= 0 && c.moveToFirst()) c.getString(i) else ""
+                }.orEmpty().lowercase()
+                val arch = try { Modem.obj("/api/settings").optString("arch") } catch (_: Exception) { "" }
+                val salah = (arch == "arm64" && nama.contains("armv7")) || (arch == "arm" && nama.contains("arm64"))
+                if (salah) { teks = "Fail ini untuk modem lain (armv7 atau arm64). Pilih fail yang betul."; return@bg }
                 val data = ctx.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: ByteArray(0)
                 if (data.isEmpty()) { teks = "Fail kosong"; return@bg }
                 teks = "Menghantar ${data.size / 1024} KB ke modem ..."
@@ -468,9 +475,54 @@ fun KadFail() {
     }
     KadWr {
         Text("Pasang dari fail .tgz (tanpa internet)", color = Wr.tx, fontWeight = FontWeight.Bold)
-        Text("Pilih fail vlesspro-…-kemaskini.tgz yang sepadan dengan modem anda. Pakej disahkan tandatangannya oleh modem sebelum dipasang.", color = Wr.mu, fontSize = 12.sp)
+        Text("Pilih fail .tgz kemas kini APK yang sepadan dengan modem anda (armv7 untuk B618-65D, arm64 untuk AW1000 / AW1000 Ultra). Modem mengesahkan tandatangan pakej sebelum memasang.", color = Wr.mu, fontSize = 12.sp)
         Spacer(Modifier.height(8.dp))
         Btn("Pilih fail .tgz") { pilih.launch(arrayOf("*/*")) }
         if (teks.isNotEmpty()) Text(teks, color = Wr.ac, fontSize = 12.sp)
+    }
+}
+
+// ───────────── Tema dan bahasa ─────────────
+@Composable
+fun SubTema() {
+    val ctx = LocalContext.current
+    Halaman {
+        Judul("Tema")
+        Text("Pilih rupa dan jenis tulisan apl. Disimpan pada telefon ini.", color = Wr.mu, fontSize = 13.sp)
+        Temas.semua.forEach { t ->
+            val c = { k: String -> Color(t.w.getValue(k)) }
+            val dipilih = Wr.id == t.id
+            Row(Modifier.fillMaxWidth().clip(androidx.compose.foundation.shape.RoundedCornerShape(20.dp)).background(c("cd"))
+                .border(2.dp, if (dipilih) c("ac") else c("bd"), androidx.compose.foundation.shape.RoundedCornerShape(20.dp))
+                .clickable { Temas.tetap(ctx, t.id) }.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(34.dp).clip(androidx.compose.foundation.shape.CircleShape).background(c("ac")))
+                Spacer(Modifier.width(14.dp))
+                Column(Modifier.weight(1f)) {
+                    androidx.compose.material3.Text(t.nama, color = c("tx"), fontWeight = FontWeight.Bold, fontSize = 17.sp, fontFamily = Temas.fonDari(t.fon))
+                    androidx.compose.material3.Text("Aa Bb 0123 · " + Bhs.t("Sambung"), color = c("mu"), fontSize = 13.sp, fontFamily = Temas.fonDari(t.fon))
+                }
+                Box(Modifier.size(14.dp).clip(androidx.compose.foundation.shape.CircleShape).background(c("ac2")))
+            }
+        }
+    }
+}
+
+@Composable
+fun SubBahasa() {
+    val ctx = LocalContext.current
+    Halaman {
+        Judul("Bahasa")
+        Text("Pilih bahasa paparan apl. Disimpan pada telefon ini.", color = Wr.mu, fontSize = 13.sp)
+        Bhs.senarai.forEach { (k, n, s) ->
+            KadWr(klik = { Bhs.tetap(ctx, k) }) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        androidx.compose.material3.Text(n, color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 17.sp, fontFamily = Wr.ff)
+                        if (s.isNotEmpty()) Text(s, color = Wr.mu, fontSize = 12.sp)
+                    }
+                    if (Bhs.kod == k) Text("✓", color = Wr.ac, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                }
+            }
+        }
     }
 }
