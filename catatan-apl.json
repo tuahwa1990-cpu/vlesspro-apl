@@ -1,15 +1,24 @@
 {
- "title": "Kemajuan pemasangan dan Uji sambungan",
+ "title": "Hantar diagnosis",
  "items": [
-  "Bar kemajuan untuk muat turun, penghantaran ke modem dan langkah pemasangan, termasuk kemas kini apl.",
-  "Amaran jika telefon guna data mudah alih, dan pemasangan diikat kepada WiFi modem supaya tidak terputus.",
-  "Jika sambungan ke modem terputus, pemasangan cuba sekali lagi secara automatik.",
-  "Butang Uji sambungan di skrin utama: semak WiFi, status VLESS Pro, IP telefon dan sama ada trafik melalui VLESS Pro.",
-  "Uji sambungan kini menguji melalui WiFi modem secara khusus dan memberi amaran jika apl lain guna data mudah alih.",
-  "Butang jenis peraturan laluan (domain, keyword, ip, geosite, geoip) tidak lagi terpotong.",
-  "Semakan kemas kini apl kini cuba semula sehingga 3 kali jika sambungan terputus (contohnya semasa VLESS Pro hidup), tanpa perlu diputuskan dahulu."
+  "Butang baharu Hantar diagnosis di Lagi > Sistem: menyalin versi apl dan modem, status VLESS Pro, ujian sambungan dan log terakhir, kemudian membuka senarai kongsi (WhatsApp, Telegram dan lain-lain).",
+  "Maklumat itu tidak mengandungi kata laluan, kunci lesen atau UUID nod."
  ],
  "history": [
+  {
+   "version": "1.0.30",
+   "date": "2026-11-20",
+   "title": "Kemajuan pemasangan dan Uji sambungan",
+   "items": [
+    "Bar kemajuan untuk muat turun, penghantaran ke modem dan langkah pemasangan, termasuk kemas kini apl.",
+    "Amaran jika telefon guna data mudah alih, dan pemasangan diikat kepada WiFi modem supaya tidak terputus.",
+    "Jika sambungan ke modem terputus, pemasangan cuba sekali lagi secara automatik.",
+    "Butang Uji sambungan di skrin utama: semak WiFi, status VLESS Pro, IP telefon dan sama ada trafik melalui VLESS Pro.",
+    "Uji sambungan kini menguji melalui WiFi modem secara khusus dan memberi amaran jika apl lain guna data mudah alih.",
+    "Butang jenis peraturan laluan (domain, keyword, ip, geosite, geoip) tidak lagi terpotong.",
+    "Semakan kemas kini apl kini cuba semula sehingga 3 kali jika sambungan terputus (contohnya semasa VLESS Pro hidup), tanpa perlu diputuskan dahulu."
+   ]
+  },
   {
    "version": "1.0.26",
    "date": "2026-11-20",

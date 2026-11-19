@@ -845,6 +845,7 @@ fun SubLog() {
 
 @Composable
 fun SubSistem() {
+    val ctx = LocalContext.current
     var s by remember { mutableStateOf<org.json.JSONObject?>(null) }
     var sah by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(Unit) { withContext(Dispatchers.IO) { try { s = Modem.system() } catch (_: Exception) {} } }
@@ -862,6 +863,17 @@ fun SubSistem() {
                 Baris("Xray", if (it.optBoolean("xray")) "Berjalan" else "Berhenti")
             } ?: Text("Memuatkan ...", color = Wr.mu)
         }
+        OutlinedButton(onClick = {
+            St.toast("Mengumpul maklumat ...")
+            Thread {
+                val t = try { Diagnosis.kumpul(ctx) } catch (e: Exception) { "Diagnosis gagal: " + (e.message ?: e.javaClass.simpleName) }
+                (ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(ClipData.newPlainText("Diagnosis", t))
+                St.toast("Diagnosis disalin dan sedia dihantar")
+                val i = android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain").putExtra(android.content.Intent.EXTRA_TEXT, t)
+                ctx.startActivity(android.content.Intent.createChooser(i, null).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
+            }.start()
+        }, modifier = Modifier.fillMaxWidth()) { Text("Hantar diagnosis", color = Wr.ac) }
+        Text("Menyalin versi apl dan modem, status dan log terakhir (tanpa kata laluan atau kunci lesen).", color = Wr.mu, fontSize = 12.sp)
         OutlinedButton(onClick = { sah = "restart" }, modifier = Modifier.fillMaxWidth()) { Text("Mulakan semula VLESS Pro", color = Wr.wn) }
         OutlinedButton(onClick = { sah = "reboot" }, modifier = Modifier.fillMaxWidth()) { Text("But semula modem", color = Wr.bad) }
     }

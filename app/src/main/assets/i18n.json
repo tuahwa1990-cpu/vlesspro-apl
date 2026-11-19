@@ -901,7 +901,13 @@
   "IP telefon berbeza daripada IP VLESS ({0}). Trafik ini tidak melalui VLESS Pro.": "The phone IP differs from the VLESS IP ({0}). This traffic is not going through VLESS Pro.",
   "Uji sambungan kini menguji melalui WiFi modem secara khusus dan memberi amaran jika apl lain guna data mudah alih.": "Test connection now tests through the modem WiFi specifically and warns if other apps use mobile data.",
   "Butang jenis peraturan laluan (domain, keyword, ip, geosite, geoip) tidak lagi terpotong.": "The routing rule type buttons (domain, keyword, ip, geosite, geoip) are no longer cut off.",
-  "Semakan kemas kini apl kini cuba semula sehingga 3 kali jika sambungan terputus (contohnya semasa VLESS Pro hidup), tanpa perlu diputuskan dahulu.": "App update checks now retry up to 3 times if the connection drops (for example while VLESS Pro is on), without needing to disconnect first."
+  "Semakan kemas kini apl kini cuba semula sehingga 3 kali jika sambungan terputus (contohnya semasa VLESS Pro hidup), tanpa perlu diputuskan dahulu.": "App update checks now retry up to 3 times if the connection drops (for example while VLESS Pro is on), without needing to disconnect first.",
+  "Hantar diagnosis": "Send diagnostics",
+  "Mengumpul maklumat ...": "Collecting information ...",
+  "Diagnosis disalin dan sedia dihantar": "Diagnostics copied and ready to send",
+  "Menyalin versi apl dan modem, status dan log terakhir (tanpa kata laluan atau kunci lesen).": "Copies the app and modem versions, status and recent log (no passwords or licence keys).",
+  "Butang baharu Hantar diagnosis di Lagi > Sistem: menyalin versi apl dan modem, status VLESS Pro, ujian sambungan dan log terakhir, kemudian membuka senarai kongsi (WhatsApp, Telegram dan lain-lain).": "New Send diagnostics button in More > System: copies the app and modem versions, VLESS Pro status, connection test and recent log, then opens the share sheet (WhatsApp, Telegram and others).",
+  "Maklumat itu tidak mengandungi kata laluan, kunci lesen atau UUID nod.": "The information contains no passwords, licence keys or node UUIDs."
  },
  "zh": {
   "Mod VPN": "VPN 模式",
