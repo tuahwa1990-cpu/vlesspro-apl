@@ -1,10 +1,19 @@
 {
- "title": "Xray sendiri untuk VLESS Pro",
+ "title": "Skrin Pemasang lebih jelas",
  "items": [
-  "Pemasang kini memasang Xray sendiri untuk VLESS Pro, jadi VLESS Pro berfungsi walaupun modem tiada VPN asal.",
-  "Pemasangan baharu dan naik taraf sama-sama memastikan Xray VLESS Pro ada pada modem."
+  "Tulisan pada skrin Pemasang kini jelas dibaca pada semua tema telefon.",
+  "Pemasang memasang Xray sendiri untuk VLESS Pro pada pemasangan baharu."
  ],
  "history": [
+  {
+   "version": "1.0.23",
+   "date": "2026-11-20",
+   "title": "Xray sendiri untuk VLESS Pro",
+   "items": [
+    "Pemasang kini memasang Xray sendiri untuk VLESS Pro, jadi VLESS Pro berfungsi walaupun modem tiada VPN asal.",
+    "Pemasangan baharu dan naik taraf sama-sama memastikan Xray VLESS Pro ada pada modem."
+   ]
+  },
   {
    "version": "1.0.22",
    "date": "2026-11-20",

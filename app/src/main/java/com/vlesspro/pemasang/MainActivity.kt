@@ -137,6 +137,8 @@ fun Pemasangan(edisi: Edisi, ip: String, ubahEdisi: (Edisi) -> Unit, ubahIp: (St
         }.start()
     }
 
+    // Skrin ini berlatar cerah tetap: guna skema cerah supaya teks tidak jadi cerah atas kad putih.
+    MaterialTheme(colorScheme = lightColorScheme(primary = Color(0xFF0E7490))) {
     Column(
         Modifier.fillMaxSize().background(Color(0xFFF4F7FB)).statusBarsPadding()
             .verticalScroll(rememberScrollState()).padding(16.dp),
@@ -233,5 +235,6 @@ fun Pemasangan(edisi: Edisi, ip: String, ubahEdisi: (Edisi) -> Unit, ubahIp: (St
             }
         }
         Text("Versi apl ${Kemas.versiSemasa(ctx)}", fontSize = 11.sp, color = Color.Gray)
+    }
     }
 }
