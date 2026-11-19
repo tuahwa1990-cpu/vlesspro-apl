@@ -454,7 +454,7 @@ fun SubTetapan() {
 
 // ───────────── Kemas kini modem dari fail .tgz ─────────────
 @Composable
-fun KadFail() {
+fun KadFail(selepas: (Boolean, String) -> Unit) {
     val ctx = LocalContext.current
     var teks by remember { mutableStateOf("") }
     val pilih = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -473,7 +473,7 @@ fun KadFail() {
                 teks = "Menghantar ${data.size / 1024} KB ke modem ..."
                 val r = Modem.muatNaik(data)
                 teks = r.second
-                St.toast(r.second)
+                selepas(r.first, r.second)
             }
         }
     }
@@ -528,5 +528,132 @@ fun SubBahasa() {
                 }
             }
         }
+    }
+}
+
+// ───────────── Kemas kini modem (seperti panel Chrome) ─────────────
+@Composable
+fun SubKemas() {
+    var u by remember { mutableStateOf<JSONObject?>(null) }
+    var proses by remember { mutableStateOf("") }
+    var jalan by remember { mutableStateOf(false) }
+    var semua by remember { mutableStateOf(false) }
+    var tukarSvr by remember { mutableStateOf(false) }
+    var pulih by remember { mutableStateOf(false) }
+    var mode by remember { mutableStateOf("notify") }
+    fun muat(f: Boolean) = bg { u = Modem.update(f); mode = u?.optString("mode").orEmpty().ifEmpty { "notify" } }
+    LaunchedEffect(Unit) { muat(false) }
+
+    /** Selepas kemas kini bermula: tunggu modem hidup semula, log masuk semula, kemudian muat data baharu. */
+    fun ikut(lama: String) = bg {
+        jalan = true
+        try {
+            val baru = Modem.tungguSiap(lama) { proses = it }
+            if (baru == null) { proses = if (proses.isEmpty()) "Gagal" else proses }
+            else {
+                proses = ""
+                St.status = null; St.nod = emptyList(); St.ipInfo = null
+                u = Modem.update(true)
+                St.toast(Bhs.f("Dikemas kini ke v{0}", baru))
+            }
+        } catch (_: SalahKata) { St.perluLog = true }
+        finally { jalan = false }
+    }
+
+    Halaman {
+        Judul("Kemas kini")
+        val v = u
+        val cur = v?.optString("cur").orEmpty()
+        val latest = v?.optString("latest").orEmpty()
+        val baru = v?.optBoolean("newer") ?: false
+        val lama = v?.optBoolean("older") ?: false
+        val info = v?.optJSONObject("info")
+        KadWr {
+            Text("KEMAS KINI DALAM TALIAN", color = Wr.mu, fontSize = 11.sp, letterSpacing = 1.sp)
+            Spacer(Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(54.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp)).background(Wr.kad2), contentAlignment = Alignment.Center) {
+                    Text(if (baru) "↑" else "✓", color = if (baru) Wr.wn else Wr.ok, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
+                }
+                Spacer(Modifier.width(14.dp))
+                Column {
+                    Text("v" + latest.ifEmpty { cur }, fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
+                    val sz = info?.optLong("size") ?: 0L
+                    Text(Bhs.t("Dipasang") + " v$cur" + (info?.optString("date")?.takeIf { it.isNotEmpty() }?.let { " · " + Bhs.t("dikeluarkan") + " $it" } ?: "") +
+                        (if (sz > 0) " · %.1f MB".format(sz / 1048576.0) else ""), color = Wr.mu, fontSize = 12.sp)
+                }
+            }
+            if (info != null) {
+                Spacer(Modifier.height(12.dp))
+                Text(info.optString("title"), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                val it = info.optJSONArray("items") ?: JSONArray()
+                for (i in 0 until it.length()) Text("•  " + it.getString(i), color = Wr.tx, fontSize = 14.sp, modifier = Modifier.padding(top = 5.dp))
+                val h = info.optJSONArray("history")
+                if (h != null && h.length() > 0) {
+                    Text(if (semua) "Sembunyikan" else "Tunjuk semua apa yang baharu", color = Wr.ac, fontWeight = FontWeight.Bold,
+                        modifier = Modifier.clickable { semua = !semua }.padding(vertical = 10.dp))
+                    if (semua) for (i in 0 until h.length()) {
+                        val o = h.getJSONObject(i)
+                        Text("v" + o.optString("version") + " · " + o.optString("date"), color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+                        Text(o.optString("title"), color = Wr.tx, fontWeight = FontWeight.Bold)
+                        val its = o.optJSONArray("items") ?: JSONArray()
+                        for (k in 0 until its.length()) Text("•  " + its.getString(k), color = Wr.mu, fontSize = 13.sp)
+                    }
+                }
+            }
+            Spacer(Modifier.height(10.dp))
+            Text(when { baru -> "Versi baharu tersedia."; lama -> "Versi anda lebih baharu daripada yang ada di pelayan."; else -> "Anda menggunakan versi terkini." },
+                color = if (baru) Wr.wn else Wr.ok, fontWeight = FontWeight.SemiBold)
+            v?.optString("msg")?.takeIf { it.isNotEmpty() && !(v.optBoolean("ok")) }?.let { Text(it, color = Wr.bad, fontSize = 12.sp) }
+            if (proses.isNotEmpty() || jalan) Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
+                if (jalan) CircularProgressIndicator(Modifier.size(18.dp), color = Wr.ac, strokeWidth = 2.dp)
+                Spacer(Modifier.width(8.dp)); Text(proses.ifEmpty { "Memulakan ..." }, color = Wr.ac, fontSize = 13.sp)
+            }
+            Spacer(Modifier.height(12.dp))
+            if (baru) Btn("Kemas kini sekarang", aktif = !jalan) { bg { val (ok, m) = Modem.kemasKini(false); proses = m; if (ok) ikut(cur) } }
+            else if (latest.isNotEmpty()) OutlinedButton(onClick = { bg { val (ok, m) = Modem.kemasKini(true); proses = m; if (ok) ikut(cur) } }, enabled = !jalan,
+                modifier = Modifier.fillMaxWidth().height(50.dp), border = androidx.compose.foundation.BorderStroke(1.dp, Wr.ac)) { Text(Bhs.t("Pasang semula") + " v$latest", color = Wr.tx, fontWeight = FontWeight.Bold) }
+            Spacer(Modifier.height(8.dp))
+            Btn("Semak sekarang", false, !jalan) { muat(true); St.toast("Semakan siap") }
+            val at = v?.optLong("checked") ?: 0L
+            val now = v?.optLong("now") ?: 0L
+            Text(Bhs.t("Semakan terakhir") + ": " + when {
+                at == 0L -> Bhs.t("belum pernah")
+                now - at < 90 -> Bhs.t("baru sahaja")
+                now - at < 5400 -> "${(now - at) / 60} " + Bhs.t("minit lalu")
+                now - at < 172800 -> "${(now - at) / 3600} " + Bhs.t("jam lalu")
+                else -> "${(now - at) / 86400} " + Bhs.t("hari lalu") }, color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+        }
+        KadWr {
+            Text("KEMAS KINI AUTOMATIK", color = Wr.mu, fontSize = 11.sp, letterSpacing = 1.sp)
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                listOf("notify" to "Beritahu saya", "auto" to "Pasang automatik", "off" to "Tutup").forEach { (k, t) ->
+                    FilterChip(mode == k, { mode = k; bg { lapor(Modem.cfgKemas(JSONObject().put("mode", k))) } }, label = { Text(t, fontSize = 12.sp) })
+                }
+            }
+            Text(when (mode) {
+                "auto" -> "Semak setiap hari dan pasang versi baharu secara automatik. Internet tidak terputus, hanya UI dimulakan semula."
+                "off" -> "Tiada semakan automatik. Tekan Semak sekarang untuk menyemak sendiri."
+                else -> "Semak setiap hari dan tunjuk loceng apabila versi baharu keluar. Anda pilih bila hendak pasang." }, color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+            Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(Bhs.t("Pelayan kemas kini") + ": " + v?.optString("server").orEmpty(), color = Wr.mu, fontSize = 12.sp, modifier = Modifier.weight(1f))
+                Text("Tukar", color = Wr.ac, fontWeight = FontWeight.Bold, modifier = Modifier.clickable { tukarSvr = true }.padding(8.dp))
+            }
+        }
+        Text("PASANG DARI FAIL", color = Wr.mu, fontSize = 11.sp, letterSpacing = 1.sp, modifier = Modifier.padding(start = 4.dp, top = 4.dp))
+        KadFail { ok, m -> St.toast(m); if (ok) ikut(cur) }
+        if (v?.optBoolean("prev") == true) Btn("Pulih versi sebelum", false, !jalan) { pulih = true }
+    }
+    if (pulih) AlertDialog(onDismissRequest = { pulih = false }, containerColor = Wr.kad,
+        title = { Text("Pulihkan versi sebelum?", color = Wr.tx) }, text = { Text("UI akan dimulakan semula.", color = Wr.mu) },
+        confirmButton = { TextButton(onClick = { pulih = false; val c = u?.optString("cur").orEmpty(); bg { val (ok, m) = Modem.pulihVersi(); proses = m; if (ok) ikut(c) } }) { Text("Pulihkan", color = Wr.ac) } },
+        dismissButton = { TextButton(onClick = { pulih = false }) { Text("Batal", color = Wr.mu) } })
+    if (tukarSvr) {
+        var url by remember { mutableStateOf(u?.optString("url").orEmpty()) }
+        AlertDialog(onDismissRequest = { tukarSvr = false }, containerColor = Wr.kad, title = { Text("Pelayan kemas kini", color = Wr.tx) },
+            text = { OutlinedTextField(url, { url = it.trim() }, label = { Text("https://…-latest.txt") }, colors = medan()) },
+            confirmButton = { TextButton(onClick = { tukarSvr = false; bg { lapor(Modem.cfgKemas(JSONObject().put("server", url))); u = Modem.update(true) } }) { Text("Simpan", color = Wr.ac) } },
+            dismissButton = { TextButton(onClick = { tukarSvr = false }) { Text("Batal", color = Wr.mu) } })
     }
 }

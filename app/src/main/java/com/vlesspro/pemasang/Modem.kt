@@ -107,6 +107,36 @@ object Modem {
     fun mulaSemula() = tindak("/api/sys/restart")
     fun reboot() = tindak("/api/sys/reboot")
     fun kemasKini(force: Boolean = false) = tindak("/api/update/apply", if (force) "force" else "")
+    fun cfgKemas(j: JSONObject) = tindak("/api/update/cfg", j.toString())
+    fun pulihVersi() = tindak("/api/update/rollback")
+
+    /**
+     * Tunggu modem selesai kemas kini: UI dimulakan semula, kemudian sahkan semula dengan kata laluan tersimpan.
+     * Kembali versi baharu, atau null jika gagal. Melempar SalahKata jika kata laluan ditolak.
+     */
+    fun tungguSiap(lama: String, log: (String) -> Unit): String? {
+        val t0 = System.currentTimeMillis()
+        var turun = false
+        while ((System.currentTimeMillis() - t0) < 300000) {
+            Thread.sleep(3000)
+            try {
+                val u = obj("/api/update?c=1")
+                val st = u.optJSONObject("st")
+                val s = st?.optString("state").orEmpty()
+                if (s == "err") { log(st?.optString("msg").orEmpty()); return null }
+                val cur = u.optString("cur")
+                if (cur.isNotEmpty() && (cur != lama || turun)) return cur
+                log(st?.optString("msg").orEmpty().ifEmpty { "Mengemas kini ..." })
+            } catch (e: SalahKata) {
+                throw e
+            } catch (_: TiadaSambungan) {
+                turun = true
+                log("Modem memulakan semula UI ...")
+            }
+        }
+        return null
+    }
+
     fun keadaKemasKini() = obj("/api/update/state")
 
     /** Cuba cari modem pada IP lalai. Kembali IP atau null. */
@@ -148,6 +178,7 @@ object St {
     var luar by mutableStateOf(false)
     var mesej by mutableStateOf("")
     var vpnMod by mutableStateOf("")
+    var perluLog by mutableStateOf(false)
     var jamOfset = 0L
 
     fun toast(m: String) { mesej = m }

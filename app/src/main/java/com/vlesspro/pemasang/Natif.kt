@@ -284,13 +284,14 @@ fun Utama2(pref: android.content.SharedPreferences, keluar: () -> Unit) {
                     if (n % 4 == 0 && s.optBoolean("vless")) St.ipInfo = Modem.ipInfo().takeIf { it.optBoolean("ok") }
                     if (n % 4 == 0 || St.nod.isEmpty()) St.nod = Modem.nodes()
                     if (n % 4 == 0) St.vpnMod = Modem.obj("/api/opts").optString("vpnmode_eff")
-                } catch (_: SalahKata) { St.toast("Kata laluan telah berubah") }
+                } catch (_: SalahKata) { St.toast("Kata laluan telah berubah"); St.perluLog = true }
                 catch (_: Exception) { St.luar = true }
             }
             n++
             delay(3000)
         }
     }
+    LaunchedEffect(St.perluLog) { if (St.perluLog) { St.perluLog = false; pref.edit().remove("pass").apply(); keluar() } }
     BackHandler(enabled = sub != null) { sub = null }
     BackHandler(enabled = sub == null && tab != 0) { tab = 0 }
 
@@ -802,36 +803,6 @@ fun SubLesen() {
                 }
             }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Wr.ac, contentColor = Wr.on)) { Text("Aktifkan") }
         }
-    }
-}
-
-@Composable
-fun SubKemas() {
-    var u by remember { mutableStateOf<org.json.JSONObject?>(null) }
-    var st by remember { mutableStateOf("") }
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) { try { u = Modem.update(false) } catch (_: Exception) {} }
-        while (true) {
-            withContext(Dispatchers.IO) { try { st = Modem.keadaKemasKini().let { it.optString("msg").ifEmpty { it.optString("st") } } } catch (_: Exception) {} }
-            delay(2500)
-        }
-    }
-    Halaman {
-        Text("Kemas kini modem", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
-        KadWr {
-            Baris("Versi dipasang", "v" + u?.optString("cur").orEmpty())
-            Baris("Versi terkini", "v" + u?.optString("latest").orEmpty().ifEmpty { "-" })
-            val baru = u?.optBoolean("newer") ?: false
-            Text(if (baru) "Versi baharu tersedia." else "Anda menggunakan versi terkini.", color = if (baru) Wr.wn else Wr.ok, fontSize = 14.sp)
-            if (st.isNotEmpty()) Text(st, color = Wr.mu, fontSize = 12.sp)
-            Spacer(Modifier.height(10.dp))
-            Button(onClick = { bg { u = Modem.update(true); St.toast("Semakan siap") } }, modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Wr.kad2, contentColor = Wr.ac)) { Text("Semak sekarang") }
-            Spacer(Modifier.height(8.dp))
-            Button(enabled = baru, onClick = { bg { val (ok, m) = Modem.kemasKini(false); St.toast(m.ifEmpty { if (ok) "Dimulakan" else "Gagal" }) } },
-                modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Wr.ac, contentColor = Wr.on)) { Text("Kemas kini sekarang") }
-        }
-        KadFail()
     }
 }
 
