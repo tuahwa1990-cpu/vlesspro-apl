@@ -53,7 +53,7 @@ object Wr {
     var ac2 by mutableStateOf(Color(0xFFA78BFA))
     var tx by mutableStateOf(Color(0xFFEAF0FF))
     var mu by mutableStateOf(Color(0xFF8591B8))
-    var on by mutableStateOf(Wr.on)
+    var on by mutableStateOf(Color(0xFF03212B))
     var inp by mutableStateOf(Color(0xFF0B1024))
     var ff by mutableStateOf<FontFamily?>(null)
     val bad = Color(0xFFF87171)
