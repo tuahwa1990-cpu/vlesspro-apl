@@ -2,12 +2,16 @@ package com.vlesspro.pemasang
 
 import android.content.Context
 
-/** Mengumpul maklumat untuk sokongan. Tiada kata laluan, kunci lesen atau UUID nod disertakan. */
+/** Mengumpul maklumat untuk sokongan. Tiada kata laluan, kunci lesen, UUID nod atau laman yang dilayari. */
 object Diagnosis {
     private val uuid = Regex("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
     private val kredensial = Regex("(://)[^@\\s/]+@")
 
-    private fun bersih(s: String) = kredensial.replace(uuid.replace(s, "<uuid>"), "\$1<disorok>@")
+    private val domain = Regex("\\b(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}\\b")
+    private val ipv4 = Regex("\\b(\\d{1,3})\\.(\\d{1,3})\\.\\d{1,3}\\.\\d{1,3}\\b")
+
+    /** Buang UUID, kelayakan, nama domain dan IP penuh supaya laman yang dilayari tidak terdedah. */
+    private fun bersih(s: String) = ipv4.replace(domain.replace(kredensial.replace(uuid.replace(s, "<uuid>"), "\$1<disorok>@"), "<domain>"), "\$1.\$2.x.x")
 
     fun kumpul(ctx: Context): String {
         val sb = StringBuilder("VLESS Pro - Diagnosis\n")
@@ -33,9 +37,19 @@ object Diagnosis {
         sb.append("\nUji sambungan:\n")
         try { Ujian.jalan(ctx).forEach { sb.append("- ").append(it.second).append('\n') } }
         catch (e: Exception) { sb.append("- gagal: ").append(e.message ?: e.javaClass.simpleName).append('\n') }
-        sb.append("\nLog terakhir:\n")
-        try { sb.append(bersih(Modem.log().lines().takeLast(40).joinToString("\n"))) }
-        catch (e: Exception) { sb.append("(log tidak dapat dibaca)") }
+        val fmt = { z: java.util.TimeZone ->
+            java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.US).apply { timeZone = z }.format(java.util.Date()) + " " + z.getDisplayName(false, java.util.TimeZone.SHORT)
+        }
+        b("Masa telefon", fmt(java.util.TimeZone.getDefault()))
+        b("Masa UTC (log modem guna UTC)", fmt(java.util.TimeZone.getTimeZone("UTC")))
+        sb.append("\nLog modem (amaran dan ralat sahaja; domain dan IP disorok):\n")
+        try {
+            val semua = Modem.log().lines().takeLast(300)
+            val masalah = semua.filter { l -> val k = l.lowercase(); "[warning]" in k || "[error]" in k || "failed" in k }
+            b("Ringkasan", semua.count { "accepted" in it }.toString() + " sambungan diterima, " + masalah.size + " amaran/ralat dalam " + semua.size + " baris terakhir")
+            if (masalah.isEmpty()) sb.append("(tiada amaran atau ralat)\n")
+            else sb.append(bersih(masalah.takeLast(20).joinToString("\n"))).append('\n')
+        } catch (e: Exception) { sb.append("(log tidak dapat dibaca)\n") }
         return sb.toString()
     }
 }

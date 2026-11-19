@@ -873,7 +873,7 @@ fun SubSistem() {
                 ctx.startActivity(android.content.Intent.createChooser(i, null).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
             }.start()
         }, modifier = Modifier.fillMaxWidth()) { Text("Hantar diagnosis", color = Wr.ac) }
-        Text("Menyalin versi apl dan modem, status dan log terakhir (tanpa kata laluan atau kunci lesen).", color = Wr.mu, fontSize = 12.sp)
+        Text("Menyalin versi apl dan modem, status dan amaran log terakhir (tanpa kata laluan, kunci lesen atau laman yang dilayari).", color = Wr.mu, fontSize = 12.sp)
         OutlinedButton(onClick = { sah = "restart" }, modifier = Modifier.fillMaxWidth()) { Text("Mulakan semula VLESS Pro", color = Wr.wn) }
         OutlinedButton(onClick = { sah = "reboot" }, modifier = Modifier.fillMaxWidth()) { Text("But semula modem", color = Wr.bad) }
     }

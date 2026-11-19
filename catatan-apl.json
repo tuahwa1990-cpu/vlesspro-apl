@@ -1,10 +1,20 @@
 {
- "title": "Hantar diagnosis",
+ "title": "Diagnosis lebih selamat dan berguna",
  "items": [
-  "Butang baharu Hantar diagnosis di Lagi > Sistem: menyalin versi apl dan modem, status VLESS Pro, ujian sambungan dan log terakhir, kemudian membuka senarai kongsi (WhatsApp, Telegram dan lain-lain).",
-  "Maklumat itu tidak mengandungi kata laluan, kunci lesen atau UUID nod."
+  "Hantar diagnosis kini tidak mendedahkan laman yang dilayari: nama domain dan IP destinasi disorok.",
+  "Log dalam diagnosis menunjukkan amaran dan ralat sahaja, dengan ringkasan bilangan sambungan.",
+  "Masa telefon dan masa UTC ditunjukkan supaya mudah menyelaraskan masa log."
  ],
  "history": [
+  {
+   "version": "1.0.31",
+   "date": "2026-11-20",
+   "title": "Hantar diagnosis",
+   "items": [
+    "Butang baharu Hantar diagnosis di Lagi > Sistem: menyalin versi apl dan modem, status VLESS Pro, ujian sambungan dan log terakhir, kemudian membuka senarai kongsi (WhatsApp, Telegram dan lain-lain).",
+    "Maklumat itu tidak mengandungi kata laluan, kunci lesen atau UUID nod."
+   ]
+  },
   {
    "version": "1.0.30",
    "date": "2026-11-20",

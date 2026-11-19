@@ -907,7 +907,12 @@
   "Diagnosis disalin dan sedia dihantar": "Diagnostics copied and ready to send",
   "Menyalin versi apl dan modem, status dan log terakhir (tanpa kata laluan atau kunci lesen).": "Copies the app and modem versions, status and recent log (no passwords or licence keys).",
   "Butang baharu Hantar diagnosis di Lagi > Sistem: menyalin versi apl dan modem, status VLESS Pro, ujian sambungan dan log terakhir, kemudian membuka senarai kongsi (WhatsApp, Telegram dan lain-lain).": "New Send diagnostics button in More > System: copies the app and modem versions, VLESS Pro status, connection test and recent log, then opens the share sheet (WhatsApp, Telegram and others).",
-  "Maklumat itu tidak mengandungi kata laluan, kunci lesen atau UUID nod.": "The information contains no passwords, licence keys or node UUIDs."
+  "Maklumat itu tidak mengandungi kata laluan, kunci lesen atau UUID nod.": "The information contains no passwords, licence keys or node UUIDs.",
+  "Menyalin versi apl dan modem, status dan amaran log terakhir (tanpa kata laluan, kunci lesen atau laman yang dilayari).": "Copies the app and modem versions, status and recent log warnings (no passwords, licence keys or websites visited).",
+  "Diagnosis lebih selamat dan berguna": "Safer and more useful diagnostics",
+  "Hantar diagnosis kini tidak mendedahkan laman yang dilayari: nama domain dan IP destinasi disorok.": "Send diagnostics no longer reveals the websites visited: destination domain names and IPs are masked.",
+  "Log dalam diagnosis menunjukkan amaran dan ralat sahaja, dengan ringkasan bilangan sambungan.": "The log in the diagnostics shows warnings and errors only, with a count of connections.",
+  "Masa telefon dan masa UTC ditunjukkan supaya mudah menyelaraskan masa log.": "Phone time and UTC time are shown so log times are easy to match."
  },
  "zh": {
   "Mod VPN": "VPN 模式",
