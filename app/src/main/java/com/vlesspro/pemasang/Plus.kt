@@ -453,36 +453,58 @@ fun SubTetapan() {
 }
 
 // ───────────── Kemas kini modem dari fail .tgz ─────────────
+fun namaFail(ctx: Context, uri: android.net.Uri): String =
+    ctx.contentResolver.query(uri, null, null, null, null)?.use { c ->
+        val i = c.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+        if (i >= 0 && c.moveToFirst()) c.getString(i) else ""
+    }.orEmpty()
+
 @Composable
-fun KadFail(selepas: (Boolean, String) -> Unit) {
+fun KadFail(aktif: Boolean, adaPrev: Boolean, selepas: (Boolean, String) -> Unit, pulih: () -> Unit) {
     val ctx = LocalContext.current
+    var uri by remember { mutableStateOf<android.net.Uri?>(null) }
+    var nama by remember { mutableStateOf("") }
     var teks by remember { mutableStateOf("") }
-    val pilih = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) {
-            teks = "Membaca fail ..."
-            bg {
-                val nama = ctx.contentResolver.query(uri, null, null, null, null)?.use { c ->
-                    val i = c.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
-                    if (i >= 0 && c.moveToFirst()) c.getString(i) else ""
-                }.orEmpty().lowercase()
-                val arch = try { Modem.obj("/api/settings").optString("arch") } catch (_: Exception) { "" }
-                val salah = (arch == "arm64" && nama.contains("armv7")) || (arch == "arm" && nama.contains("arm64"))
-                if (salah) { teks = "Fail ini untuk modem lain (armv7 atau arm64). Pilih fail yang betul."; return@bg }
-                val data = ctx.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: ByteArray(0)
-                if (data.isEmpty()) { teks = "Fail kosong"; return@bg }
-                teks = "Menghantar ${data.size / 1024} KB ke modem ..."
-                val r = Modem.muatNaik(data)
-                teks = r.second
-                selepas(r.first, r.second)
-            }
-        }
+    val pilih = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { u ->
+        if (u != null) { uri = u; nama = namaFail(ctx, u); teks = "" }
     }
     KadWr {
-        Text("Pasang dari fail .tgz (tanpa internet)", color = Wr.tx, fontWeight = FontWeight.Bold)
-        Text("Pilih fail .tgz kemas kini APK yang sepadan dengan modem anda (armv7 untuk B618-65D, arm64 untuk AW1000 / AW1000 Ultra). Modem mengesahkan tandatangan pakej sebelum memasang.", color = Wr.mu, fontSize = 12.sp)
-        Spacer(Modifier.height(8.dp))
-        Btn("Pilih fail .tgz") { pilih.launch(arrayOf("*/*")) }
-        if (teks.isNotEmpty()) Text(teks, color = Wr.ac, fontSize = 12.sp)
+        Text("Tiada internet? Pilih fail .tgz kemas kini:", color = Wr.mu, fontSize = 14.sp)
+        Spacer(Modifier.height(10.dp))
+        Row(Modifier.fillMaxWidth().clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp)).background(Wr.inp)
+            .border(1.dp, Wr.garis, androidx.compose.foundation.shape.RoundedCornerShape(16.dp)).clickable { pilih.launch(arrayOf("*/*")) }.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp)).background(Wr.kad2).padding(horizontal = 12.dp, vertical = 7.dp)) {
+                Text("Pilih fail", color = Wr.ac, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            }
+            Spacer(Modifier.width(12.dp))
+            Text(nama.ifEmpty { "Tiada fail dipilih" }, color = if (nama.isEmpty()) Wr.mu else Wr.tx, fontSize = 13.sp, maxLines = 2)
+        }
+        Text("armv7 = B618-65D · arm64 = AW1000 / AW1000 Ultra", color = Wr.mu, fontSize = 11.sp, modifier = Modifier.padding(top = 6.dp))
+        Spacer(Modifier.height(10.dp))
+        OutlinedButton(enabled = uri != null && aktif, modifier = Modifier.fillMaxWidth().height(50.dp), border = androidx.compose.foundation.BorderStroke(1.dp, Wr.ac),
+            onClick = {
+                val u = uri ?: return@OutlinedButton
+                teks = "Membaca fail ..."
+                bg {
+                    val n = nama.lowercase()
+                    val arch = try { Modem.obj("/api/settings").optString("arch") } catch (_: Exception) { "" }
+                    val salah = (arch == "arm64" && n.contains("armv7")) || (arch == "arm" && n.contains("arm64"))
+                    if (salah) { teks = "Fail ini untuk modem lain (armv7 atau arm64). Pilih fail yang betul."; return@bg }
+                    val data = ctx.contentResolver.openInputStream(u)?.use { it.readBytes() } ?: ByteArray(0)
+                    if (data.isEmpty()) { teks = "Fail kosong"; return@bg }
+                    teks = "Menghantar ${data.size / 1024} KB ke modem ..."
+                    val r = Modem.muatNaik(data)
+                    teks = r.second
+                    selepas(r.first, r.second)
+                }
+            }) { Text("Pasang dari fail", color = Wr.tx, fontWeight = FontWeight.Bold) }
+        if (adaPrev) {
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(enabled = aktif, modifier = Modifier.fillMaxWidth().height(50.dp), border = androidx.compose.foundation.BorderStroke(1.dp, Wr.ac),
+                onClick = pulih) { Text("Pulih versi sebelum", color = Wr.tx, fontWeight = FontWeight.Bold) }
+        }
+        if (teks.isNotEmpty()) Text(teks, color = Wr.ac, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
     }
 }
 
@@ -642,8 +664,7 @@ fun SubKemas() {
             }
         }
         Text("PASANG DARI FAIL", color = Wr.mu, fontSize = 11.sp, letterSpacing = 1.sp, modifier = Modifier.padding(start = 4.dp, top = 4.dp))
-        KadFail { ok, m -> St.toast(m); if (ok) ikut(cur) }
-        if (v?.optBoolean("prev") == true) Btn("Pulih versi sebelum", false, !jalan) { pulih = true }
+        KadFail(!jalan, v?.optBoolean("prev") == true, { ok, m -> St.toast(m); if (ok) ikut(cur) }, { pulih = true })
     }
     if (pulih) AlertDialog(onDismissRequest = { pulih = false }, containerColor = Wr.kad,
         title = { Text("Pulihkan versi sebelum?", color = Wr.tx) }, text = { Text("UI akan dimulakan semula.", color = Wr.mu) },

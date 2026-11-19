@@ -268,6 +268,7 @@ fun medan() = OutlinedTextFieldDefaults.colors(
 
 @Composable
 fun Utama2(pref: android.content.SharedPreferences, keluar: () -> Unit) {
+    val ctx0 = LocalContext.current
     var tab by remember { mutableIntStateOf(0) }
     var sub by remember { mutableStateOf<String?>(null) }
     var sahJom by remember { mutableStateOf(false) }
@@ -291,6 +292,15 @@ fun Utama2(pref: android.content.SharedPreferences, keluar: () -> Unit) {
             delay(3000)
         }
     }
+    LaunchedEffect(Unit) {
+        if (pref.getBoolean("autoapl", true)) withContext(Dispatchers.IO) {
+            try {
+                val t = Kemas.terkini()
+                St.aplBaru = if (t.code > Kemas.versiSemasa(ctx0)) t.name else ""
+                pref.edit().putLong("cekapl", System.currentTimeMillis() / 1000).apply()
+            } catch (_: Exception) {}
+        }
+    }
     LaunchedEffect(St.perluLog) { if (St.perluLog) { St.perluLog = false; pref.edit().remove("pass").apply(); keluar() } }
     BackHandler(enabled = sub != null) { sub = null }
     BackHandler(enabled = sub == null && tab != 0) { tab = 0 }
@@ -302,6 +312,13 @@ fun Utama2(pref: android.content.SharedPreferences, keluar: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically) {
                     Text("Tiada sambungan ke modem. Sambung telefon ke WiFi modem.", color = Wr.wn, fontSize = 12.sp, modifier = Modifier.weight(1f))
                     TextButton(onClick = keluar) { Text("Tukar", color = Wr.tx, fontSize = 12.sp) }
+                }
+            }
+            if (St.aplBaru.isNotEmpty() && sub != "apl") {
+                Row(Modifier.fillMaxWidth().background(Wr.kad2).clickable { sub = "apl" }.padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Text(Bhs.t("Versi apl baharu tersedia") + " · v" + St.aplBaru, color = Wr.wn, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                    Text("Kemas kini", color = Wr.ac, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Box(Modifier.weight(1f)) {
@@ -855,33 +872,96 @@ fun SubSistem() {
 @Composable
 fun SubApl() {
     val ctx = LocalContext.current
+    val pref = remember { ctx.getSharedPreferences("vp", Context.MODE_PRIVATE) }
     var info by remember { mutableStateOf<InfoApl?>(null) }
-    var teks by remember { mutableStateOf("Menyemak ...") }
+    var teks by remember { mutableStateOf("") }
     var sibuk by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            try {
-                val t = Kemas.terkini()
-                if (t.code > Kemas.versiSemasa(ctx)) { info = t; teks = "Versi baharu: ${t.name}" } else teks = "Anda menggunakan versi apl terkini."
-            } catch (e: Exception) { teks = "Tidak dapat menyemak: ${e.message}" }
+    var semua by remember { mutableStateOf(false) }
+    var auto by remember { mutableStateOf(pref.getBoolean("autoapl", true)) }
+    var cek by remember { mutableLongStateOf(pref.getLong("cekapl", 0L)) }
+    val semasa = Kemas.versiSemasa(ctx)
+    fun semak() = bg {
+        teks = "Menyemak ..."
+        try {
+            val t = Kemas.terkini(); info = t
+            cek = System.currentTimeMillis() / 1000; pref.edit().putLong("cekapl", cek).apply()
+            St.aplBaru = if (t.code > semasa) t.name else ""
+            teks = ""
+        } catch (e: Exception) { teks = Bhs.t("Tidak dapat menyemak: ") + (e.message ?: "") }
+    }
+    LaunchedEffect(Unit) { semak() }
+    val baru = info?.let { it.code > semasa } ?: false
+    fun pasang() {
+        val k = info ?: return
+        sibuk = true
+        bg {
+            try { val m = Kemas.pasang(ctx, k) { teks = it }; teks = m ?: "Apl dikemas kini. Pemasang Android dibuka." } finally { sibuk = false }
         }
     }
     Halaman {
-        Text("Kemas kini apl", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
+        Judul("Kemas kini apl")
         KadWr {
-            Baris("Versi apl", "${Kemas.versiSemasa(ctx)}")
-            Text(teks, color = if (info != null) Wr.wn else Wr.mu, fontSize = 14.sp)
-            info?.let { k ->
-                Spacer(Modifier.height(10.dp))
-                Button(enabled = !sibuk, onClick = {
-                    sibuk = true
-                    bg {
-                        try { val m = Kemas.pasang(ctx, k) { teks = it }; if (m != null) teks = m } finally { sibuk = false }
-                    }
-                }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Wr.ac, contentColor = Wr.on)) {
-                    Text(if (sibuk) "Sila tunggu ..." else "Kemas kini apl sekarang")
+            Text("KEMAS KINI APL", color = Wr.mu, fontSize = 11.sp, letterSpacing = 1.sp)
+            Spacer(Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(54.dp).clip(RoundedCornerShape(16.dp)).background(Wr.kad2), contentAlignment = Alignment.Center) {
+                    Text(if (baru) "↑" else "✓", color = if (baru) Wr.wn else Wr.ok, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
+                }
+                Spacer(Modifier.width(14.dp))
+                Column {
+                    Text("v" + (info?.name ?: Kemas.namaSemasa(ctx)), fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
+                    val k = info
+                    Text(Bhs.t("Dipasang") + " v" + Kemas.namaSemasa(ctx) + (k?.date?.takeIf { it.isNotEmpty() }?.let { " · " + Bhs.t("dikeluarkan") + " $it" } ?: "") +
+                        (if ((k?.size ?: 0L) > 0) " · %.1f MB".format(k!!.size / 1048576.0) else ""), color = Wr.mu, fontSize = 12.sp)
                 }
             }
+            info?.let { k ->
+                if (k.title.isNotEmpty()) { Spacer(Modifier.height(12.dp)); Text(k.title, color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 17.sp) }
+                k.items.forEach { Text("•  $it", color = Wr.tx, fontSize = 14.sp, modifier = Modifier.padding(top = 5.dp)) }
+                if (k.history.length() > 0) {
+                    Text(if (semua) "Sembunyikan" else "Tunjuk semua apa yang baharu", color = Wr.ac, fontWeight = FontWeight.Bold,
+                        modifier = Modifier.clickable { semua = !semua }.padding(vertical = 10.dp))
+                    if (semua) for (i in 0 until k.history.length()) {
+                        val o = k.history.getJSONObject(i)
+                        Text("v" + o.optString("version") + " · " + o.optString("date"), color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+                        Text(o.optString("title"), color = Wr.tx, fontWeight = FontWeight.Bold)
+                        val its = o.optJSONArray("items") ?: org.json.JSONArray()
+                        for (j in 0 until its.length()) Text("•  " + its.getString(j), color = Wr.mu, fontSize = 13.sp)
+                    }
+                }
+            }
+            Spacer(Modifier.height(10.dp))
+            if (info != null) Text(if (baru) "Versi apl baharu tersedia" else "Anda menggunakan versi apl terkini.", color = if (baru) Wr.wn else Wr.ok, fontWeight = FontWeight.SemiBold)
+            if (teks.isNotEmpty() || sibuk) Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
+                if (sibuk) CircularProgressIndicator(Modifier.size(18.dp), color = Wr.ac, strokeWidth = 2.dp)
+                Spacer(Modifier.width(8.dp)); Text(teks.ifEmpty { "Sila tunggu ..." }, color = Wr.ac, fontSize = 13.sp)
+            }
+            Spacer(Modifier.height(12.dp))
+            if (baru) Btn("Kemas kini apl sekarang", aktif = !sibuk) { pasang() }
+            else if (info != null) OutlinedButton(onClick = { pasang() }, enabled = !sibuk, modifier = Modifier.fillMaxWidth().height(50.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Wr.ac)) { Text("Pasang semula apl", color = Wr.tx, fontWeight = FontWeight.Bold) }
+            Spacer(Modifier.height(8.dp))
+            Btn("Semak sekarang", false, !sibuk) { semak() }
+            val now = System.currentTimeMillis() / 1000
+            Text(Bhs.t("Semakan terakhir") + ": " + when {
+                cek == 0L -> Bhs.t("belum pernah")
+                now - cek < 90 -> Bhs.t("baru sahaja")
+                now - cek < 5400 -> "${(now - cek) / 60} " + Bhs.t("minit lalu")
+                now - cek < 172800 -> "${(now - cek) / 3600} " + Bhs.t("jam lalu")
+                else -> "${(now - cek) / 86400} " + Bhs.t("hari lalu") }, color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+        }
+        KadWr {
+            Suis("Semak apabila apl dibuka", auto) { auto = it; pref.edit().putBoolean("autoapl", it).apply() }
+            Text("Semak versi apl baharu setiap kali apl dibuka dan tunjuk jalur pemberitahuan di skrin Utama.", color = Wr.mu, fontSize = 12.sp)
+        }
+        KadWr {
+            Text("Maklumat apl", color = Wr.tx, fontWeight = FontWeight.Bold)
+            Baris("Nama versi", Kemas.namaSemasa(ctx))
+            Baris("Kod binaan", semasa.toString())
+            Baris("Pakej", ctx.packageName)
+            Baris("Peranti telefon", android.os.Build.MODEL + " · Android " + android.os.Build.VERSION.RELEASE)
+            if (Modem.ip.isNotEmpty()) Baris("Modem disambung", Modem.ip)
+            Text("Sumber: GitHub (tuahwa1990-cpu/vlesspro-apl). Fail disemak SHA-256 sebelum dipasang.", color = Wr.mu, fontSize = 11.sp, modifier = Modifier.padding(top = 6.dp))
         }
     }
 }

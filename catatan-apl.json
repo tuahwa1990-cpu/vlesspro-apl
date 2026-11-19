@@ -1,0 +1,39 @@
+{
+ "title": "Apl natif penuh: kemas kini, tema dan bahasa",
+ "items": [
+  "Skrin Kemas kini modem kini seperti panel Chrome: nota keluaran, mod automatik, pelayan dan pulih versi.",
+  "Selepas kemas kini modem, apl log masuk semula sendiri dan memaparkan versi baharu.",
+  "Pasang dari fail .tgz dengan semakan seni bina (armv7 atau arm64).",
+  "Tema dan jenis tulisan (11 tema), bahasa Melayu, English, 中文 dan தமிழ்.",
+  "Cip Mod VPN pada skrin Utama."
+ ],
+ "history": [
+  {
+   "version": "1.0.14",
+   "date": "2026-11-20",
+   "title": "Mod VPN pada skrin Utama",
+   "items": [
+    "Cip mod VPN (redirect, tproxy atau tun) semasa disambung."
+   ]
+  },
+  {
+   "version": "1.0.13",
+   "date": "2026-11-19",
+   "title": "Feature Plus dan penghalaan",
+   "items": [
+    "SQM, sekat iklan, kuota, peranti, tukar IP WAN, failover.",
+    "Penghalaan, kumpulan, langganan dan tetapan.",
+    "Edit profil dan kemas kini modem dari fail .tgz."
+   ]
+  },
+  {
+   "version": "1.0.12",
+   "date": "2026-11-19",
+   "title": "Apl natif pertama",
+   "items": [
+    "Utama, Profil, Statistik dan Lagi tanpa paparan web.",
+    "Aktifkan lesen dari apl."
+   ]
+  }
+ ]
+}

@@ -34,7 +34,8 @@ jobs:
           sha256sum VLESSPro-Pemasang.apk
           NAMA="vlesspro-pemasang-1.0.${{ github.run_number }}-B618-65D-AW1000-AW1000Ultra.apk"
           SHA=$(sha256sum "$NAMA" | cut -d' ' -f1)
-          jq -nc --argjson code "${{ github.run_number }}" --arg name "1.0.${{ github.run_number }}" --arg sha "$SHA" --arg apk "$NAMA" '{code:$code,name:$name,sha256:$sha,apk:$apk}' > versi.json
+          SZ=$(stat -c%s "$NAMA"); TARIKH=$(TZ=Asia/Kuala_Lumpur date +%Y-%m-%d)
+          jq -nc --argjson code "${{ github.run_number }}" --arg name "1.0.${{ github.run_number }}" --arg sha "$SHA" --arg apk "$NAMA" --argjson size "$SZ" --arg date "$TARIKH" --slurpfile n catatan-apl.json '{code:$code,name:$name,sha256:$sha,apk:$apk,size:$size,date:$date,title:$n[0].title,items:$n[0].items,history:$n[0].history}' > versi.json
           cat versi.json
           gh release delete terkini --cleanup-tag -y || true
           gh release create terkini VLESSPro-Pemasang.apk "vlesspro-pemasang-1.0.${{ github.run_number }}-B618-65D-AW1000-AW1000Ultra.apk" versi.json --title "VLESS Pro Pemasang 1.0.${{ github.run_number }}" --notes "Apl untuk memasang dan mengemas kini VLESS Pro pada Huawei B618-65D, AW1000 dan AW1000 Ultra terus dari telefon." --latest
