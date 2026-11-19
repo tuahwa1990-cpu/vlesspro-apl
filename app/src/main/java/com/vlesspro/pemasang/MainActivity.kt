@@ -1,6 +1,23 @@
 package com.vlesspro.pemasang
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.app.DownloadManager
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.webkit.CookieManager
+import android.webkit.JsPromptResult
+import android.webkit.JsResult
+import android.webkit.URLUtil
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
+import android.webkit.WebSettings
+import android.widget.EditText
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -38,34 +55,173 @@ import androidx.compose.ui.viewinterop.AndroidView
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.statusBarColor = 0xFF111114.toInt()
+        window.navigationBarColor = 0xFF1B1B20.toInt()
         setContent {
             MaterialTheme(colorScheme = lightColorScheme(primary = Color(0xFF0B5FA5))) { Utama() }
         }
     }
 }
 
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun Utama() {
     val ctx = LocalContext.current
     val pref = remember { ctx.getSharedPreferences("vp", Context.MODE_PRIVATE) }
-    var tab by remember { mutableIntStateOf(0) }
+    // Skrin pertama ialah panel VLESS Pro; kali pertama (belum ada modem disimpan) mula di Pemasang.
+    var tab by remember { mutableIntStateOf(if (pref.getString("ip", null) == null) 1 else 0) }
     var edisi by remember { mutableStateOf(Edisi.values().firstOrNull { it.name == pref.getString("edisi", "") } ?: Edisi.B618) }
     var ip by remember { mutableStateOf(pref.getString("ip", null) ?: edisi.ipLalai) }
-    var panel by remember { mutableStateOf<String?>(null) }
+    var ralat by remember { mutableStateOf<String?>(null) }
+    var kemas by remember { mutableStateOf<InfoApl?>(null) }
+    var mengemas by remember { mutableStateOf(false) }
+    var pilihCb by remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
+    val pilih = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        pilihCb?.onReceiveValue(if (uri != null) arrayOf(uri) else null); pilihCb = null
+    }
 
     fun simpan() { pref.edit().putString("edisi", edisi.name).putString("ip", ip).apply() }
+    fun panelUrl() = if (ip.startsWith("http")) ip else "http://$ip:8990"
 
+    val web = remember {
+        WebView(ctx).apply {
+            setBackgroundColor(0xFF111114.toInt())
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.useWideViewPort = true
+            settings.loadWithOverviewMode = true
+            settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            webViewClient = object : WebViewClient() {
+                override fun onPageStarted(v: WebView, u: String?, f: android.graphics.Bitmap?) { ralat = null }
+                override fun onReceivedError(v: WebView, r: WebResourceRequest, e: WebResourceError) {
+                    if (r.isForMainFrame) ralat = e.description?.toString() ?: "ralat"
+                }
+                override fun shouldOverrideUrlLoading(v: WebView, r: WebResourceRequest): Boolean {
+                    val u = r.url
+                    if (u.scheme == "http" || u.scheme == "https") {
+                        val h = Uri.parse(v.url ?: "").host
+                        if (h != null && u.host != h) {
+                            try { ctx.startActivity(Intent(Intent.ACTION_VIEW, u)) } catch (_: Exception) {}
+                            return true
+                        }
+                        return false
+                    }
+                    try { ctx.startActivity(Intent(Intent.ACTION_VIEW, u)) } catch (_: Exception) {}
+                    return true
+                }
+            }
+            webChromeClient = object : WebChromeClient() {
+                override fun onJsAlert(v: WebView, url: String?, message: String?, result: JsResult): Boolean {
+                    AlertDialog.Builder(ctx).setMessage(message).setCancelable(false)
+                        .setPositiveButton("OK") { _, _ -> result.confirm() }.show()
+                    return true
+                }
+                override fun onJsConfirm(v: WebView, url: String?, message: String?, result: JsResult): Boolean {
+                    AlertDialog.Builder(ctx).setMessage(message).setCancelable(false)
+                        .setPositiveButton("OK") { _, _ -> result.confirm() }
+                        .setNegativeButton("Batal") { _, _ -> result.cancel() }.show()
+                    return true
+                }
+                override fun onJsPrompt(v: WebView, url: String?, message: String?, def: String?, result: JsPromptResult): Boolean {
+                    val et = EditText(ctx); et.setText(def ?: "")
+                    AlertDialog.Builder(ctx).setMessage(message).setView(et).setCancelable(false)
+                        .setPositiveButton("OK") { _, _ -> result.confirm(et.text.toString()) }
+                        .setNegativeButton("Batal") { _, _ -> result.cancel() }.show()
+                    return true
+                }
+                override fun onShowFileChooser(v: WebView, cb: ValueCallback<Array<Uri>>, p: WebChromeClient.FileChooserParams): Boolean {
+                    pilihCb?.onReceiveValue(null)
+                    pilihCb = cb
+                    return try { pilih.launch(arrayOf("*/*")); true } catch (_: Exception) { pilihCb = null; false }
+                }
+            }
+            setDownloadListener { url, ua, cd, mime, _ ->
+                try {
+                    val nama = URLUtil.guessFileName(url, cd, mime)
+                    val rq = DownloadManager.Request(Uri.parse(url))
+                        .addRequestHeader("User-Agent", ua)
+                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                        .setTitle(nama)
+                    CookieManager.getInstance().getCookie(url)?.let { rq.addRequestHeader("Cookie", it) }
+                    if (Build.VERSION.SDK_INT >= 29) rq.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, nama)
+                    else rq.setDestinationInExternalFilesDir(ctx, Environment.DIRECTORY_DOWNLOADS, nama)
+                    (ctx.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).enqueue(rq)
+                    Toast.makeText(ctx, "Memuat turun $nama ke folder Download", Toast.LENGTH_LONG).show()
+                } catch (e: Exception) {
+                    Toast.makeText(ctx, "Muat turun gagal: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+            loadUrl(panelUrl())
+        }
+    }
+    DisposableEffect(Unit) { onDispose { web.destroy() } }
+    BackHandler(enabled = tab == 0 && web.canGoBack()) { web.goBack() }
+
+    LaunchedEffect(Unit) {
+        Thread {
+            try {
+                val t = Kemas.terkini()
+                if (t.code > Kemas.versiSemasa(ctx)) kemas = t
+            } catch (_: Exception) {}
+        }.start()
+    }
+
+    val warna = NavigationBarItemDefaults.colors(
+        selectedIconColor = Color.White, selectedTextColor = Color.White, indicatorColor = Color(0xFF2E6F4E),
+        unselectedIconColor = Color(0xFF9AA0A6), unselectedTextColor = Color(0xFF9AA0A6))
     Scaffold(
+        containerColor = Color(0xFF111114),
         bottomBar = {
-            NavigationBar {
-                NavigationBarItem(selected = tab == 0, onClick = { tab = 0 }, icon = { Icon(Icons.Filled.Settings, null) }, label = { Text("Pemasang") })
-                NavigationBarItem(selected = tab == 1, onClick = { tab = 1 }, icon = { Icon(Icons.Filled.Home, null) }, label = { Text("Panel VLESS Pro") })
+            Column {
+                if (tab == 0) kemas?.let { k ->
+                    Row(Modifier.fillMaxWidth().background(Color(0xFF3A3320)).padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("Versi apl baharu: ${k.name}", color = Color(0xFFFFE28A), fontSize = 13.sp)
+                        TextButton(enabled = !mengemas, onClick = {
+                            mengemas = true
+                            Thread {
+                                try {
+                                    val m = Kemas.pasang(ctx, k) { }
+                                    if (m != null) android.os.Handler(android.os.Looper.getMainLooper()).post { Toast.makeText(ctx, m, Toast.LENGTH_LONG).show() }
+                                } catch (e: Exception) {
+                                    android.os.Handler(android.os.Looper.getMainLooper()).post { Toast.makeText(ctx, "Gagal: ${e.message}", Toast.LENGTH_LONG).show() }
+                                }
+                                mengemas = false
+                            }.start()
+                        }) { Text(if (mengemas) "Sebentar ..." else "Kemas kini", color = Color.White) }
+                    }
+                }
+                NavigationBar(containerColor = Color(0xFF1B1B20)) {
+                    NavigationBarItem(selected = tab == 0, onClick = { tab = 0 }, colors = warna,
+                        icon = { Icon(Icons.Filled.Home, null) }, label = { Text("VLESS Pro") })
+                    NavigationBarItem(selected = tab == 1, onClick = { tab = 1 }, colors = warna,
+                        icon = { Icon(Icons.Filled.Settings, null) }, label = { Text("Pemasang") })
+                }
             }
         }
     ) { pad ->
         Box(Modifier.padding(pad).fillMaxSize()) {
-            if (tab == 0) Pemasangan(edisi, ip, { e -> edisi = e; ip = e.ipLalai; simpan() }, { ip = it; simpan() }, { p -> panel = p; tab = 1 })
-            else PanelWeb(panel ?: "$ip:8990", ip)
+            // Panel kekal hidup di belakang supaya sesi tidak hilang bila tukar tab.
+            AndroidView(modifier = Modifier.fillMaxSize(), factory = { (web.parent as? android.view.ViewGroup)?.removeView(web); web },
+                update = { it.visibility = if (tab == 0) android.view.View.VISIBLE else android.view.View.INVISIBLE })
+            if (tab == 0 && ralat != null) {
+                Column(Modifier.fillMaxSize().background(Color(0xFF111114)).padding(24.dp),
+                    verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("VLESS Pro", color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(12.dp))
+                    Text("Tidak dapat sambung ke modem ($ip).\nPastikan telefon disambung ke WiFi modem dan VLESS Pro sudah dipasang.",
+                        color = Color(0xFFC9D4E0), fontSize = 14.sp)
+                    Spacer(Modifier.height(16.dp))
+                    Button(onClick = { ralat = null; web.loadUrl(panelUrl()) }, modifier = Modifier.fillMaxWidth()) { Text("Cuba lagi") }
+                    OutlinedButton(onClick = { tab = 1 }, modifier = Modifier.fillMaxWidth()) { Text("Pasang VLESS Pro / tukar modem", color = Color.White) }
+                }
+            }
+            if (tab == 1) {
+                Pemasangan(edisi, ip,
+                    { e -> edisi = e; ip = e.ipLalai; simpan() },
+                    { ip = it; simpan() },
+                    { _ -> simpan(); ralat = null; web.loadUrl(panelUrl()); tab = 0 })
+            }
         }
     }
 }
@@ -192,41 +348,5 @@ fun Pemasangan(edisi: Edisi, ip: String, ubahEdisi: (Edisi) -> Unit, ubahIp: (St
             }
         }
         Text("Versi apl ${Kemas.versiSemasa(ctx)}", fontSize = 11.sp, color = Color.Gray)
-    }
-}
-
-@SuppressLint("SetJavaScriptEnabled")
-@Composable
-fun PanelWeb(alamat: String, ip: String) {
-    var url by remember(alamat) { mutableStateOf(alamat) }
-    var web by remember { mutableStateOf<WebView?>(null) }
-    var ralat by remember { mutableStateOf<String?>(null) }
-    BackHandler(enabled = web?.canGoBack() == true) { web?.goBack() }
-    Column(Modifier.fillMaxSize().statusBarsPadding()) {
-        Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(url, { url = it.trim() }, singleLine = true, modifier = Modifier.weight(1f),
-                label = { Text("Alamat panel") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri))
-            Button(onClick = { ralat = null; web?.loadUrl(if (url.startsWith("http")) url else "http://$url") }) { Text("Buka") }
-        }
-        ralat?.let {
-            Text("Tidak dapat sambung ke panel. Pastikan telefon disambung ke WiFi modem dan VLESS Pro sudah dipasang.\n($it)",
-                color = Color(0xFFB00020), fontSize = 12.sp, modifier = Modifier.padding(horizontal = 12.dp))
-        }
-        AndroidView(modifier = Modifier.fillMaxSize(), factory = { c ->
-            WebView(c).apply {
-                settings.javaScriptEnabled = true
-                settings.domStorageEnabled = true
-                settings.useWideViewPort = true
-                settings.loadWithOverviewMode = true
-                webViewClient = object : WebViewClient() {
-                    override fun onReceivedError(v: WebView, r: WebResourceRequest, e: WebResourceError) {
-                        if (r.isForMainFrame) ralat = e.description?.toString() ?: "ralat"
-                    }
-                    override fun onPageFinished(v: WebView, u: String) { if (ralat != null && u.startsWith("http")) { /* kekal mesej sehingga muat semula */ } }
-                }
-                web = this
-                loadUrl(if (alamat.startsWith("http")) alamat else "http://$alamat")
-            }
-        })
     }
 }
