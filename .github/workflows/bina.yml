@@ -1,0 +1,36 @@
+name: Bina APK
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['README.md']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: 8.9 }
+      - name: Kunci tandatangan
+        env:
+          KS_PASS: ${{ secrets.KS_PASS }}
+        run: |
+          if [ -z "$KS_PASS" ]; then echo "Rahsia KS_PASS tiada"; exit 1; fi
+          openssl enc -d -aes-256-cbc -pbkdf2 -pass env:KS_PASS -in vp.jks.enc -out "$RUNNER_TEMP/vp.jks"
+          echo "KS_PATH=$RUNNER_TEMP/vp.jks" >> "$GITHUB_ENV"
+      - name: Bina
+        env:
+          KS_PASS: ${{ secrets.KS_PASS }}
+        run: gradle assembleRelease --no-daemon --stacktrace -PvCode=${{ github.run_number }} -PvName=1.0.${{ github.run_number }}
+      - name: Terbit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk VLESSPro-Pemasang.apk
+          sha256sum VLESSPro-Pemasang.apk
+          gh release delete terkini --cleanup-tag -y || true
+          gh release create terkini VLESSPro-Pemasang.apk --title "VLESS Pro Pemasang 1.0.${{ github.run_number }}" --notes "Apl untuk memasang dan mengemas kini VLESS Pro pada Huawei B618-65D, AW1000 dan AW1000 Ultra terus dari telefon." --latest
