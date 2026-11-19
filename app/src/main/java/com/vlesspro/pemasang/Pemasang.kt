@@ -138,7 +138,7 @@ object Pemasang {
             ssh.put("$h/bin/vpro", vpro)
         }
         if (tiadaXray) {
-            log("XLITE tiada: memuat turun Xray (sekitar 15 MB) ...")
+            log("VPN asal tiada: memuat turun Xray (sekitar 15 MB) ...")
             ssh.put("$h/bin/xray", xray("Xray-linux-arm32-v7a.zip"))
         }
         log("[3/4] Memasang ...")
