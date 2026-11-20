@@ -1,11 +1,21 @@
 {
- "title": "Diagnosis lebih selamat dan berguna",
+ "title": "Kestabilan lebih baik",
  "items": [
-  "Hantar diagnosis kini tidak mendedahkan laman yang dilayari: nama domain dan IP destinasi disorok.",
-  "Log dalam diagnosis menunjukkan amaran dan ralat sahaja, dengan ringkasan bilangan sambungan.",
-  "Masa telefon dan masa UTC ditunjukkan supaya mudah menyelaraskan masa log."
+  "Jika apl ranap, jejak ralat terakhir disimpan dan disertakan dalam Hantar diagnosis.",
+  "Panggilan ke modem cuba semula sekali jika sambungan terputus seketika.",
+  "Semakan terjemahan automatik ditambah semasa binaan supaya teks English tidak tertinggal."
  ],
  "history": [
+  {
+   "version": "1.0.32",
+   "date": "2026-11-20",
+   "title": "Diagnosis lebih selamat dan berguna",
+   "items": [
+    "Hantar diagnosis kini tidak mendedahkan laman yang dilayari: nama domain dan IP destinasi disorok.",
+    "Log dalam diagnosis menunjukkan amaran dan ralat sahaja, dengan ringkasan bilangan sambungan.",
+    "Masa telefon dan masa UTC ditunjukkan supaya mudah menyelaraskan masa log."
+   ]
+  },
   {
    "version": "1.0.31",
    "date": "2026-11-20",

@@ -912,7 +912,11 @@
   "Diagnosis lebih selamat dan berguna": "Safer and more useful diagnostics",
   "Hantar diagnosis kini tidak mendedahkan laman yang dilayari: nama domain dan IP destinasi disorok.": "Send diagnostics no longer reveals the websites visited: destination domain names and IPs are masked.",
   "Log dalam diagnosis menunjukkan amaran dan ralat sahaja, dengan ringkasan bilangan sambungan.": "The log in the diagnostics shows warnings and errors only, with a count of connections.",
-  "Masa telefon dan masa UTC ditunjukkan supaya mudah menyelaraskan masa log.": "Phone time and UTC time are shown so log times are easy to match."
+  "Masa telefon dan masa UTC ditunjukkan supaya mudah menyelaraskan masa log.": "Phone time and UTC time are shown so log times are easy to match.",
+  "Kestabilan lebih baik": "Better stability",
+  "Jika apl ranap, jejak ralat terakhir disimpan dan disertakan dalam Hantar diagnosis.": "If the app crashes, the last error trace is saved and included in Send diagnostics.",
+  "Panggilan ke modem cuba semula sekali jika sambungan terputus seketika.": "Calls to the modem retry once if the connection drops briefly.",
+  "Semakan terjemahan automatik ditambah semasa binaan supaya teks English tidak tertinggal.": "An automatic translation check was added to the build so no English text is left out."
  },
  "zh": {
   "Mod VPN": "VPN 模式",

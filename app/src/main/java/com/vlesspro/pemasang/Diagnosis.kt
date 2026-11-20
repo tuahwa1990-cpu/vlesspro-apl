@@ -50,6 +50,9 @@ object Diagnosis {
             if (masalah.isEmpty()) sb.append("(tiada amaran atau ralat)\n")
             else sb.append(bersih(masalah.takeLast(20).joinToString("\n"))).append('\n')
         } catch (e: Exception) { sb.append("(log tidak dapat dibaca)\n") }
+        val ranap = VpApp.ranapTerakhir(ctx)
+        sb.append("\nRanap apl terakhir:\n")
+        sb.append(if (ranap.isEmpty()) "(tiada)\n" else bersih(ranap) + "\n")
         return sb.toString()
     }
 }

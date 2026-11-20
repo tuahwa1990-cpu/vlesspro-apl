@@ -10,7 +10,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class SalahKata : Exception("Kata laluan salah")
-class TiadaSambungan(m: String) : Exception(m)
+class TiadaSambungan(m: String, sebab: Throwable? = null) : Exception(m, sebab)
 
 data class Nod(val i: Int, val nama: String, val host: String, val port: Int, val net: String, val sec: String, val pilih: Boolean)
 
@@ -22,6 +22,20 @@ object Modem {
     private fun url(p: String) = "http://$ip:8990$p"
 
     fun req(path: String, body: String? = null, baca: Int = 10000): Pair<Int, String> {
+        // Cuba semula sekali jika sambungan terputus (bukan tamat masa baca). POST hanya jika belum sempat disambung.
+        try {
+            return req1(path, body, baca)
+        } catch (e: TiadaSambungan) {
+            val c = e.cause
+            val boleh = if (body == null) (c is java.net.ConnectException || c is java.net.UnknownHostException || c is java.net.SocketException || c is java.io.EOFException)
+                        else (c is java.net.ConnectException || c is java.net.UnknownHostException)
+            if (!boleh) throw e
+            Thread.sleep(800)
+            return req1(path, body, baca)
+        }
+    }
+
+    private fun req1(path: String, body: String?, baca: Int): Pair<Int, String> {
         try {
             val c = URL(url(path)).openConnection() as HttpURLConnection
             c.connectTimeout = 4000
@@ -39,7 +53,7 @@ object Modem {
         } catch (e: SalahKata) {
             throw e
         } catch (e: Exception) {
-            throw TiadaSambungan(e.message ?: "Tiada sambungan")
+            throw TiadaSambungan(e.message ?: "Tiada sambungan", e)
         }
     }
 
