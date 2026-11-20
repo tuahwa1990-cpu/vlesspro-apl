@@ -242,7 +242,7 @@ private fun SkrinUtama(ke: (String) -> Unit) {
 
     val keadaan = if (memulih) 1 else if (jalan) 2 else if (sibuk) 1 else 0
     Halaman {
-        Judul("VPN telefon")
+        Text("VPN telefon", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             BtnKecil(Bhs.t("Tetapan"), Modifier.weight(1f)) { ke("tetapan") }
             BtnKecil(Bhs.t("Per-apl"), Modifier.weight(1f)) { ke("apl") }

@@ -460,15 +460,16 @@ fun Utama() {
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 130.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Text("VLESS PRO", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 3.sp, style = TextStyle(brush = Wr.grad))
-        Column {
-            Text(sapa, color = Wr.mu, fontSize = 14.sp)
-            Text(if (s == null) "Menyambung ..." else if (on) "Anda disambung" else if (s.optString("mode") == "xlite") "VLESS Pro tidak aktif" else "Tiada sambungan",
-                fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = if (on) Wr.ac else Wr.tx)
+        Text("VLESS PRO", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 3.sp, style = TextStyle(brush = Wr.grad),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(sapa, color = Wr.mu, fontSize = 14.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+            Text(if (s == null && St.luar) "Modem tidak dicapai" else if (s == null) "Menyambung ..." else if (on) "Anda disambung" else if (s.optString("mode") == "xlite") "VLESS Pro tidak aktif" else "Tiada sambungan",
+                fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = if (on) Wr.ac else Wr.tx, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
             val ip = St.ipInfo
             Text(if (on && ip != null) "${ip.optString("ip")} · ${ip.optString("country")}"
-            else if (s != null && !on && s.optBoolean("xlite")) "VPN asal sedang digunakan" else if (on) "Memeriksa IP ..." else "Sentuh butang untuk menyambung",
-                color = Wr.mu, fontSize = 14.sp)
+            else if (s != null && !on && s.optBoolean("xlite")) "VPN asal sedang digunakan" else if (on) "Memeriksa IP ..." else if (s == null && St.luar) "Sambung telefon ke WiFi modem" else "Sentuh butang untuk menyambung",
+                color = Wr.mu, fontSize = 14.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
         }
 
         Box(Modifier.fillMaxWidth().height(260.dp), contentAlignment = Alignment.Center) {
