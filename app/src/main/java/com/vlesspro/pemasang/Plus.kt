@@ -84,24 +84,38 @@ fun SubPlus(ke: (String) -> Unit) {
 fun SubSqm() {
     val d = muat { Modem.obj("/api/sqm") }
     var on by remember { mutableStateOf(false) }
-    var dn by remember { mutableStateOf("") }
     var up by remember { mutableStateOf("") }
-    LaunchedEffect(d.value) { d.value?.optJSONObject("cfg")?.let { on = it.optBoolean("on"); dn = it.optDouble("down").toString(); up = it.optDouble("up").toString() } }
+    fun papar(x: Double) = if (x <= 0.0) "" else if (x == Math.floor(x)) x.toInt().toString() else x.toString()
+    LaunchedEffect(d.value) { d.value?.optJSONObject("cfg")?.let { on = it.optBoolean("on"); up = papar(it.optDouble("up")) } }
     Halaman {
         Judul("SQM")
         val v = d.value
         if (v != null && v.optBoolean("unsupported")) KadWr { Text("Ciri SQM belum disokong pada modem B618.", color = Wr.wn) }
         else KadWr {
-            Text("Hadkan lebar jalur dan kurangkan lag. 0 = tiada had.", color = Wr.mu, fontSize = 13.sp)
+            Text("Hadkan kelajuan muat naik supaya lag kekal rendah semasa muat naik.", color = Wr.mu, fontSize = 13.sp)
             Suis("Hidupkan SQM", on) { on = it }
-            OutlinedTextField(dn, { dn = it }, label = { Text("Muat turun (Mbit/s)") }, singleLine = true, modifier = Modifier.fillMaxWidth(), colors = medan(),
+            OutlinedTextField(up, { up = it }, label = { Text("Had muat naik (Mbit/s)") }, singleLine = true, modifier = Modifier.fillMaxWidth(), colors = medan(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
             Spacer(Modifier.height(8.dp))
-            OutlinedTextField(up, { up = it }, label = { Text("Muat naik (Mbit/s)") }, singleLine = true, modifier = Modifier.fillMaxWidth(), colors = medan(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                listOf(5, 10, 20, 50, 100).forEach { n ->
+                    FilterChip(up.toDoubleOrNull() == n.toDouble(), { up = n.toString() }, label = { Text("$n Mbit/s", fontSize = 12.sp) })
+                }
+            }
+            Text("Tip: tetapkan sekitar 90% kelajuan muat naik sebenar anda (uji dengan Speedtest).", color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+            Text("Had muat turun tidak disokong pada modem ini kerana pecutan perkakasan.", color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp))
             Spacer(Modifier.height(10.dp))
-            Btn("Simpan") { bg { lapor(Modem.tindak("/api/sqm", JSONObject().put("on", on).put("down", dn.toDoubleOrNull() ?: 0.0).put("up", up.toDoubleOrNull() ?: 0.0).toString())) } }
-            if (v != null) Text(Bhs.t("Antara muka") + ": ${v.optString("iface")} · " + Bhs.t(if (v.optBoolean("active")) "aktif" else "tidak aktif"), color = Wr.mu, fontSize = 12.sp)
+            Btn("Simpan") {
+                val nilai = up.toDoubleOrNull() ?: 0.0
+                if (on && nilai <= 0.0) St.toast("Tetapkan had muat naik dahulu (lebih daripada 0).")
+                else bg { lapor(Modem.tindak("/api/sqm", JSONObject().put("on", on).put("down", 0.0).put("up", nilai).toString())) }
+            }
+            if (v != null) {
+                val cfgUp = v.optJSONObject("cfg")?.optDouble("up") ?: 0.0
+                Text(if (v.optBoolean("active")) Bhs.f("SQM aktif. Had muat naik {0} Mbit/s", papar(cfgUp)) else Bhs.t("SQM tidak aktif"),
+                    color = if (v.optBoolean("active")) Wr.ok else Wr.mu, fontSize = 13.sp, modifier = Modifier.padding(top = 10.dp))
+                Text(Bhs.t("Antara muka") + ": ${v.optString("iface")}", color = Wr.mu, fontSize = 12.sp)
+            }
         }
     }
 }

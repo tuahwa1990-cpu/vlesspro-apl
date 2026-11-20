@@ -919,7 +919,19 @@
   "Semakan terjemahan automatik ditambah semasa binaan supaya teks English tidak tertinggal.": "An automatic translation check was added to the build so no English text is left out.",
   "Kurang beban semakan IP": "Lighter IP checks",
   "Semakan IP keluar kini lebih jarang (setiap 2 minit, bukan setiap 12 saat), mengurangkan trafik dan catatan amaran pada modem.": "The exit IP is now checked less often (every 2 minutes instead of every 12 seconds), reducing traffic and warning entries on the modem.",
-  "Hantar diagnosis menyembunyikan amaran jinak daripada semakan IP supaya masalah sebenar mudah dilihat.": "Send diagnostics hides harmless warnings from the IP check so real problems are easy to see."
+  "Hantar diagnosis menyembunyikan amaran jinak daripada semakan IP supaya masalah sebenar mudah dilihat.": "Send diagnostics hides harmless warnings from the IP check so real problems are easy to see.",
+  "Hadkan kelajuan muat naik supaya lag kekal rendah semasa muat naik.": "Limit the upload speed so lag stays low while uploading.",
+  "Had muat naik (Mbit/s)": "Upload limit (Mbit/s)",
+  "Tip: tetapkan sekitar 90% kelajuan muat naik sebenar anda (uji dengan Speedtest).": "Tip: set about 90% of your real upload speed (measure it with Speedtest).",
+  "Had muat turun tidak disokong pada modem ini kerana pecutan perkakasan.": "A download limit is not supported on this modem because of hardware acceleration.",
+  "Tetapkan had muat naik dahulu (lebih daripada 0).": "Set the upload limit first (greater than 0).",
+  "SQM aktif. Had muat naik {0} Mbit/s": "SQM is on. Upload limit {0} Mbit/s",
+  "SQM tidak aktif": "SQM is off",
+  "SQM lebih jelas": "Clearer SQM",
+  "Skrin SQM kini hanya menunjukkan had muat naik, kerana had muat turun tidak boleh dikawal pada modem ini. Ini dijelaskan dalam skrin.": "The SQM screen now shows only the upload limit, because a download limit cannot be controlled on this modem. This is explained on the screen.",
+  "Butang pantas 5, 10, 20, 50 dan 100 Mbit/s, serta tip untuk memilih nilai.": "Quick buttons for 5, 10, 20, 50 and 100 Mbit/s, plus a tip for choosing a value.",
+  "Status jelas: SQM aktif atau tidak, dengan had muat naik yang digunakan.": "A clear status: SQM on or off, with the upload limit in use.",
+  "Amaran jika SQM dihidupkan tanpa had muat naik.": "A warning if SQM is turned on without an upload limit."
  },
  "zh": {
   "Mod VPN": "VPN 模式",

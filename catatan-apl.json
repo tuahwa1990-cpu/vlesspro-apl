@@ -1,10 +1,21 @@
 {
- "title": "Kurang beban semakan IP",
+ "title": "SQM lebih jelas",
  "items": [
-  "Semakan IP keluar kini lebih jarang (setiap 2 minit, bukan setiap 12 saat), mengurangkan trafik dan catatan amaran pada modem.",
-  "Hantar diagnosis menyembunyikan amaran jinak daripada semakan IP supaya masalah sebenar mudah dilihat."
+  "Skrin SQM kini hanya menunjukkan had muat naik, kerana had muat turun tidak boleh dikawal pada modem ini. Ini dijelaskan dalam skrin.",
+  "Butang pantas 5, 10, 20, 50 dan 100 Mbit/s, serta tip untuk memilih nilai.",
+  "Status jelas: SQM aktif atau tidak, dengan had muat naik yang digunakan.",
+  "Amaran jika SQM dihidupkan tanpa had muat naik."
  ],
  "history": [
+  {
+   "version": "1.0.34",
+   "date": "2026-11-20",
+   "title": "Kurang beban semakan IP",
+   "items": [
+    "Semakan IP keluar kini lebih jarang (setiap 2 minit, bukan setiap 12 saat), mengurangkan trafik dan catatan amaran pada modem.",
+    "Hantar diagnosis menyembunyikan amaran jinak daripada semakan IP supaya masalah sebenar mudah dilihat."
+   ]
+  },
   {
    "version": "1.0.33",
    "date": "2026-11-20",
