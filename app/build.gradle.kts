@@ -23,7 +23,9 @@ android {
     }
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = if (System.getenv("KS_PATH") != null) signingConfigs.getByName("rel") else signingConfigs.getByName("debug")
         }
     }
