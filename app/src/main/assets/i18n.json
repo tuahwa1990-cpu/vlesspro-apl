@@ -957,7 +957,19 @@
   "{0} pelayan ditambah.": "{0} server(s) added.",
   "Jika WiFi modem anda sudah menjalankan VLESS Pro, matikan salah satu supaya trafik tidak melalui dua lapisan (lebih perlahan).": "If your modem's WiFi already runs VLESS Pro, turn one of them off so traffic does not pass through two layers (slower).",
   "Fungsi ini berjalan sepenuhnya dalam telefon dan tidak membebankan modem.": "This function runs entirely on the phone and does not load the modem.",
-  "VPN telefon (tanpa modem)": "Phone VPN (no modem needed)"
+  "VPN telefon (tanpa modem)": "Phone VPN (no modem needed)",
+  "Hanya pautan vless:// dan vmess:// disokong buat masa ini.": "Only vless:// and vmess:// links are supported for now.",
+  "Bersambung": "Connected",
+  "Sentuh untuk sambung": "Tap to connect",
+  "Jumlah turun": "Total down",
+  "Jumlah naik": "Total up",
+  "Tambah pelayan dahulu.": "Add a server first.",
+  "Tiada pautan vless:// atau vmess:// dalam papan klip.": "No vless:// or vmess:// link in the clipboard.",
+  "Menguji...": "Testing...",
+  "Uji ping": "Test ping",
+  "+ Tampal pautan": "+ Paste link",
+  "Belum ada pelayan.": "No servers yet.",
+  "Salin pautan vless:// atau vmess:// kemudian tekan Tampal pautan.": "Copy a vless:// or vmess:// link, then tap Paste link."
  },
  "zh": {
   "Mod VPN": "VPN 模式",

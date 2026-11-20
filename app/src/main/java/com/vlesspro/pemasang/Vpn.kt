@@ -35,63 +35,99 @@ object TProxyService {
     init { System.loadLibrary("hev-socks5-tunnel") }
     @JvmStatic external fun TProxyStartService(configPath: String, fd: Int)
     @JvmStatic external fun TProxyStopService()
+    @JvmStatic external fun TProxyGetStats(): LongArray
 }
 
-/** Pautan vless:// kepada konfigurasi Xray. */
+/** Pautan vless:// dan vmess:// kepada konfigurasi Xray. */
 object VlessPautan {
-    class Hasil(val nama: String, val outbound: JSONObject)
+    class Hasil(val nama: String, val outbound: JSONObject, val jenis: String, val rangkaian: String, val sekuriti: String, val host: String, val port: Int) {
+        val ringkas get() = listOf(jenis, rangkaian.uppercase(), sekuriti.uppercase().takeIf { it != "NONE" }).filterNotNull().joinToString(" · ")
+    }
 
     private fun dec(s: String) = try { URLDecoder.decode(s, "UTF-8") } catch (_: Exception) { s }
+    private fun tak() = IllegalArgumentException(Bhs.t("Pautan tidak sah."))
+
+    /** Tetapan aliran (tcp/ws/grpc/tls/reality) daripada parameter pautan. */
+    private fun aliran(q: Map<String, String>, host: String): JSONObject {
+        val net = (q["type"] ?: "tcp").let { if (it == "splithttp") "xhttp" else it }
+        val sec = q["security"] ?: "none"
+        val ss = JSONObject().put("network", net).put("security", sec)
+        val sni = q["sni"]?.takeIf { it.isNotEmpty() } ?: q["host"]?.takeIf { it.isNotEmpty() } ?: host
+        when (sec) {
+            "tls" -> {
+                val t = JSONObject().put("serverName", sni).put("fingerprint", q["fp"]?.takeIf { it.isNotEmpty() } ?: "chrome")
+                q["alpn"]?.takeIf { it.isNotEmpty() }?.let { t.put("alpn", JSONArray(it.split(','))) }
+                ss.put("tlsSettings", t)
+            }
+            "reality" -> ss.put("realitySettings", JSONObject()
+                .put("serverName", q["sni"] ?: "").put("fingerprint", q["fp"] ?: "chrome")
+                .put("publicKey", q["pbk"] ?: "").put("shortId", q["sid"] ?: "").put("spiderX", q["spx"] ?: ""))
+        }
+        val hostHdr = q["host"]?.takeIf { it.isNotEmpty() } ?: host
+        when (net) {
+            "ws" -> ss.put("wsSettings", JSONObject().put("path", q["path"] ?: "/").put("headers", JSONObject().put("Host", hostHdr)))
+            "grpc" -> ss.put("grpcSettings", JSONObject().put("serviceName", q["serviceName"] ?: "").put("multiMode", q["mode"] == "multi"))
+            "httpupgrade" -> ss.put("httpupgradeSettings", JSONObject().put("path", q["path"] ?: "/").put("host", hostHdr))
+            "xhttp" -> ss.put("xhttpSettings", JSONObject().put("path", q["path"] ?: "/").put("host", hostHdr).put("mode", q["mode"] ?: "auto"))
+        }
+        return ss
+    }
+
+    private fun vless(p: String): Hasil {
+        var r = p.removePrefix("vless://")
+        val nama = dec(r.substringAfter('#', ""))
+        r = r.substringBefore('#')
+        val query = r.substringAfter('?', "")
+        r = r.substringBefore('?').trimEnd('/')
+        val uuid = dec(r.substringBeforeLast('@'))
+        val hp = r.substringAfterLast('@')
+        val host: String
+        val port: Int
+        if (hp.startsWith("[")) { host = hp.substring(1, hp.indexOf(']')); port = hp.substringAfter("]:").toInt() }
+        else { host = hp.substringBeforeLast(':'); port = hp.substringAfterLast(':').toInt() }
+        if (uuid.isEmpty() || host.isEmpty()) throw tak()
+        val q = query.split('&').filter { it.contains('=') }.associate { dec(it.substringBefore('=')) to dec(it.substringAfter('=')) }
+        val user = JSONObject().put("id", uuid).put("encryption", q["encryption"] ?: "none")
+        q["flow"]?.takeIf { it.isNotEmpty() }?.let { user.put("flow", it) }
+        val ss = aliran(q, host)
+        val out = JSONObject().put("tag", "proxy").put("protocol", "vless")
+            .put("settings", JSONObject().put("vnext", JSONArray().put(JSONObject().put("address", host).put("port", port).put("users", JSONArray().put(user)))))
+            .put("streamSettings", ss)
+        return Hasil(nama.ifEmpty { "$host:$port" }, out, "VLESS", ss.optString("network"), ss.optString("security"), host, port)
+    }
+
+    private fun vmess(p: String): Hasil {
+        val b64 = p.removePrefix("vmess://").trim().replace('-', '+').replace('_', '/')
+        val j = JSONObject(String(android.util.Base64.decode(b64, android.util.Base64.DEFAULT), Charsets.UTF_8))
+        val host = j.optString("add"); val port = j.optString("port").toIntOrNull() ?: throw tak()
+        val id = j.optString("id")
+        if (host.isEmpty() || id.isEmpty()) throw tak()
+        val net = j.optString("net").ifEmpty { "tcp" }
+        val q = mutableMapOf(
+            "type" to net, "security" to (if (j.optString("tls") == "tls") "tls" else "none"),
+            "sni" to j.optString("sni"), "host" to j.optString("host"), "path" to j.optString("path"),
+            "alpn" to j.optString("alpn"), "fp" to j.optString("fp"), "serviceName" to j.optString("path")
+        )
+        val ss = aliran(q, host)
+        val user = JSONObject().put("id", id).put("alterId", j.optString("aid").toIntOrNull() ?: 0).put("security", j.optString("scy").ifEmpty { "auto" })
+        val out = JSONObject().put("tag", "proxy").put("protocol", "vmess")
+            .put("settings", JSONObject().put("vnext", JSONArray().put(JSONObject().put("address", host).put("port", port).put("users", JSONArray().put(user)))))
+            .put("streamSettings", ss)
+        return Hasil(j.optString("ps").ifEmpty { "$host:$port" }, out, "VMESS", ss.optString("network"), ss.optString("security"), host, port)
+    }
 
     fun hurai(pautan: String): Hasil {
         val p = pautan.trim()
-        if (!p.startsWith("vless://")) throw IllegalArgumentException(Bhs.t("Hanya pautan vless:// disokong buat masa ini."))
         try {
-            var r = p.removePrefix("vless://")
-            val nama = dec(r.substringAfter('#', ""))
-            r = r.substringBefore('#')
-            val query = r.substringAfter('?', "")
-            r = r.substringBefore('?').trimEnd('/')
-            val uuid = dec(r.substringBeforeLast('@'))
-            val hp = r.substringAfterLast('@')
-            val host: String
-            val port: Int
-            if (hp.startsWith("[")) { host = hp.substring(1, hp.indexOf(']')); port = hp.substringAfter("]:").toInt() }
-            else { host = hp.substringBeforeLast(':'); port = hp.substringAfterLast(':').toInt() }
-            if (uuid.isEmpty() || host.isEmpty()) throw IllegalArgumentException()
-            val q = query.split('&').filter { it.contains('=') }.associate { dec(it.substringBefore('=')) to dec(it.substringAfter('=')) }
-
-            val user = JSONObject().put("id", uuid).put("encryption", q["encryption"] ?: "none")
-            q["flow"]?.takeIf { it.isNotEmpty() }?.let { user.put("flow", it) }
-            val net = (q["type"] ?: "tcp").let { if (it == "splithttp") "xhttp" else it }
-            val sec = q["security"] ?: "none"
-            val ss = JSONObject().put("network", net).put("security", sec)
-            val sni = q["sni"]?.takeIf { it.isNotEmpty() } ?: q["host"]?.takeIf { it.isNotEmpty() } ?: host
-            when (sec) {
-                "tls" -> {
-                    val t = JSONObject().put("serverName", sni).put("fingerprint", q["fp"] ?: "chrome")
-                    q["alpn"]?.takeIf { it.isNotEmpty() }?.let { t.put("alpn", JSONArray(it.split(','))) }
-                    ss.put("tlsSettings", t)
-                }
-                "reality" -> ss.put("realitySettings", JSONObject()
-                    .put("serverName", q["sni"] ?: "").put("fingerprint", q["fp"] ?: "chrome")
-                    .put("publicKey", q["pbk"] ?: "").put("shortId", q["sid"] ?: "").put("spiderX", q["spx"] ?: ""))
+            return when {
+                p.startsWith("vless://") -> vless(p)
+                p.startsWith("vmess://") -> vmess(p)
+                else -> throw IllegalArgumentException(Bhs.t("Hanya pautan vless:// dan vmess:// disokong buat masa ini."))
             }
-            val hostHdr = q["host"]?.takeIf { it.isNotEmpty() } ?: host
-            when (net) {
-                "ws" -> ss.put("wsSettings", JSONObject().put("path", q["path"] ?: "/").put("headers", JSONObject().put("Host", hostHdr)))
-                "grpc" -> ss.put("grpcSettings", JSONObject().put("serviceName", q["serviceName"] ?: "").put("multiMode", q["mode"] == "multi"))
-                "httpupgrade" -> ss.put("httpupgradeSettings", JSONObject().put("path", q["path"] ?: "/").put("host", hostHdr))
-                "xhttp" -> ss.put("xhttpSettings", JSONObject().put("path", q["path"] ?: "/").put("host", hostHdr).put("mode", q["mode"] ?: "auto"))
-            }
-            val out = JSONObject().put("tag", "proxy").put("protocol", "vless")
-                .put("settings", JSONObject().put("vnext", JSONArray().put(JSONObject().put("address", host).put("port", port).put("users", JSONArray().put(user)))))
-                .put("streamSettings", ss)
-            return Hasil(nama.ifEmpty { "$host:$port" }, out)
         } catch (e: IllegalArgumentException) {
-            throw IllegalArgumentException(Bhs.t("Pautan tidak sah."))
-        } catch (e: IndexOutOfBoundsException) {
-            throw IllegalArgumentException(Bhs.t("Pautan tidak sah."))
+            throw e
+        } catch (e: Exception) {
+            throw tak()
         }
     }
 
@@ -122,6 +158,8 @@ class VpnPerkhidmatan : VpnService() {
         @Volatile var sibuk = false
         @Volatile var ralat = ""
         @Volatile var nama = ""
+        @Volatile var masa0 = 0L
+        fun statistik(): LongArray? = if (!jalan) null else try { TProxyService.TProxyGetStats() } catch (_: Throwable) { null }
         const val HENTI = "com.vlesspro.pemasang.VPN_HENTI"
         const val PORT = 10808
         private const val SALURAN = "vpn"
@@ -143,7 +181,7 @@ class VpnPerkhidmatan : VpnService() {
         val pautan = intent?.getStringExtra("pautan") ?: return START_NOT_STICKY
         if (sibuk || jalan) return START_NOT_STICKY
         sibuk = true; ralat = ""
-        Thread { try { sambung(pautan) } catch (e: Exception) { gagal(e.message ?: e.toString()) } }.start()
+        Thread { try { sambung(pautan) } catch (e: Throwable) { gagal(e.message ?: e.toString()) } }.start()
         return START_NOT_STICKY
     }
 
@@ -186,7 +224,7 @@ class VpnPerkhidmatan : VpnService() {
         val yml = File(filesDir, "vpn-hev.yml")
         yml.writeText("tunnel:\n  mtu: 1500\n  ipv4: 26.26.26.1\nsocks5:\n  port: $PORT\n  address: 127.0.0.1\n  udp: 'udp'\nmisc:\n  log-level: warn\n")
         TProxyService.TProxyStartService(yml.path, fd.fd)
-        jalan = true; sibuk = false
+        jalan = true; sibuk = false; masa0 = System.currentTimeMillis()
         notif(Bhs.f("Bersambung ke {0}", h.nama))
     }
 
@@ -210,76 +248,3 @@ class VpnPerkhidmatan : VpnService() {
     override fun onDestroy() { if (jalan || tun != null) berhenti(); super.onDestroy() }
 }
 
-@Composable
-fun SubVpn() {
-    val ctx = LocalContext.current
-    var senarai by remember { mutableStateOf(SimpanVpn.senarai(ctx)) }
-    var pilih by remember { mutableStateOf(SimpanVpn.pilih(ctx).coerceIn(0, maxOf(0, senarai.size - 1))) }
-    var jalan by remember { mutableStateOf(VpnPerkhidmatan.jalan) }
-    var sibuk by remember { mutableStateOf(VpnPerkhidmatan.sibuk) }
-    var ralat by remember { mutableStateOf("") }
-    LaunchedEffect(Unit) {
-        while (true) {
-            jalan = VpnPerkhidmatan.jalan; sibuk = VpnPerkhidmatan.sibuk; ralat = VpnPerkhidmatan.ralat
-            delay(700)
-        }
-    }
-    fun namaDari(p: String) = try { VlessPautan.hurai(p).nama } catch (_: Exception) { p.take(30) }
-    fun sambung() {
-        val p = senarai.getOrNull(pilih) ?: return
-        VpnPerkhidmatan.ralat = ""
-        VpnPerkhidmatan.mula(ctx, p)
-    }
-    val minta = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
-        if (r.resultCode == android.app.Activity.RESULT_OK) sambung() else St.toast(Bhs.t("Kebenaran VPN tidak diberi."))
-    }
-    fun mulaSambung() {
-        val i = VpnService.prepare(ctx)
-        if (i != null) minta.launch(i) else sambung()
-    }
-    Halaman {
-        Judul("VPN telefon")
-        KadWr {
-            Text(
-                if (jalan) Bhs.f("Bersambung ke {0}", VpnPerkhidmatan.nama) else if (sibuk) Bhs.t("Menyambung...") else Bhs.t("Tidak bersambung"),
-                color = if (jalan) Wr.ac else Wr.tx, fontWeight = FontWeight.Bold, fontSize = 18.sp
-            )
-            if (ralat.isNotEmpty() && !jalan && !sibuk) Text(ralat, color = Wr.bad, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
-            Spacer(Modifier.height(10.dp))
-            if (jalan || sibuk) Btn("Putus", utama = false) { VpnPerkhidmatan.henti(ctx) }
-            else Btn("Sambung", aktif = senarai.isNotEmpty()) { mulaSambung() }
-            if (senarai.isEmpty()) Text("Tambah pelayan dahulu dengan menampal pautan vless://.", color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
-        }
-        KadWr {
-            Text("Pelayan", color = Wr.tx, fontWeight = FontWeight.Bold)
-            senarai.forEachIndexed { i, p ->
-                Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(i == pilih, { pilih = i; SimpanVpn.setPilih(ctx, i) })
-                    Text(namaDari(p), color = Wr.tx, modifier = Modifier.weight(1f))
-                    TextButton({
-                        val b = senarai.toMutableList(); b.removeAt(i); senarai = b; SimpanVpn.simpan(ctx, b)
-                        pilih = pilih.coerceIn(0, maxOf(0, b.size - 1)); SimpanVpn.setPilih(ctx, pilih)
-                    }) { Text("Padam", color = Wr.bad) }
-                }
-            }
-            Spacer(Modifier.height(6.dp))
-            Btn("Tampal pautan dari papan klip", utama = false) {
-                val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                val t = cm.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(ctx)?.toString().orEmpty()
-                val baris = t.lines().map { it.trim() }.filter { it.startsWith("vless://") }
-                if (baris.isEmpty()) St.toast(Bhs.t("Tiada pautan vless:// dalam papan klip."))
-                else {
-                    var tambah = 0
-                    val b = senarai.toMutableList()
-                    for (l in baris) {
-                        try { VlessPautan.hurai(l); if (l !in b) { b.add(l); tambah++ } } catch (e: Exception) { St.toast(e.message ?: "") }
-                    }
-                    senarai = b; SimpanVpn.simpan(ctx, b)
-                    if (tambah > 0) St.toast(Bhs.f("{0} pelayan ditambah.", tambah.toString()))
-                }
-            }
-        }
-        Text("Jika WiFi modem anda sudah menjalankan VLESS Pro, matikan salah satu supaya trafik tidak melalui dua lapisan (lebih perlahan).", color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp))
-        Text("Fungsi ini berjalan sepenuhnya dalam telefon dan tidak membebankan modem.", color = Wr.mu, fontSize = 12.sp)
-    }
-}
