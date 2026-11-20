@@ -11,7 +11,7 @@ object Diagnosis {
     private val ipv4 = Regex("\\b(\\d{1,3})\\.(\\d{1,3})\\.\\d{1,3}\\.\\d{1,3}\\b")
 
     /** Buang UUID, kelayakan, nama domain dan IP penuh supaya laman yang dilayari tidak terdedah. */
-    private fun bersih(s: String) = ipv4.replace(domain.replace(kredensial.replace(uuid.replace(s, "<uuid>"), "\$1<disorok>@"), "<domain>"), "\$1.\$2.x.x")
+    fun bersih(s: String) = ipv4.replace(domain.replace(kredensial.replace(uuid.replace(s, "<uuid>"), "\$1<disorok>@"), "<domain>"), "\$1.\$2.x.x")
 
     fun kumpul(ctx: Context): String {
         val sb = StringBuilder("VLESS Pro - Diagnosis\n")

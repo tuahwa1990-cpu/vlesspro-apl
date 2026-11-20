@@ -3,6 +3,7 @@ package com.vlesspro.pemasang
 import android.content.ClipboardManager
 import android.content.Context
 import android.net.VpnService
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.*
@@ -25,6 +26,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,6 +34,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import java.net.InetSocketAddress
 import java.net.Socket
 
@@ -59,8 +63,10 @@ private suspend fun ambilIp(proksi: java.net.Proxy?, rangkaian: android.net.Netw
         val c = (if (proksi != null) url.openConnection(proksi) else if (rangkaian != null) rangkaian.openConnection(url) else url.openConnection()) as java.net.HttpURLConnection
         c.connectTimeout = 7000; c.readTimeout = 7000
         c.inputStream.bufferedReader().readText().trim()
-    } catch (_: Exception) { "?" }
+    } catch (e: Exception) { sebabIp = e.javaClass.simpleName + ": " + (e.message ?: ""); "?" }
 }
+
+@Volatile private var sebabIp = ""
 
 private fun masaStr(ms: Long): String {
     val s = ms / 1000
@@ -105,13 +111,35 @@ private fun Angka(label: String, nilai: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
+private fun BtnKecil(t: String, modifier: Modifier = Modifier, klik: () -> Unit) {
+    OutlinedButton(onClick = klik, modifier = modifier, contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = Wr.ac)) { Text(t, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1) }
+}
+
+@Composable
 fun SubVpn() {
+    var skrin by remember { mutableStateOf("utama") }
+    BackHandler(skrin != "utama") { skrin = "utama" }
+    when (skrin) {
+        "apl" -> SkrinApl { skrin = "utama" }
+        "tetapan" -> SkrinTetapan { skrin = "utama" }
+        "tentang" -> SkrinTentang { skrin = "utama" }
+        "ssh" -> SkrinSsh { skrin = "utama" }
+        else -> SkrinUtama { skrin = it }
+    }
+}
+
+@Composable
+private fun SkrinUtama(ke: (String) -> Unit) {
     val ctx = LocalContext.current
     val skop = rememberCoroutineScope()
-    var senarai by remember { mutableStateOf(SimpanVpn.senarai(ctx)) }
-    var pilih by remember { mutableStateOf(SimpanVpn.pilih(ctx).coerceIn(0, maxOf(0, senarai.size - 1))) }
+    var senarai by remember { mutableStateOf(SimpanVpn.semua(ctx)) }
+    var manual by remember { mutableStateOf(SimpanVpn.manual(ctx)) }
+    var langganan by remember { mutableStateOf(SimpanVpn.langganan(ctx)) }
+    var pilih by remember { mutableStateOf(SimpanVpn.pilih(ctx)) }
     var jalan by remember { mutableStateOf(VpnPerkhidmatan.jalan) }
     var sibuk by remember { mutableStateOf(VpnPerkhidmatan.sibuk) }
+    var memulih by remember { mutableStateOf(VpnPerkhidmatan.memulih) }
     var ralat by remember { mutableStateOf("") }
     var tempoh by remember { mutableStateOf(0L) }
     var turun by remember { mutableStateOf(0L) }
@@ -120,15 +148,18 @@ fun SubVpn() {
     var lajuNaik by remember { mutableStateOf(0L) }
     var ping by remember { mutableStateOf<Map<Int, Long>>(emptyMap()) }
     var mengujiPing by remember { mutableStateOf(false) }
+    var pingS by remember { mutableStateOf(0L) }
+    var mengujiS by remember { mutableStateOf(false) }
     var ipTel by remember { mutableStateOf("") }
     var ipVpn by remember { mutableStateOf("") }
     var menyemakIp by remember { mutableStateOf(false) }
+    var sedangImport by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         var lt = 0L; var ln = 0L; var lm = 0L
         while (true) {
             while (!St.depan) delay(1000)
-            jalan = VpnPerkhidmatan.jalan; sibuk = VpnPerkhidmatan.sibuk; ralat = VpnPerkhidmatan.ralat
+            jalan = VpnPerkhidmatan.jalan; sibuk = VpnPerkhidmatan.sibuk; memulih = VpnPerkhidmatan.memulih; ralat = VpnPerkhidmatan.ralat
             if (jalan) {
                 tempoh = System.currentTimeMillis() - VpnPerkhidmatan.masa0
                 val st = withContext(Dispatchers.IO) { VpnPerkhidmatan.statistik() }
@@ -143,13 +174,28 @@ fun SubVpn() {
     }
 
     val hasil = senarai.map { p -> try { VlessPautan.hurai(p) } catch (_: Exception) { null } }
-    fun sambung() {
-        val p = senarai.getOrNull(pilih) ?: return
-        VpnPerkhidmatan.ralat = ""
-        VpnPerkhidmatan.mula(ctx, p)
+    fun muatSemula() {
+        senarai = SimpanVpn.semua(ctx); manual = SimpanVpn.manual(ctx); langganan = SimpanVpn.langganan(ctx)
+        pilih = SimpanVpn.pilih(ctx); ping = emptyMap()
     }
+    fun masuk(teks: String) {
+        if (sedangImport) return
+        sedangImport = true
+        skop.launch {
+            val m = withContext(Dispatchers.IO) { try { VpnImport.proses(ctx, teks) } catch (e: Exception) { e.message ?: e.javaClass.simpleName } }
+            muatSemula(); sedangImport = false; St.toast(m)
+        }
+    }
+    fun sambung() { if (!VpnKongsi.mula(ctx)) St.toast(Bhs.t("Tambah pelayan dahulu.")) }
     val minta = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
         if (r.resultCode == android.app.Activity.RESULT_OK) sambung() else St.toast(Bhs.t("Kebenaran VPN tidak diberi."))
+    }
+    val imbas = rememberLauncherForActivityResult(ScanContract()) { r -> r.contents?.let { masuk(it) } }
+    val galeri = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { u ->
+        if (u != null) skop.launch {
+            val t = withContext(Dispatchers.IO) { VpnAlat.imbasGambar(ctx, u) }
+            if (t == null) St.toast(Bhs.t("Kod QR tidak ditemui dalam gambar.")) else masuk(t)
+        }
     }
     fun togol() {
         if (jalan || sibuk) { VpnPerkhidmatan.henti(ctx); return }
@@ -160,37 +206,26 @@ fun SubVpn() {
     fun tampal() {
         val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val t = cm.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(ctx)?.toString().orEmpty()
-        val baris = t.lines().map { it.trim() }.filter { it.startsWith("vless://") || it.startsWith("vmess://") }
-        if (baris.isEmpty()) { St.toast(Bhs.t("Tiada pautan vless:// atau vmess:// dalam papan klip.")); return }
-        var tambah = 0
-        val b = senarai.toMutableList()
-        for (l in baris) {
-            try { VlessPautan.hurai(l); if (l !in b) { b.add(l); tambah++ } } catch (e: Exception) { St.toast(e.message ?: "") }
-        }
-        senarai = b; SimpanVpn.simpan(ctx, b)
-        if (tambah > 0) St.toast(Bhs.f("{0} pelayan ditambah.", tambah.toString()))
+        if (t.isBlank()) { St.toast(Bhs.t("Papan klip kosong.")); return }
+        masuk(t)
     }
-    fun ujiPing() {
+    fun ujiPing(terbaik: Boolean) {
         if (mengujiPing) return
         mengujiPing = true
         skop.launch {
-            val h = hasil
-            val m = mutableMapOf<Int, Long>()
-            h.forEachIndexed { i, x ->
-                if (x != null) {
-                    m[i] = withContext(Dispatchers.IO) {
-                        try { val t0 = System.nanoTime(); Socket().use { it.connect(InetSocketAddress(x.host, x.port), 3000) }; (System.nanoTime() - t0) / 1_000_000 } catch (_: Exception) { -1L }
-                    }
-                    ping = m.toMap()
-                }
+            val m = withContext(Dispatchers.IO) { VpnAlat.pingSemua(hasil) }
+            ping = m.toMap()
+            if (terbaik) {
+                val b = m.filter { it.value >= 0 }.minByOrNull { it.value }?.key
+                if (b != null) { pilih = b; SimpanVpn.setPilih(ctx, b); St.toast(Bhs.f("Dipilih: {0}", hasil[b]?.nama ?: "")) }
+                else St.toast(Bhs.t("Semua pelayan gagal dihubungi."))
             }
             mengujiPing = false
         }
     }
-
     fun semakIp() {
         if (menyemakIp) return
-        menyemakIp = true; ipTel = ""; ipVpn = ""
+        menyemakIp = true; ipTel = ""; ipVpn = ""; sebabIp = ""
         skop.launch {
             // Apl ini dikecualikan daripada VPN: sambungan terus = IP telefon sebenar; melalui SOCKS Xray = IP pelayan.
             ipTel = ambilIp(null, rangkaianAsal(ctx))
@@ -198,23 +233,34 @@ fun SubVpn() {
             menyemakIp = false
         }
     }
-    val keadaan = if (jalan) 2 else if (sibuk) 1 else 0
+    fun ujiSebenar() {
+        if (mengujiS) return
+        mengujiS = true; pingS = 0
+        skop.launch { pingS = withContext(Dispatchers.IO) { VpnAlat.pingSebenar() }; mengujiS = false }
+    }
+
+    val keadaan = if (memulih) 1 else if (jalan) 2 else if (sibuk) 1 else 0
     Halaman {
         Judul("VPN telefon")
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            BtnKecil(Bhs.t("Tetapan"), Modifier.weight(1f)) { ke("tetapan") }
+            BtnKecil(Bhs.t("Per-apl"), Modifier.weight(1f)) { ke("apl") }
+            BtnKecil(Bhs.t("Tentang"), Modifier.weight(1f)) { ke("tentang") }
+        }
         Column(Modifier.fillMaxWidth().padding(top = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             ButangKuasa(keadaan) { togol() }
             Spacer(Modifier.height(10.dp))
             Text(
-                when (keadaan) { 2 -> Bhs.t("Bersambung"); 1 -> Bhs.t("Menyambung..."); else -> Bhs.t("Sentuh untuk sambung") },
+                when { memulih -> Bhs.t("Menyambung semula..."); keadaan == 2 -> Bhs.t("Bersambung"); keadaan == 1 -> Bhs.t("Menyambung..."); else -> Bhs.t("Sentuh untuk sambung") },
                 color = if (keadaan == 2) Wr.ac else Wr.tx, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp
             )
-            if (keadaan == 2) {
+            if (jalan) {
                 Text(VpnPerkhidmatan.nama, color = Wr.mu, fontSize = 13.sp, textAlign = TextAlign.Center)
                 Text(masaStr(tempoh), color = Wr.tx, fontSize = 26.sp, fontWeight = FontWeight.Light, modifier = Modifier.padding(top = 4.dp))
             }
             if (ralat.isNotEmpty() && keadaan == 0) Text(ralat, color = Wr.bad, fontSize = 12.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 6.dp))
         }
-        if (keadaan == 2) {
+        if (jalan) {
             KadWr {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                     Angka(Bhs.t("Muat turun"), saizB(lajuTurun) + "/s", Modifier.weight(1f))
@@ -226,32 +272,49 @@ fun SubVpn() {
                     Angka(Bhs.t("Jumlah naik"), saizB(naik), Modifier.weight(1f))
                 }
             }
-        }
-        if (keadaan == 2) {
             KadWr {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text("Semak IP keluar", color = Wr.tx, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                    TextButton({ semakIp() }, enabled = !menyemakIp) { Text(if (menyemakIp) "Menyemak..." else "Semak IP", color = Wr.ac) }
+                    Text(Bhs.t("Ping sebenar"), color = Wr.tx, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    if (pingS > 0) Text("$pingS ms", color = if (pingS < 300) Wr.ac else Wr.wn, fontWeight = FontWeight.Bold)
+                    if (pingS < 0) Text(Bhs.t("Gagal"), color = Wr.bad, fontWeight = FontWeight.Bold)
+                    TextButton({ ujiSebenar() }, enabled = !mengujiS) { Text(if (mengujiS) Bhs.t("Menguji...") else Bhs.t("Uji"), color = Wr.ac) }
+                }
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(Bhs.t("Semak IP keluar"), color = Wr.tx, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    TextButton({ semakIp() }, enabled = !menyemakIp) { Text(if (menyemakIp) Bhs.t("Menyemak...") else Bhs.t("Semak IP"), color = Wr.ac) }
                 }
                 if (ipTel.isNotEmpty() || ipVpn.isNotEmpty()) {
                     Text(Bhs.f("IP telefon (tanpa VPN): {0}", ipTel.ifEmpty { "..." }), color = Wr.mu, fontSize = 13.sp)
                     Text(Bhs.f("IP melalui pelayan: {0}", ipVpn.ifEmpty { "..." }), color = Wr.tx, fontSize = 13.sp)
+                    if (ipTel == "?" && sebabIp.isNotEmpty()) Text(sebabIp, color = Wr.mu, fontSize = 11.sp)
                     if (ipTel.isNotEmpty() && ipVpn.isNotEmpty() && ipTel != "?" && ipVpn != "?") {
-                        if (ipTel == ipVpn) Text("IP sama: trafik mungkin tidak melalui pelayan.", color = Wr.wn, fontSize = 12.sp)
-                        else Text("IP berbeza: trafik melalui pelayan.", color = Wr.ac, fontSize = 12.sp)
+                        if (ipTel == ipVpn) Text(Bhs.t("IP sama: trafik mungkin tidak melalui pelayan."), color = Wr.wn, fontSize = 12.sp)
+                        else Text(Bhs.t("IP berbeza: trafik melalui pelayan."), color = Wr.ac, fontSize = 12.sp)
                     }
                 }
             }
         }
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text("Pelayan", color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 17.sp, modifier = Modifier.weight(1f))
-            if (senarai.isNotEmpty()) TextButton({ ujiPing() }, enabled = !mengujiPing) { Text(if (mengujiPing) "Menguji..." else "Uji ping", color = Wr.ac) }
-            TextButton({ tampal() }) { Text("+ Tampal pautan", color = Wr.ac, fontWeight = FontWeight.Bold) }
+            Text(Bhs.t("Pelayan"), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 17.sp, modifier = Modifier.weight(1f))
+            if (senarai.isNotEmpty()) {
+                TextButton({ ujiPing(false) }, enabled = !mengujiPing) { Text(if (mengujiPing) Bhs.t("Menguji...") else Bhs.t("Uji ping"), color = Wr.ac) }
+                TextButton({ ujiPing(true) }, enabled = !mengujiPing) { Text(Bhs.t("Terpantas"), color = Wr.ac, fontWeight = FontWeight.Bold) }
+            }
         }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            BtnKecil(Bhs.t("Tampal"), Modifier.weight(1f)) { tampal() }
+            BtnKecil(Bhs.t("Imbas QR"), Modifier.weight(1f)) {
+                imbas.launch(ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE).setPrompt(Bhs.t("Halakan kamera ke kod QR"))
+                    .setBeepEnabled(false).setOrientationLocked(false).setCaptureActivity(ImbasQr::class.java))
+            }
+            BtnKecil(Bhs.t("Imej QR"), Modifier.weight(1f)) { galeri.launch("image/*") }
+            BtnKecil("+ SSH", Modifier.weight(1f)) { ke("ssh") }
+        }
+        if (sedangImport) Text(Bhs.t("Mengimport..."), color = Wr.mu, fontSize = 12.sp)
         if (senarai.isEmpty()) {
             KadWr {
-                Text("Belum ada pelayan.", color = Wr.tx, fontWeight = FontWeight.Bold)
-                Text("Salin pautan vless:// atau vmess:// kemudian tekan Tampal pautan.", color = Wr.mu, fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp))
+                Text(Bhs.t("Belum ada pelayan."), color = Wr.tx, fontWeight = FontWeight.Bold)
+                Text(Bhs.t("Salin pautan (vless, vmess, trojan, ss, ssh) atau pautan langganan, kemudian tekan Tampal. Atau imbas kod QR."), color = Wr.mu, fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp))
             }
         }
         senarai.forEachIndexed { i, p ->
@@ -271,12 +334,165 @@ fun SubVpn() {
                         ping[i]?.let { ms -> if (ms >= 0) CipVpn("$ms ms", if (ms < 150) Wr.ac else Wr.wn) else CipVpn(Bhs.t("Gagal"), Wr.bad) }
                     }
                 }
-                TextButton({
-                    val b = senarai.toMutableList(); b.removeAt(i); senarai = b; SimpanVpn.simpan(ctx, b)
-                    pilih = pilih.coerceIn(0, maxOf(0, b.size - 1)); SimpanVpn.setPilih(ctx, pilih); ping = emptyMap()
-                }) { Text("✕", color = Wr.mu, fontSize = 16.sp) }
+                if (p in manual) {
+                    TextButton({
+                        SimpanVpn.simpanManual(ctx, manual.filter { it != p })
+                        muatSemula()
+                    }) { Text("✕", color = Wr.mu, fontSize = 16.sp) }
+                } else CipVpn(Bhs.t("Langganan"), Wr.mu)
             }
         }
-        Text("Jika WiFi modem anda sudah menjalankan VLESS Pro, matikan salah satu supaya trafik tidak melalui dua lapisan (lebih perlahan).", color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
+        if (langganan.isNotEmpty()) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(Bhs.t("Langganan"), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 17.sp, modifier = Modifier.weight(1f))
+                TextButton({
+                    if (!sedangImport) { sedangImport = true; skop.launch { val m = withContext(Dispatchers.IO) { VpnImport.segarkan(ctx) }; muatSemula(); sedangImport = false; St.toast(m) } }
+                }) { Text(Bhs.t("Segar semua"), color = Wr.ac, fontWeight = FontWeight.Bold) }
+            }
+            langganan.forEach { (u, l) ->
+                KadWr {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text(try { java.net.URL(u).host } catch (_: Exception) { u.take(30) }, color = Wr.tx, fontWeight = FontWeight.Bold)
+                            Text(Bhs.f("{0} pelayan", l.size.toString()), color = Wr.mu, fontSize = 12.sp)
+                        }
+                        TextButton({ SimpanVpn.simpanLangganan(ctx, langganan.filter { it.first != u }); muatSemula() }) { Text("✕", color = Wr.mu, fontSize = 16.sp) }
+                    }
+                }
+            }
+        }
+        Text(Bhs.t("Ping TCP hanyalah anggaran (nod D1G1 menunjukkan ping palsu). Ping sebenar boleh diuji selepas bersambung."), color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
+        Text(Bhs.t("Jika WiFi modem anda sudah menjalankan VLESS Pro, matikan salah satu supaya trafik tidak melalui dua lapisan (lebih perlahan)."), color = Wr.mu, fontSize = 12.sp)
+        Text(Bhs.f("Apl {0} · Xray {1}", Kemas.namaSemasa(ctx), VpnPerkhidmatan.VERSI_XRAY), color = Wr.mu, fontSize = 11.sp)
+    }
+}
+
+@Composable
+private fun SkrinTetapan(kembali: () -> Unit) {
+    val ctx = LocalContext.current
+    var auto by remember { mutableStateOf(VpnTetapan.auto(ctx)) }
+    var kill by remember { mutableStateOf(VpnTetapan.kill(ctx)) }
+    var boot by remember { mutableStateOf(VpnTetapan.boot(ctx)) }
+    var cepat by remember { mutableStateOf(VpnTetapan.terpantas(ctx)) }
+    Halaman {
+        Judul(Bhs.t("Tetapan VPN"))
+        Suis(Bhs.t("Sambung semula automatik"), auto) { auto = it; VpnTetapan.set(ctx, "vpn_auto", it) }
+        Text(Bhs.t("Jika sambungan terputus atau rangkaian bertukar (WiFi/data), VPN cuba menyambung semula sendiri."), color = Wr.mu, fontSize = 12.sp)
+        Suis(Bhs.t("Kill switch"), kill) { kill = it; VpnTetapan.set(ctx, "vpn_kill", it) }
+        Text(Bhs.t("Semasa VPN terputus dan sedang cuba semula, internet disekat (tidak bocor ikut IP asal) dan percubaan tidak berhenti."), color = Wr.mu, fontSize = 12.sp)
+        Suis(Bhs.t("Sambung semasa telefon dihidupkan"), boot) { boot = it; VpnTetapan.set(ctx, "vpn_boot", it) }
+        Text(Bhs.t("Memerlukan kebenaran VPN diberi sekali dan apl tidak dihentikan paksa."), color = Wr.mu, fontSize = 12.sp)
+        Suis(Bhs.t("Pilih pelayan terpantas semasa sambung"), cepat) { cepat = it; VpnTetapan.set(ctx, "vpn_terpantas", it) }
+        Text(Bhs.t("Menguji ping semua pelayan dan memilih yang terendah setiap kali menyambung."), color = Wr.mu, fontSize = 12.sp)
+        Spacer(Modifier.height(6.dp))
+        Btn(Bhs.t("Buka tetapan VPN Android"), utama = false) {
+            try { ctx.startActivity(android.content.Intent(android.provider.Settings.ACTION_VPN_SETTINGS).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) } catch (_: Exception) {}
+        }
+        Text(Bhs.t("Untuk kill switch peringkat sistem, di sana hidupkan Sentiasa-hidup VPN dan Sekat sambungan tanpa VPN. Perubahan di halaman ini terpakai pada sambungan seterusnya."), color = Wr.mu, fontSize = 12.sp)
+        Btn(Bhs.t("Kembali"), utama = false) { kembali() }
+    }
+}
+
+@Composable
+private fun SkrinApl(kembali: () -> Unit) {
+    val ctx = LocalContext.current
+    var mod by remember { mutableStateOf(VpnTetapan.modApl(ctx)) }
+    var dipilih by remember { mutableStateOf(VpnTetapan.apl(ctx)) }
+    var cari by remember { mutableStateOf("") }
+    var senarai by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
+    LaunchedEffect(Unit) {
+        senarai = withContext(Dispatchers.IO) {
+            val pm = ctx.packageManager
+            pm.queryIntentActivities(android.content.Intent(android.content.Intent.ACTION_MAIN).addCategory(android.content.Intent.CATEGORY_LAUNCHER), 0)
+                .map { it.activityInfo.packageName to it.loadLabel(pm).toString() }
+                .filter { it.first != ctx.packageName }.distinctBy { it.first }.sortedBy { it.second.lowercase() }
+        }
+    }
+    val pilihan = listOf(Bhs.t("Semua apl guna VPN"), Bhs.t("Hanya apl dipilih guna VPN"), Bhs.t("Semua apl guna VPN kecuali yang dipilih"))
+    Halaman {
+        Judul(Bhs.t("VPN per-apl"))
+        pilihan.forEachIndexed { i, t ->
+            KadWr(klik = { mod = i; VpnTetapan.setModApl(ctx, i) }) {
+                Text((if (mod == i) "◉  " else "○  ") + t, color = if (mod == i) Wr.ac else Wr.tx, fontWeight = FontWeight.Bold)
+            }
+        }
+        Text(Bhs.t("Perubahan terpakai pada sambungan seterusnya. Sambung semula VPN selepas mengubah."), color = Wr.mu, fontSize = 12.sp)
+        if (mod != 0) {
+            OutlinedTextField(value = cari, onValueChange = { cari = it }, singleLine = true, colors = medan(),
+                label = { Text(Bhs.t("Cari apl")) }, modifier = Modifier.fillMaxWidth())
+            Text(Bhs.f("{0} apl dipilih", dipilih.size.toString()), color = Wr.mu, fontSize = 12.sp)
+            senarai.filter { cari.isBlank() || it.second.contains(cari, true) }.forEach { (pkg, nama) ->
+                Suis(nama, pkg in dipilih) { on ->
+                    dipilih = if (on) dipilih + pkg else dipilih - pkg
+                    VpnTetapan.setApl(ctx, dipilih)
+                }
+            }
+        }
+        Btn(Bhs.t("Kembali"), utama = false) { kembali() }
+    }
+}
+
+@Composable
+private fun SkrinTentang(kembali: () -> Unit) {
+    val ctx = LocalContext.current
+    var log by remember { mutableStateOf(VpnPerkhidmatan.logTerkini()) }
+    LaunchedEffect(Unit) { while (true) { log = VpnPerkhidmatan.logTerkini(); delay(2000) } }
+    Halaman {
+        Judul(Bhs.t("Tentang"))
+        KadWr {
+            Text("VLESS Pro", color = Wr.tx, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+            Text(Bhs.f("Versi apl: {0} (binaan {1})", Kemas.namaSemasa(ctx), Kemas.versiSemasa(ctx).toString()), color = Wr.tx, fontSize = 13.sp)
+            Text(Bhs.f("Teras Xray: {0}", VpnPerkhidmatan.VERSI_XRAY), color = Wr.mu, fontSize = 13.sp)
+            Text(android.os.Build.MODEL + " · Android " + android.os.Build.VERSION.RELEASE, color = Wr.mu, fontSize = 13.sp)
+            Text(Bhs.f("Status: {0}", if (VpnPerkhidmatan.jalan) Bhs.t("Bersambung") else Bhs.t("Putus")), color = Wr.mu, fontSize = 13.sp)
+        }
+        Text(Bhs.t("VPN telefon ini percuma. Hanya versi modem (VLESS Pro modem) yang berbayar."), color = Wr.mu, fontSize = 13.sp)
+        Btn(Bhs.t("Hantar log kepada penyokong")) {
+            val i = android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain")
+                .putExtra(android.content.Intent.EXTRA_SUBJECT, "VLESS Pro VPN log").putExtra(android.content.Intent.EXTRA_TEXT, VpnLaporan.bina(ctx))
+            try { ctx.startActivity(android.content.Intent.createChooser(i, null).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) } catch (_: Exception) {}
+        }
+        Text(Bhs.t("Log tidak mengandungi pautan, kata laluan, UUID atau nama domain."), color = Wr.mu, fontSize = 12.sp)
+        if (log.isNotBlank()) {
+            Text(Bhs.t("Log terkini"), color = Wr.tx, fontWeight = FontWeight.Bold)
+            Text(Diagnosis.bersih(log).lines().takeLast(12).joinToString("\n"), color = Wr.mu, fontSize = 11.sp)
+        }
+        Btn(Bhs.t("Kembali"), utama = false) { kembali() }
+    }
+}
+
+@Composable
+private fun SkrinSsh(kembali: () -> Unit) {
+    val ctx = LocalContext.current
+    var nama by remember { mutableStateOf("") }
+    var host by remember { mutableStateOf("") }
+    var port by remember { mutableStateOf("22") }
+    var pengguna by remember { mutableStateOf("") }
+    var kata by remember { mutableStateOf("") }
+    var sni by remember { mutableStateOf("") }
+    var payload by remember { mutableStateOf("") }
+    @Composable fun medanTeks(label: String, nilai: String, ubah: (String) -> Unit, rahsia: Boolean = false) {
+        OutlinedTextField(value = nilai, onValueChange = ubah, singleLine = true, colors = medan(), label = { Text(label) },
+            visualTransformation = if (rahsia) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
+            modifier = Modifier.fillMaxWidth())
+    }
+    Halaman {
+        Judul(Bhs.t("Tambah SSH"))
+        medanTeks(Bhs.t("Nama"), nama, { nama = it })
+        medanTeks(Bhs.t("Hos atau IP"), host, { host = it.trim() })
+        medanTeks(Bhs.t("Port"), port, { port = it.filter { c -> c.isDigit() } })
+        medanTeks(Bhs.t("Pengguna"), pengguna, { pengguna = it.trim() })
+        medanTeks(Bhs.t("Kata laluan"), kata, { kata = it }, true)
+        medanTeks(Bhs.t("SNI (kosong = tanpa SSL/TLS)"), sni, { sni = it.trim() })
+        medanTeks(Bhs.t("Payload (kosong = tiada)"), payload, { payload = it })
+        BtnKecil(Bhs.t("Isi payload WebSocket"), Modifier.fillMaxWidth()) { payload = SshPautan.PAYLOAD_WS }
+        Text(Bhs.t("Payload menyokong [crlf], [host], [port]. SNI diisi untuk SSH melalui SSL/TLS. Isi kedua-duanya untuk SSL + payload."), color = Wr.mu, fontSize = 12.sp)
+        Btn(Bhs.t("Simpan")) {
+            if (host.isBlank() || pengguna.isBlank()) { St.toast(Bhs.t("Isi hos dan pengguna.")); return@Btn }
+            val p = SshProfil(nama.ifBlank { host }, host, port.toIntOrNull() ?: 22, pengguna, kata, sni, payload)
+            val m = SimpanVpn.manual(ctx).toMutableList(); m.add(SshPautan.bina(p)); SimpanVpn.simpanManual(ctx, m)
+            St.toast(Bhs.t("Pelayan SSH disimpan.")); kembali()
+        }
+        Btn(Bhs.t("Kembali"), utama = false) { kembali() }
     }
 }

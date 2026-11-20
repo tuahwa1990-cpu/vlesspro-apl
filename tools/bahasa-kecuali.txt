@@ -2,3 +2,9 @@
 : admin
  · Android 
 armv7 = B618-65D · arm64 = AW1000 / AW1000 Ultra
+plugin=
+image/*
+VLESS Pro VPN
++ SSH
+Kill switch
+Pilih terpantas: pelayan 

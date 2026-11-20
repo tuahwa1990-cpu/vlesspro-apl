@@ -55,7 +55,7 @@ class TProxyService {
 
 /** Pautan vless:// dan vmess:// kepada konfigurasi Xray. */
 object VlessPautan {
-    class Hasil(val nama: String, val outbound: JSONObject, val jenis: String, val rangkaian: String, val sekuriti: String, val host: String, val port: Int) {
+    class Hasil(val nama: String, val outbound: JSONObject, val jenis: String, val rangkaian: String, val sekuriti: String, val host: String, val port: Int, val ssh: SshProfil? = null) {
         val ringkas get() = listOf(jenis, rangkaian.uppercase(), sekuriti.uppercase().takeIf { it != "NONE" }).filterNotNull().joinToString(" · ")
     }
 
@@ -131,13 +131,76 @@ object VlessPautan {
         return Hasil(j.optString("ps").ifEmpty { "$host:$port" }, out, "VMESS", ss.optString("network"), ss.optString("security"), host, port)
     }
 
+    private fun hostPort(hp: String): Pair<String, Int> =
+        if (hp.startsWith("[")) hp.substring(1, hp.indexOf(']')) to hp.substringAfter("]:").toInt()
+        else hp.substringBeforeLast(':') to hp.substringAfterLast(':').toInt()
+
+    private fun b64(s: String): String {
+        var t = s.trim().replace('-', '+').replace('_', '/')
+        while (t.length % 4 != 0) t += "="
+        return String(android.util.Base64.decode(t, android.util.Base64.DEFAULT), Charsets.UTF_8)
+    }
+
+    private fun trojan(p: String): Hasil {
+        var r = p.removePrefix("trojan://")
+        val nama = dec(r.substringAfter('#', ""))
+        r = r.substringBefore('#')
+        val query = r.substringAfter('?', "")
+        r = r.substringBefore('?').trimEnd('/')
+        val kata = dec(r.substringBeforeLast('@'))
+        val (host, port) = hostPort(r.substringAfterLast('@'))
+        if (kata.isEmpty() || host.isEmpty()) throw tak()
+        val q = query.split('&').filter { it.contains('=') }.associate { dec(it.substringBefore('=')) to dec(it.substringAfter('=')) }.toMutableMap()
+        if (!q.containsKey("security")) q["security"] = "tls"
+        val ss = aliran(q, host)
+        val out = JSONObject().put("tag", "proxy").put("protocol", "trojan")
+            .put("settings", JSONObject().put("servers", JSONArray().put(JSONObject().put("address", host).put("port", port).put("password", kata))))
+            .put("streamSettings", ss)
+        return Hasil(nama.ifEmpty { "$host:$port" }, out, "TROJAN", ss.optString("network"), ss.optString("security"), host, port)
+    }
+
+    private fun shadowsocks(p: String): Hasil {
+        var r = p.removePrefix("ss://")
+        val nama = dec(r.substringAfter('#', ""))
+        r = r.substringBefore('#')
+        if (r.substringAfter('?', "").contains("plugin=")) throw IllegalArgumentException(Bhs.t("Pemalam (plugin) Shadowsocks belum disokong."))
+        r = r.substringBefore('?').trimEnd('/')
+        val cred: String; val hp: String
+        if ('@' in r) {
+            val ui = r.substringBeforeLast('@')
+            cred = dec(ui).takeIf { ':' in it } ?: b64(ui)
+            hp = r.substringAfterLast('@')
+        } else {
+            val d = b64(r)
+            cred = d.substringBeforeLast('@'); hp = d.substringAfterLast('@')
+        }
+        val method = cred.substringBefore(':'); val kata = cred.substringAfter(':')
+        val (host, port) = hostPort(hp)
+        if (method.isEmpty() || host.isEmpty()) throw tak()
+        val out = JSONObject().put("tag", "proxy").put("protocol", "shadowsocks")
+            .put("settings", JSONObject().put("servers", JSONArray().put(JSONObject().put("address", host).put("port", port).put("method", method).put("password", kata))))
+        return Hasil(nama.ifEmpty { "$host:$port" }, out, "SS", "tcp", "none", host, port)
+    }
+
+    private fun ssh(p: String): Hasil {
+        val s = SshPautan.hurai(p)
+        val out = JSONObject().put("tag", "proxy").put("protocol", "socks")
+            .put("settings", JSONObject().put("servers", JSONArray().put(JSONObject().put("address", "127.0.0.1").put("port", VpnPerkhidmatan.PORT_SSH))))
+        return Hasil(s.nama, out, "SSH", if (s.payload.isNotBlank()) "payload" else "tcp", if (s.sni.isNotBlank()) "tls" else "none", s.host, s.port, s)
+    }
+
+    val skema = listOf("vless://", "vmess://", "trojan://", "ss://", "ssh://")
+
     fun hurai(pautan: String): Hasil {
         val p = pautan.trim()
         try {
             return when {
                 p.startsWith("vless://") -> vless(p)
                 p.startsWith("vmess://") -> vmess(p)
-                else -> throw IllegalArgumentException(Bhs.t("Hanya pautan vless:// dan vmess:// disokong buat masa ini."))
+                p.startsWith("trojan://") -> trojan(p)
+                p.startsWith("ss://") -> shadowsocks(p)
+                p.startsWith("ssh://") -> ssh(p)
+                else -> throw IllegalArgumentException(Bhs.t("Pautan tidak dikenali. Disokong: vless, vmess, trojan, ss, ssh."))
             }
         } catch (e: IllegalArgumentException) {
             throw e
@@ -146,130 +209,24 @@ object VlessPautan {
         }
     }
 
-    fun konfig(h: Hasil, portSocks: Int): String = JSONObject()
-        .put("log", JSONObject().put("loglevel", "warning"))
-        .put("dns", JSONObject().put("servers", JSONArray().put("1.1.1.1").put("8.8.8.8")))
-        .put("inbounds", JSONArray().put(JSONObject().put("tag", "socks").put("listen", "127.0.0.1").put("port", portSocks).put("protocol", "socks")
-            .put("settings", JSONObject().put("auth", "noauth").put("udp", true))))
-        .put("outbounds", JSONArray().put(h.outbound).put(JSONObject().put("tag", "direct").put("protocol", "freedom")))
-        .toString()
-}
-
-/** Senarai pelayan Fungsi 2 disimpan dalam telefon sahaja. */
-object SimpanVpn {
-    private fun p(ctx: Context) = ctx.getSharedPreferences("vp", Context.MODE_PRIVATE)
-    fun senarai(ctx: Context): List<String> {
-        val a = try { JSONArray(p(ctx).getString("vpn_pelayan", "[]")) } catch (_: Exception) { JSONArray() }
-        return (0 until a.length()).map { a.getString(it) }
-    }
-    fun simpan(ctx: Context, s: List<String>) { p(ctx).edit().putString("vpn_pelayan", JSONArray(s).toString()).apply() }
-    fun pilih(ctx: Context) = p(ctx).getInt("vpn_pilih", 0)
-    fun setPilih(ctx: Context, i: Int) { p(ctx).edit().putInt("vpn_pilih", i).apply() }
-}
-
-class VpnPerkhidmatan : VpnService() {
-    companion object {
-        @Volatile var jalan = false
-        @Volatile var sibuk = false
-        @Volatile var ralat = ""
-        @Volatile var nama = ""
-        @Volatile var masa0 = 0L
-        fun statistik(): LongArray? = if (!jalan) null else try { HevLib.muat(); TProxyService.TProxyGetStats() } catch (_: Throwable) { null }
-        const val HENTI = "com.vlesspro.pemasang.VPN_HENTI"
-        const val PORT = 10808
-        private const val SALURAN = "vpn"
-
-        fun mula(ctx: Context, pautan: String) {
-            ctx.startService(Intent(ctx, VpnPerkhidmatan::class.java).putExtra("pautan", pautan))
+    fun konfig(h: Hasil, portSocks: Int): String {
+        val ssh = h.ssh != null
+        val dns = JSONObject().put("servers", JSONArray().apply {
+            if (ssh) { put("tcp://1.1.1.1"); put("tcp://8.8.8.8") } else { put("1.1.1.1"); put("8.8.8.8") }
+        })
+        val keluar = JSONArray().put(h.outbound).put(JSONObject().put("tag", "direct").put("protocol", "freedom"))
+        val j = JSONObject()
+            .put("log", JSONObject().put("loglevel", "warning"))
+            .put("dns", dns)
+            .put("inbounds", JSONArray().put(JSONObject().put("tag", "socks").put("listen", "127.0.0.1").put("port", portSocks).put("protocol", "socks")
+                .put("settings", JSONObject().put("auth", "noauth").put("udp", true))))
+        if (ssh) {
+            // SSH hanya bawa TCP: pertanyaan DNS (UDP 53) ditukar kepada DNS-over-TCP melalui terowong.
+            keluar.put(JSONObject().put("tag", "dns-out").put("protocol", "dns"))
+            j.put("routing", JSONObject().put("domainStrategy", "AsIs").put("rules", JSONArray().put(
+                JSONObject().put("type", "field").put("inboundTag", JSONArray().put("socks")).put("network", "udp").put("port", "53").put("outboundTag", "dns-out"))))
         }
-        fun henti(ctx: Context) {
-            ctx.startService(Intent(ctx, VpnPerkhidmatan::class.java).setAction(HENTI))
-        }
+        return j.put("outbounds", keluar).toString()
     }
-
-    private var xray: Process? = null
-    private var tun: ParcelFileDescriptor? = null
-    private val log = StringBuilder()
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == HENTI) { berhenti(); return START_NOT_STICKY }
-        val pautan = intent?.getStringExtra("pautan") ?: return START_NOT_STICKY
-        if (sibuk || jalan) return START_NOT_STICKY
-        sibuk = true; ralat = ""
-        Thread { try { sambung(pautan) } catch (e: Throwable) { gagal(huraiRalat(e)) } }.start()
-        return START_NOT_STICKY
-    }
-
-    private fun notif(teks: String) {
-        val nm = getSystemService(NotificationManager::class.java)
-        if (Build.VERSION.SDK_INT >= 26) nm.createNotificationChannel(NotificationChannel(SALURAN, "VPN", NotificationManager.IMPORTANCE_LOW))
-        val buka = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
-        val henti = PendingIntent.getService(this, 1, Intent(this, VpnPerkhidmatan::class.java).setAction(HENTI), PendingIntent.FLAG_IMMUTABLE)
-        val n = Notification.Builder(this, SALURAN).setSmallIcon(R.drawable.ic_launcher).setContentTitle("VLESS Pro").setContentText(teks)
-            .setContentIntent(buka).setOngoing(true)
-            .addAction(Notification.Action.Builder(R.drawable.ic_launcher, Bhs.t("Putus"), henti).build()).build()
-        try {
-            if (Build.VERSION.SDK_INT >= 29) startForeground(7, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED) else startForeground(7, n)
-        } catch (_: Exception) { try { startForeground(7, n) } catch (_: Exception) {} }
-    }
-
-    private fun sambung(pautan: String) {
-        val h = VlessPautan.hurai(pautan)
-        nama = h.nama
-        notif(Bhs.f("Menyambung ke {0}", h.nama))
-        val bin = File(applicationInfo.nativeLibraryDir, "libxray.so")
-        if (!bin.exists()) throw RuntimeException(Bhs.t("Teras Xray tiada dalam binaan apl ini."))
-        val cfg = File(filesDir, "vpn-xray.json").apply { writeText(VlessPautan.konfig(h, PORT)) }
-        val pb = ProcessBuilder(bin.path, "run", "-c", cfg.path).redirectErrorStream(true)
-        pb.environment()["XRAY_LOCATION_ASSET"] = filesDir.path
-        val pr = pb.start()
-        xray = pr
-        log.setLength(0)
-        Thread {
-            try { pr.inputStream.bufferedReader().forEachLine { synchronized(log) { log.append(it).append('\n'); if (log.length > 4000) log.delete(0, 1000) } } } catch (_: Exception) {}
-        }.start()
-        Thread.sleep(1200)
-        if (!pr.isAlive) throw RuntimeException(Bhs.f("Xray berhenti: {0}", synchronized(log) { log.toString().trim().takeLast(300) }))
-
-        val b = Builder().setSession("VLESS Pro").setMtu(1500).addAddress("26.26.26.1", 30)
-            .addRoute("0.0.0.0", 0).addDnsServer("1.1.1.1").addDnsServer("8.8.8.8")
-            .addAddress("fd00:26:26::1", 126).addRoute("::", 0)
-        try { b.addDisallowedApplication(packageName) } catch (_: Exception) {}
-        val fd = b.establish() ?: throw RuntimeException(Bhs.t("Kebenaran VPN tidak diberi."))
-        tun = fd
-        val yml = File(filesDir, "vpn-hev.yml")
-        yml.writeText("tunnel:\n  mtu: 1500\n  ipv4: 26.26.26.1\n  ipv6: 'fd00:26:26::1'\nsocks5:\n  port: $PORT\n  address: 127.0.0.1\n  udp: 'udp'\nmisc:\n  log-level: warn\n")
-        HevLib.muat()
-        if (!TProxyService.TProxyStartService(yml.path, fd.fd)) throw RuntimeException(Bhs.t("Penerowong gagal dimulakan."))
-        jalan = true; sibuk = false; masa0 = System.currentTimeMillis()
-        notif(Bhs.f("Bersambung ke {0}", h.nama))
-    }
-
-    private fun huraiRalat(e: Throwable): String {
-        val b = StringBuilder(e.javaClass.simpleName + ": " + (e.message ?: ""))
-        var c = e.cause; var n = 0
-        while (c != null && n < 3) { b.append(" <- ").append(c.javaClass.simpleName).append(": ").append(c.message ?: ""); c = c.cause; n++ }
-        e.stackTrace.take(3).forEach { b.append("\n  ").append(it.toString()) }
-        return b.toString()
-    }
-
-    private fun gagal(m: String) {
-        ralat = m
-        berhenti()
-    }
-
-    private fun berhenti() {
-        try { if (tun != null) TProxyService.TProxyStopService() } catch (_: Throwable) {}
-        try { xray?.destroy() } catch (_: Exception) {}
-        xray = null
-        try { tun?.close() } catch (_: Exception) {}
-        tun = null
-        jalan = false; sibuk = false
-        stopForeground(true)
-        stopSelf()
-    }
-
-    override fun onRevoke() { berhenti() }
-    override fun onDestroy() { if (jalan || tun != null) berhenti(); super.onDestroy() }
 }
 
