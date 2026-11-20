@@ -670,9 +670,9 @@ fun SubKemas() {
         KadWr {
             Text("KEMAS KINI AUTOMATIK", color = Wr.mu, fontSize = 11.sp, letterSpacing = 1.sp)
             Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 listOf("notify" to "Beritahu saya", "auto" to "Pasang automatik", "off" to "Tutup").forEach { (k, t) ->
-                    FilterChip(mode == k, { mode = k; bg { lapor(Modem.cfgKemas(JSONObject().put("mode", k))) } }, label = { Text(t, fontSize = 12.sp) })
+                    FilterChip(mode == k, { mode = k; bg { lapor(Modem.cfgKemas(JSONObject().put("mode", k))) } }, label = { Text(t, fontSize = 12.sp, maxLines = 1) })
                 }
             }
             Text(when (mode) {
