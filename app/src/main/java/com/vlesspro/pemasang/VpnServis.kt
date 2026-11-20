@@ -237,7 +237,7 @@ class VpnPerkhidmatan : VpnService() {
                 val x = xray
                 if (x == null || !x.isAlive || (hasil?.ssh != null && ssh?.sihat != true)) { pulih("Teras tidak aktif"); continue }
                 kitar++
-                if (kitar % 3 == 0) cubaMatiModem()
+                cubaMatiModem()
                 if (kitar % 4 == 0) {
                     if (VpnAlat.pingSebenar() < 0) gagalBerturut++ else gagalBerturut = 0
                     if (gagalBerturut >= 4) { gagalBerturut = 0; pulih("Pelayan tidak membalas") }
@@ -259,6 +259,7 @@ class VpnPerkhidmatan : VpnService() {
                 }
                 @Synchronized override fun onAvailable(n: Network) {
                     ada.add(n)
+                    cubaMatiModem()
                     if (aktif == null) { aktif = n; if (hilang) { hilang = false; picu("Rangkaian kembali") } }
                 }
                 @Synchronized override fun onLost(n: Network) {
