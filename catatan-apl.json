@@ -1,12 +1,24 @@
 {
- "title": "VPN telefon baharu",
+ "title": "VPN telefon lebih lengkap",
  "items": [
-  "Fungsi baharu: VPN terus dari telefon (seperti v2rayNG) tanpa memerlukan modem. Buka dari skrin log masuk (VPN telefon (tanpa modem)) atau Lagi > VPN telefon.",
-  "Tampal pautan vless:// atau vmess:// dari papan klip, pilih pelayan, kemudian sentuh butang kuasa untuk sambung.",
-  "Paparan masa sambungan, kelajuan dan jumlah data, serta ujian ping untuk setiap pelayan.",
-  "Saiz apl lebih besar kerana enjin Xray disertakan, jadi kemas kini kali ini lebih lama dimuat turun."
+  "Sambung semula automatik apabila sambungan terputus atau rangkaian bertukar (WiFi/data), serta pilihan kill switch.",
+  "Protokol baharu (percubaan): Trojan, Shadowsocks dan SSH (termasuk SSL/TLS dan payload WebSocket).",
+  "Tambah pelayan dengan imbas kod QR, gambar QR atau pautan langganan. Ujian ping, pilihan pelayan terpantas dan ping sebenar.",
+  "VPN per-apl, jubin Tetapan Pantas, widget skrin utama dan pilihan sambung semasa telefon dihidupkan.",
+  "Skrin Tentang dengan versi apl dan butang hantar log."
  ],
  "history": [
+  {
+   "version": "1.0.37",
+   "date": "2026-11-20",
+   "title": "VPN telefon baharu",
+   "items": [
+    "Fungsi baharu: VPN terus dari telefon (seperti v2rayNG) tanpa memerlukan modem. Buka dari skrin log masuk (VPN telefon (tanpa modem)) atau Lagi > VPN telefon.",
+    "Tampal pautan vless:// atau vmess:// dari papan klip, pilih pelayan, kemudian sentuh butang kuasa untuk sambung.",
+    "Paparan masa sambungan, kelajuan dan jumlah data, serta ujian ping untuk setiap pelayan.",
+    "Saiz apl lebih besar kerana enjin Xray disertakan, jadi kemas kini kali ini lebih lama dimuat turun."
+   ]
+  },
   {
    "version": "1.0.36",
    "date": "2026-11-20",
