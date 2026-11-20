@@ -87,7 +87,10 @@ class MainActivity : ComponentActivity() {
                     isAppearanceLightNavigationBars = Wr.terang
                 }
             }
-            MaterialTheme(colorScheme = cs) { AppNatif() }
+            var janji by remember { mutableStateOf(Janji.diterima(this@MainActivity)) }
+            MaterialTheme(colorScheme = cs) {
+                if (janji) AppNatif() else Box(Modifier.fillMaxSize().background(Wr.bg)) { SkrinJanji { janji = true } }
+            }
         }
     }
 }

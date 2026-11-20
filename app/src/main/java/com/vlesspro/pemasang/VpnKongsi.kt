@@ -22,6 +22,7 @@ object VpnKongsi {
 
     /** Sambung pelayan terpilih mengikut tetapan. Pulangkan false jika tiada pelayan. */
     fun mula(ctx: Context, boot: Boolean = false): Boolean {
+        if (!Janji.diterima(ctx)) return false
         val s = SimpanVpn.semua(ctx)
         val p = s.getOrNull(SimpanVpn.pilih(ctx)) ?: return false
         VpnPerkhidmatan.ralat = ""
@@ -60,7 +61,7 @@ class VpnTile : TileService() {
     override fun onClick() {
         if (VpnPerkhidmatan.jalan || VpnPerkhidmatan.sibuk) { VpnPerkhidmatan.henti(this); return }
         if (!VpnLesen.berlesen(this)) St.toast(VpnLesen.mesej("Jubin dan widget"))
-        if (!VpnLesen.berlesen(this) || SimpanVpn.semua(this).isEmpty() || VpnService.prepare(this) != null) {
+        if (!Janji.diterima(this) || !VpnLesen.berlesen(this) || SimpanVpn.semua(this).isEmpty() || VpnService.prepare(this) != null) {
             val i = Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             if (Build.VERSION.SDK_INT >= 34) startActivityAndCollapse(PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_IMMUTABLE))
             else startActivityAndCollapse(i)
