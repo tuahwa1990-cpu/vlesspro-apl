@@ -829,7 +829,7 @@ fun Statistik() {
             IconButton(onClick = { segarKunci++ }) { Text("⟳", fontSize = 22.sp, color = Wr.ac) }
         }
         if (kemas > 0) Text(Bhs.t("Dikemas kini pukul") + " " + java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.US).format(java.util.Date(kemas * 1000)),
-            color = Wr.mu, fontSize = 11.sp, modifier = Modifier.padding(top = (-8).dp))
+            color = Wr.mu, fontSize = 11.sp)
 
         KadWr {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -912,7 +912,7 @@ fun Statistik() {
                 Baris(Bhs.t("Get laluan"), it.optString("gw").ifEmpty { "-" })
                 val dns = it.optJSONArray("dns")
                 if (dns != null && dns.length() > 0) Baris("DNS", (0 until dns.length()).joinToString(", ") { i -> dns.optString(i) })
-            } ?: Text(Bhs.t("Memuatkan..."), color = Wr.mu, fontSize = 13.sp)
+            } ?: Text(Bhs.t("Memuatkan ..."), color = Wr.mu, fontSize = 13.sp)
         }
 
         KadWr {
