@@ -1,14 +1,23 @@
 {
- "title": "Profil lebih lengkap dan panduan VPN telefon",
+ "title": "Penambahbaikan keselamatan dan prestasi",
  "items": [
-  "Profil: failover automatik, ujian dan susunan ikut laju, butang Guna terpantas.",
-  "Profil: kegemaran, tag, namakan semula, kod QR, eksport dan import profil.",
-  "Hantar profil antara modem dan VPN telefon dengan satu ketikan.",
-  "Paparan jumlah data dan data setiap profil.",
-  "Panduan cara guna VPN telefon dalam apl.",
-  "Tajuk halaman Utama dan VPN telefon di tengah, dengan status modem yang lebih jelas."
+  "Penambahbaikan keselamatan dalaman apl.",
+  "Saiz apl lebih kecil dan pemasangan lebih pantas."
  ],
  "history": [
+  {
+   "version": "1.0.42",
+   "date": "2026-11-20",
+   "title": "Profil lebih lengkap dan panduan VPN telefon",
+   "items": [
+    "Profil: failover automatik, ujian dan susunan ikut laju, butang Guna terpantas.",
+    "Profil: kegemaran, tag, namakan semula, kod QR, eksport dan import profil.",
+    "Hantar profil antara modem dan VPN telefon dengan satu ketikan.",
+    "Paparan jumlah data dan data setiap profil.",
+    "Panduan cara guna VPN telefon dalam apl.",
+    "Tajuk halaman Utama dan VPN telefon di tengah, dengan status modem yang lebih jelas."
+   ]
+  },
   {
    "version": "1.0.41",
    "date": "2026-11-20",
