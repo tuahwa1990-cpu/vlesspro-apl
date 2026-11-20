@@ -233,9 +233,7 @@ fun Profil(ke: (String) -> Unit) {
                 val ms = St.ping[n.i]
                 val tag = ProfilMeta.tag(ctx, n.id)
                 val pakai = guna?.optJSONObject(n.id)
-                KadWr(klik = {
-                    if (!n.pilih) bg { val (ok, m) = Modem.pilihNod(n.i); St.toast(m.ifEmpty { if (ok) "Dipilih" else "Gagal" }); St.nod = Modem.nodes() }
-                }) {
+                KadWr {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(Modifier.size(44.dp).clip(CircleShape).background(if (n.pilih) Wr.grad else Brush.linearGradient(listOf(Wr.garis, Wr.garis))),
                             contentAlignment = Alignment.Center) {
@@ -273,9 +271,19 @@ fun Profil(ke: (String) -> Unit) {
                                 DropdownMenuItem({ Text("Hantar ke VPN telefon") }, { m = false; bg {
                                     val l = Modem.obj("/api/node/link?i=${n.i}").optString("link")
                                     St.toast(VpnImport.proses(ctx, l)) } })
-                                DropdownMenuItem({ Text("Edit pautan") }, { m = false; bg { edit = n to Modem.obj("/api/node/link?i=${n.i}").optString("link") } })
-                                DropdownMenuItem({ Text("Padam", color = Wr.bad) }, { m = false; padam = n })
                             }
+                        }
+                    }
+                    Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                        if (n.pilih) Text("✓ " + Bhs.t("Aktif"), color = Wr.ok, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        else TextButton(onClick = { bg { val (ok, m) = Modem.pilihNod(n.i); St.toast(m.ifEmpty { if (ok) "Dipilih" else "Gagal" }); St.nod = Modem.nodes() } }, contentPadding = PaddingValues(0.dp)) {
+                            Text(Bhs.t("Aktifkan"), color = Wr.ac, fontSize = 13.sp)
+                        }
+                        TextButton(onClick = { bg { edit = n to Modem.obj("/api/node/link?i=${n.i}").optString("link") } }, contentPadding = PaddingValues(0.dp)) {
+                            Text(Bhs.t("Edit"), color = Wr.ac, fontSize = 13.sp)
+                        }
+                        TextButton(onClick = { padam = n }, contentPadding = PaddingValues(0.dp)) {
+                            Text(Bhs.t("Hapus"), color = Wr.bad, fontSize = 13.sp)
                         }
                     }
                 }
