@@ -1,9 +1,19 @@
 {
- "title": "Urus profil lebih pantas",
+ "title": "Pilih gaya butang sambung",
  "items": [
-  "Setiap profil kini ada butang Aktifkan, Edit dan Hapus terus kelihatan, tak perlu buka menu lagi."
+  "Baharu di Lagi > Gaya Butang: pilih bentuk dan pergerakan butang sambung/putuskan di skrin Utama.",
+  "8 gaya tersedia — Bulat Klasik, Nafas, Cincin Berputar, Kapsul, Pelangi, Neon, Ombak Riak dan Bintang Berkilau — dengan pratonton boleh cuba sebelum pilih.",
+  "Pilihan disimpan terus pada telefon anda."
  ],
  "history": [
+  {
+   "version": "1.0.46",
+   "date": "2026-11-20",
+   "title": "Urus profil lebih pantas",
+   "items": [
+    "Setiap profil kini ada butang Aktifkan, Edit dan Hapus terus kelihatan, tak perlu buka menu lagi."
+   ]
+  },
   {
    "version": "1.0.45",
    "date": "2026-11-20",
