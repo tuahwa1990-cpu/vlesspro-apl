@@ -1226,7 +1226,9 @@
   "Pilih gaya butang sambung": "Pick a connect button style",
   "Baharu di Lagi > Gaya Butang: pilih bentuk dan pergerakan butang sambung/putuskan di skrin Utama.": "New in More > Button Style: choose the shape and motion of the connect/disconnect button on the Home screen.",
   "8 gaya tersedia — Bulat Klasik, Nafas, Cincin Berputar, Kapsul, Pelangi, Neon, Ombak Riak dan Bintang Berkilau — dengan pratonton boleh cuba sebelum pilih.": "8 styles available — Classic Circle, Breathe, Spinning Ring, Capsule, Rainbow, Neon, Ripple Waves and Sparkling Stars — with a preview you can try before choosing.",
-  "Pilihan disimpan terus pada telefon anda.": "Your choice is saved directly on your phone."
+  "Pilihan disimpan terus pada telefon anda.": "Your choice is saved directly on your phone.",
+  "Pembetulan kecil antara muka": "Minor interface fix",
+  "Betulkan paparan pilihan \"Kemas Kini Automatik\" di skrin Kemas kini modem supaya tidak lagi terbalit.": "Fixed the \"Automatic Update\" option display on the Update modem screen so the text no longer wraps oddly."
  },
  "zh": {
   "Mod VPN": "VPN 模式",

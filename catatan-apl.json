@@ -1,11 +1,20 @@
 {
- "title": "Pilih gaya butang sambung",
+ "title": "Pembetulan kecil antara muka",
  "items": [
-  "Baharu di Lagi > Gaya Butang: pilih bentuk dan pergerakan butang sambung/putuskan di skrin Utama.",
-  "8 gaya tersedia — Bulat Klasik, Nafas, Cincin Berputar, Kapsul, Pelangi, Neon, Ombak Riak dan Bintang Berkilau — dengan pratonton boleh cuba sebelum pilih.",
-  "Pilihan disimpan terus pada telefon anda."
+  "Betulkan paparan pilihan \"Kemas Kini Automatik\" di skrin Kemas kini modem supaya tidak lagi terbalit.",
+  "Penambahbaikan dalaman. Semua fungsi sama."
  ],
  "history": [
+  {
+   "version": "1.0.47",
+   "date": "2026-11-20",
+   "title": "Pilih gaya butang sambung",
+   "items": [
+    "Baharu di Lagi > Gaya Butang: pilih bentuk dan pergerakan butang sambung/putuskan di skrin Utama.",
+    "8 gaya tersedia — Bulat Klasik, Nafas, Cincin Berputar, Kapsul, Pelangi, Neon, Ombak Riak dan Bintang Berkilau — dengan pratonton boleh cuba sebelum pilih.",
+    "Pilihan disimpan terus pada telefon anda."
+   ]
+  },
   {
    "version": "1.0.46",
    "date": "2026-11-20",
