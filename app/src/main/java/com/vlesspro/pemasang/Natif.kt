@@ -779,20 +779,42 @@ fun SubGaya() {
 
 // ───────────────────────── Statistik ─────────────────────────
 
+private class Guna(val r1: Long, val t1: Long, val r7: Long, val t7: Long, val r30: Long, val t30: Long)
+
 @Composable
 fun Statistik() {
     var live by remember { mutableStateOf<List<Pair<Double, Double>>>(emptyList()) }
+    var spd by remember { mutableStateOf<List<Pair<Double, Double>>>(emptyList()) }
+    var guna by remember { mutableStateOf<Guna?>(null) }
     var ov by remember { mutableStateOf<org.json.JSONObject?>(null) }
-    LaunchedEffect(Unit) {
+    var kemas by remember { mutableStateOf(0L) }
+    var segarKunci by remember { mutableStateOf(0) }
+    var julat by remember { mutableStateOf(0) } // 0 = 3 minit, 1 = 1 jam
+
+    LaunchedEffect(segarKunci) {
         var n = 0
         while (true) {
             while (!St.depan) delay(1000)
             withContext(Dispatchers.IO) {
                 try {
                     val g = Modem.graphs()
-                    val a = g.optJSONArray("live") ?: g.optJSONArray("speed")
-                    if (a != null) live = (0 until a.length()).map { val p = a.optJSONArray(it); (p?.optDouble(0) ?: 0.0) to (p?.optDouble(1) ?: 0.0) }
+                    val now = g.optLong("now", System.currentTimeMillis() / 1000)
+                    g.optJSONArray("live")?.let { a -> live = (0 until a.length()).map { val p = a.optJSONArray(it); (p?.optDouble(0) ?: 0.0) to (p?.optDouble(1) ?: 0.0) } }
+                    g.optJSONArray("speed")?.let { a -> spd = (0 until a.length()).map { val p = a.optJSONArray(it); (p?.optDouble(0) ?: 0.0) to (p?.optDouble(1) ?: 0.0) } }
+                    g.optJSONArray("usage")?.let { a ->
+                        var r1 = 0L; var t1 = 0L; var r7 = 0L; var t7 = 0L; var r30 = 0L; var t30 = 0L
+                        for (i in 0 until a.length()) {
+                            val o = a.optJSONObject(i) ?: continue
+                            val age = now - o.optLong("t")
+                            val rx = o.optLong("rx"); val tx = o.optLong("tx")
+                            if (age < 24L * 3600) { r1 += rx; t1 += tx }
+                            if (age < 7L * 24 * 3600) { r7 += rx; t7 += tx }
+                            if (age < 30L * 24 * 3600) { r30 += rx; t30 += tx }
+                        }
+                        guna = Guna(r1, t1, r7, t7, r30, t30)
+                    }
                     if (n % 5 == 0) ov = Modem.overview()
+                    kemas = System.currentTimeMillis() / 1000
                 } catch (_: Exception) {}
             }
             n++
@@ -802,44 +824,126 @@ fun Statistik() {
     val s = St.status
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 130.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Text("Statistik", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(Bhs.t("Statistik"), fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx, modifier = Modifier.weight(1f))
+            IconButton(onClick = { segarKunci++ }) { Text("⟳", fontSize = 22.sp, color = Wr.ac) }
+        }
+        if (kemas > 0) Text(Bhs.t("Dikemas kini pukul") + " " + java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.US).format(java.util.Date(kemas * 1000)),
+            color = Wr.mu, fontSize = 11.sp, modifier = Modifier.padding(top = (-8).dp))
+
         KadWr {
-            Text("Kelajuan (3 minit terakhir)", color = Wr.mu, fontSize = 12.sp, letterSpacing = 1.sp)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(Bhs.t("Kelajuan live"), color = Wr.mu, fontSize = 12.sp, letterSpacing = 1.sp, modifier = Modifier.weight(1f))
+                Row(Modifier.clip(RoundedCornerShape(50)).background(Wr.kad2).padding(2.dp)) {
+                    listOf(Bhs.t("3 minit"), Bhs.t("1 jam")).forEachIndexed { i, t ->
+                        val sel = julat == i
+                        Text(t, color = if (sel) Wr.bg else Wr.mu, fontSize = 11.sp, fontWeight = FontWeight.Bold,
+                            modifier = Modifier.clip(RoundedCornerShape(50)).background(if (sel) Wr.ac else Color.Transparent)
+                                .clickable { julat = i }.padding(horizontal = 10.dp, vertical = 5.dp))
+                    }
+                }
+            }
+            Spacer(Modifier.height(6.dp))
+            val data = if (julat == 0) live else spd
+            Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                val cur = data.lastOrNull() ?: (0.0 to 0.0)
+                Column {
+                    Text(Bhs.t("Muat turun"), color = Wr.ac, fontSize = 11.sp)
+                    Text(fB(cur.first) + "/s", color = Wr.tx, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+                }
+                Column {
+                    Text(Bhs.t("Muat naik"), color = Wr.ac2, fontSize = 11.sp)
+                    Text(fB(cur.second) + "/s", color = Wr.tx, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+                }
+            }
             Spacer(Modifier.height(8.dp))
-            val mx = (live.maxOfOrNull { maxOf(it.first, it.second) } ?: 0.0).coerceAtLeast(20 * 1024.0)
+            val mx = (data.maxOfOrNull { maxOf(it.first, it.second) } ?: 0.0).coerceAtLeast(20 * 1024.0)
             Canvas(Modifier.fillMaxWidth().height(150.dp)) {
                 val w = size.width; val h = size.height
-                fun garis(sel: (Pair<Double, Double>) -> Double, c: Color) {
-                    if (live.size < 2) return
+                for (g in 1..3) drawLine(Wr.garis.copy(alpha = 0.4f), Offset(0f, h * g / 4), Offset(w, h * g / 4), 1f)
+                fun garis(sel: (Pair<Double, Double>) -> Double, c: Color, isi: Boolean) {
+                    if (data.size < 2) return
                     val p = Path()
-                    live.forEachIndexed { i, v ->
-                        val x = w * i / (live.size - 1)
+                    data.forEachIndexed { i, v ->
+                        val x = w * i / (data.size - 1)
                         val y = h - (sel(v) / mx * (h - 8f)).toFloat() - 4f
                         if (i == 0) p.moveTo(x, y) else p.lineTo(x, y)
+                    }
+                    if (isi) {
+                        val area = Path().apply { addPath(p); lineTo(w, h); lineTo(0f, h); close() }
+                        drawPath(area, Brush.verticalGradient(listOf(c.copy(alpha = 0.22f), c.copy(alpha = 0f))))
                     }
                     drawPath(p, c, style = Stroke(5f, cap = StrokeCap.Round))
                 }
                 drawLine(Wr.garis, Offset(0f, h - 1f), Offset(w, h - 1f), 2f)
-                garis({ it.first }, Wr.ac)
-                garis({ it.second }, Wr.ac2)
+                garis({ it.first }, Wr.ac, true)
+                garis({ it.second }, Wr.ac2, true)
             }
             Spacer(Modifier.height(6.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text("● Muat turun", color = Wr.ac, fontSize = 12.sp)
-                Text("● Muat naik", color = Wr.ac2, fontSize = 12.sp)
+                Text("● " + Bhs.t("Muat turun"), color = Wr.ac, fontSize = 12.sp)
+                Text("● " + Bhs.t("Muat naik"), color = Wr.ac2, fontSize = 12.sp)
                 Spacer(Modifier.weight(1f))
                 Text(Bhs.t("puncak") + " " + fB(mx) + "/s", color = Wr.mu, fontSize = 12.sp)
             }
         }
+
         KadWr {
-            Baris("Muat turun semasa", fB(s?.optDouble("rx") ?: 0.0) + "/s")
-            Baris("Muat naik semasa", fB(s?.optDouble("tx") ?: 0.0) + "/s")
+            Text(Bhs.t("Penggunaan data"), color = Wr.mu, fontSize = 12.sp, letterSpacing = 1.sp)
+            Spacer(Modifier.height(10.dp))
+            Row(Modifier.fillMaxWidth()) {
+                val g = guna
+                listOf(Triple(Bhs.t("24 jam"), g?.r1, g?.t1), Triple(Bhs.t("7 hari"), g?.r7, g?.t7), Triple(Bhs.t("30 hari"), g?.r30, g?.t30)).forEach { (label, rx, tx) ->
+                    Column(Modifier.weight(1f)) {
+                        Text(label, color = Wr.mu, fontSize = 11.sp, letterSpacing = 1.sp)
+                        Spacer(Modifier.height(4.dp))
+                        Text(if (rx != null && tx != null) fB((rx + tx).toDouble()) else "-", color = Wr.tx, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
+                        if (rx != null && tx != null) Text("↓${fB(rx.toDouble())} ↑${fB(tx.toDouble())}", color = Wr.mu, fontSize = 10.sp)
+                    }
+                }
+            }
+        }
+
+        KadWr {
+            Text(Bhs.t("Rangkaian"), color = Wr.mu, fontSize = 12.sp, letterSpacing = 1.sp)
+            Spacer(Modifier.height(4.dp))
             ov?.let {
-                Baris("IP WAN", it.optString("wanip").ifEmpty { "-" })
-                Baris("Get laluan", it.optString("gw").ifEmpty { "-" })
+                Baris(Bhs.t("IP WAN"), it.optString("wanip").ifEmpty { "-" })
+                Baris(Bhs.t("Get laluan"), it.optString("gw").ifEmpty { "-" })
+                val dns = it.optJSONArray("dns")
+                if (dns != null && dns.length() > 0) Baris("DNS", (0 until dns.length()).joinToString(", ") { i -> dns.optString(i) })
+            } ?: Text(Bhs.t("Memuatkan..."), color = Wr.mu, fontSize = 13.sp)
+        }
+
+        KadWr {
+            Text(Bhs.t("Kesihatan sistem"), color = Wr.mu, fontSize = 12.sp, letterSpacing = 1.sp)
+            Spacer(Modifier.height(10.dp))
+            ov?.let {
                 val tot = it.optDouble("memtot"); val fr = it.optDouble("memfree")
-                if (tot > 0) Baris("Memori bebas", fB(fr * 1024) + " / " + fB(tot * 1024))
-                Baris("Sambungan gagal (1 jam)", it.optInt("drops1h").toString())
+                if (tot > 0) {
+                    val frac = (fr / tot).coerceIn(0.0, 1.0)
+                    val wMem = if (frac > 0.5) Wr.ac else if (frac > 0.2) Wr.wn else Wr.bad
+                    Row(Modifier.fillMaxWidth()) {
+                        Text(Bhs.t("Memori bebas"), color = Wr.mu, fontSize = 14.sp, modifier = Modifier.weight(1f))
+                        Text(fB(fr * 1024) + " / " + fB(tot * 1024), color = wMem, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                    Spacer(Modifier.height(6.dp))
+                    Box(Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(50)).background(Wr.kad2)) {
+                        Box(Modifier.fillMaxWidth(frac.toFloat()).fillMaxHeight().clip(RoundedCornerShape(50)).background(wMem))
+                    }
+                    Spacer(Modifier.height(14.dp))
+                }
+                val d1 = it.optInt("drops1h"); val d24 = it.optInt("drops24h")
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Column(Modifier.weight(1f)) {
+                        Text(Bhs.t("Sambungan gagal (1 jam)"), color = Wr.mu, fontSize = 12.sp)
+                        Text(d1.toString(), color = if (d1 > 0) Wr.wn else Wr.ac, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+                    }
+                    Column(Modifier.weight(1f)) {
+                        Text(Bhs.t("Sambungan gagal (24 jam)"), color = Wr.mu, fontSize = 12.sp)
+                        Text(d24.toString(), color = if (d24 > 3) Wr.bad else if (d24 > 0) Wr.wn else Wr.ac, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+                    }
+                }
             }
         }
     }

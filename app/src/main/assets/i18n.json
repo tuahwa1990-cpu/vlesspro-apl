@@ -1253,7 +1253,16 @@
     "Butang sambung/putus di VPN Telefon kini guna gaya animasi yang sama seperti anda pilih di skrin Utama.": "The connect/disconnect button on Phone VPN now uses the same animated style you picked on the Home screen.",
     "Senarai pelayan kini ada aksen warna ikut jenis sambungan (VLESS, VMess, Trojan, Shadowsocks, SSH) supaya mudah dibezakan.": "The server list now has color accents by connection type (VLESS, VMess, Trojan, Shadowsocks, SSH) so they're easier to tell apart.",
     "Kad pelayan yang dipilih kini bercahaya lembut berdenyut, dan status Bersambung/Menyambung kini berwarna-warni.": "The selected server card now has a soft pulsing glow, and the Connected/Connecting status is now colorful.",
-    "Butang Tetapan, Per-apl, Panduan dan Tentang kini berwarna berbeza-beza.": "The Settings, Per-app, Guide and About buttons now each have their own color."
+    "Butang Tetapan, Per-apl, Panduan dan Tentang kini berwarna berbeza-beza.": "The Settings, Per-app, Guide and About buttons now each have their own color.",
+    "Dikemas kini pukul": "Updated at",
+    "Kelajuan live": "Live speed",
+    "3 minit": "3 min",
+    "1 jam": "1 hour",
+    "24 jam": "24 hours",
+    "7 hari": "7 days",
+    "30 hari": "30 days",
+    "Kesihatan sistem": "System health",
+    "Sambungan gagal (24 jam)": "Failed connections (24h)"
   },
   "zh": {
     "Mod VPN": "VPN 模式",
