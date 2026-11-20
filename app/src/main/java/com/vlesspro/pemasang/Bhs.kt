@@ -18,7 +18,7 @@ import org.json.JSONObject
 
 /** Bahasa paparan apl. Kamus (Melayu -> en/zh/ta) dimuat daripada assets/i18n.json, sama seperti panel Chrome. */
 object Bhs {
-    var kod by mutableStateOf("ms")
+    var kod by mutableStateOf("en")
     private var kamus: Map<String, Map<String, String>> = emptyMap()
     val senarai = listOf(
         Triple("ms", "Bahasa Melayu", ""), Triple("en", "English", "Bahasa Inggeris"),
@@ -31,7 +31,7 @@ object Bhs {
                 val o = j.getJSONObject(k); o.keys().asSequence().associateWith { o.getString(it) }
             }
         } catch (_: Exception) {}
-        kod = ctx.getSharedPreferences("vp", Context.MODE_PRIVATE).getString("bhs", "ms") ?: "ms"
+        kod = ctx.getSharedPreferences("vp", Context.MODE_PRIVATE).getString("bhs", "en") ?: "en"
     }
 
     fun tetap(ctx: Context, k: String) {
