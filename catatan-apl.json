@@ -1,9 +1,18 @@
 {
- "title": "Auto-tukar lebih pantas",
+ "title": "Penambahbaikan umum",
  "items": [
-  "Auto-tukar VPN telefon dan VLESS modem kini bertindak lebih cepat, dan cuba semula setiap 5 saat jika modem belum dapat dicapai (contohnya bila telefon kembali ke WiFi modem)."
+  "Syarat penggunaan dan resit persetujuan kini boleh dibaca di Lagi > Perjanjian.",
+  "Penambahbaikan dalaman untuk kestabilan dan penyelenggaraan VPN telefon."
  ],
  "history": [
+  {
+   "version": "1.0.40",
+   "date": "2026-11-20",
+   "title": "Auto-tukar lebih pantas",
+   "items": [
+    "Auto-tukar VPN telefon dan VLESS modem kini bertindak lebih cepat, dan cuba semula setiap 5 saat jika modem belum dapat dicapai (contohnya bila telefon kembali ke WiFi modem)."
+   ]
+  },
   {
    "version": "1.0.39",
    "date": "2026-11-20",

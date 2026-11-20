@@ -1093,7 +1093,10 @@
   "Resit disalin.": "Receipt copied.",
   "Perjanjian": "Agreement",
   "Syarat dan resit persetujuan": "Terms and agreement receipt",
-  "Keluar": "Exit"
+  "Keluar": "Exit",
+  "Penambahbaikan umum": "General improvements",
+  "Syarat penggunaan dan resit persetujuan kini boleh dibaca di Lagi > Perjanjian.": "The terms of use and agreement receipt can now be read in More > Agreement.",
+  "Penambahbaikan dalaman untuk kestabilan dan penyelenggaraan VPN telefon.": "Internal improvements for phone VPN stability and maintenance."
  },
  "zh": {
   "Mod VPN": "VPN 模式",
