@@ -1,7 +1,9 @@
 {
- "title": "Tip SQM lebih jelas",
+ "title": "Lebih ringan dan stabil",
  "items": [
-  "Tip SQM kini menjelaskan bahawa had yang lebih tinggi daripada kelajuan muat naik sebenar tidak memberi kesan, dan mencadangkan 80 hingga 90% kelajuan sebenar."
+  "Tip SQM kini menjelaskan bahawa had yang lebih tinggi daripada kelajuan muat naik sebenar tidak memberi kesan, dan mencadangkan 80 hingga 90% kelajuan sebenar.",
+  "Pemasangan Xray menggunakan fail sementara dan bukan memori, jadi telefon dengan RAM kecil kurang berisiko ranap semasa memasang.",
+  "Apl berhenti menyemak modem secara berkala apabila berada di latar belakang, menjimatkan bateri dan trafik."
  ],
  "history": [
   {

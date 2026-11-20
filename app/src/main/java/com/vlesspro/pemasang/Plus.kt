@@ -239,7 +239,7 @@ fun SubKuota() {
 @Composable
 fun SubWan() {
     var s by remember { mutableStateOf<JSONObject?>(null) }
-    LaunchedEffect(Unit) { while (true) { withContext(Dispatchers.IO) { try { s = Modem.obj("/api/wanip") } catch (_: Exception) {} }; delay(2500) } }
+    LaunchedEffect(Unit) { while (true) { while (!St.depan) delay(1000); withContext(Dispatchers.IO) { try { s = Modem.obj("/api/wanip") } catch (_: Exception) {} }; delay(2500) } }
     Halaman {
         Judul("Tukar IP WAN")
         KadWr {

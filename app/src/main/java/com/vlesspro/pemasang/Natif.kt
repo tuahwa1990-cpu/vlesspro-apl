@@ -277,6 +277,7 @@ fun Utama2(pref: android.content.SharedPreferences, keluar: () -> Unit) {
         var n = 0
         var ipMasa = 0L // semakan IP keluar: jarang, kerana modem menghantar beberapa permintaan melalui VLESS setiap kali
         while (true) {
+            while (!St.depan) delay(1000) // jeda bila apl di latar belakang
             withContext(Dispatchers.IO) {
                 try {
                     val s = Modem.status()
@@ -644,6 +645,7 @@ fun Statistik() {
     LaunchedEffect(Unit) {
         var n = 0
         while (true) {
+            while (!St.depan) delay(1000)
             withContext(Dispatchers.IO) {
                 try {
                     val g = Modem.graphs()

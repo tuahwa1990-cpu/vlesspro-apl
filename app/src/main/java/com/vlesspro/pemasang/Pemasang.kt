@@ -8,6 +8,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.FilterInputStream
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
@@ -30,6 +33,16 @@ class Kira(private val d: ByteArray, nama: String) : ByteArrayInputStream(d) {
         Pemasang.mulaKemajuan("hantar", nm, if (d.isEmpty()) 1f else pos.toFloat() / d.size)
         return n
     }
+    override fun close() { Pemasang.tamatKemajuan(); super.close() }
+}
+
+/** Aliran fail yang melaporkan kemajuan penghantaran ke modem. */
+class KiraFail(private val f: File, private val nm: String) : FilterInputStream(FileInputStream(f)) {
+    private var baca = 0L
+    init { Pemasang.mulaKemajuan("hantar", nm, 0f) }
+    override fun read(): Int { val n = super.read(); if (n >= 0) lapor(1); return n }
+    override fun read(b: ByteArray, off: Int, len: Int): Int { val n = super.read(b, off, len); if (n > 0) lapor(n); return n }
+    private fun lapor(n: Int) { baca += n; Pemasang.mulaKemajuan("hantar", nm, if (f.length() == 0L) 1f else (baca.toFloat() / f.length()).coerceAtMost(1f)) }
     override fun close() { Pemasang.tamatKemajuan(); super.close() }
 }
 
@@ -74,6 +87,15 @@ class Ssh(ip: String, user: String, pass: String) : AutoCloseable {
         val (kod, o) = run(
             "mkdir -p '$dir' && cat > '$path.tmp' && chmod $mode '$path.tmp' && { rm -f '$path'; mv '$path.tmp' '$path'; }",
             Kira(data, path.substringAfterLast('/')), 900
+        )
+        if (kod != 0) throw RuntimeException(Bhs.f("Gagal menghantar {0} ke modem: {1}", path, o))
+    }
+
+    fun putFail(path: String, f: File, mode: String = "755") {
+        val dir = path.substringBeforeLast('/')
+        val (kod, o) = run(
+            "mkdir -p '$dir' && cat > '$path.tmp' && chmod $mode '$path.tmp' && { rm -f '$path'; mv '$path.tmp' '$path'; }",
+            KiraFail(f, path.substringAfterLast('/')), 900
         )
         if (kod != 0) throw RuntimeException(Bhs.f("Gagal menghantar {0} ke modem: {1}", path, o))
     }
@@ -141,16 +163,30 @@ object Pemasang {
         if (dijangka == null || dijangka != sha(data)) throw RuntimeException(Bhs.f("Semakan fail {0} tidak sepadan. Dibatalkan.", nama))
     }
 
-    private fun xray(arkib: String): ByteArray {
+    /** Muat turun zip Xray dan ekstrak ke fail sementara (bukan memori), supaya telefon RAM kecil tidak ranap. */
+    private fun xray(arkib: String): File {
         val zip = muat(XRAY + arkib)
-        ZipInputStream(ByteArrayInputStream(zip)).use { z ->
-            var e = z.nextEntry
-            while (e != null) {
-                if (e.name == "xray") return z.readBytes()
-                e = z.nextEntry
+        val out = File.createTempFile("xray", ".bin")
+        try {
+            ZipInputStream(ByteArrayInputStream(zip)).use { z ->
+                var e = z.nextEntry
+                while (e != null) {
+                    if (e.name == "xray") {
+                        out.outputStream().use { z.copyTo(it) }
+                        return out
+                    }
+                    e = z.nextEntry
+                }
             }
-        }
+        } catch (e: Exception) { out.delete(); throw e }
+        out.delete()
         throw RuntimeException(Bhs.t("Fail xray tiada dalam zip."))
+    }
+
+    /** Hantar fail Xray ke modem dan padam fail sementara. */
+    private fun hantarXray(ssh: Ssh, tujuan: String, arkib: String) {
+        val f = xray(arkib)
+        try { ssh.putFail(tujuan, f) } finally { f.delete() }
     }
 
     private fun cari(teks: String, corak: String): String? =
@@ -198,7 +234,7 @@ object Pemasang {
         }
         if (tiadaXray) {
             log(Bhs.t("Memasang Xray sendiri untuk VLESS Pro (sekitar 20 MB) ..."))
-            ssh.put("$h/bin/xray", xray("Xray-linux-arm32-v7a.zip"))
+            hantarXray(ssh, "$h/bin/xray", "Xray-linux-arm32-v7a.zip")
         }
         log(Bhs.t("[3/4] Memasang ..."))
         val o = ssh.run(if (lama) "sh $h/upgrade.sh" else "sh $h/install.sh", null, 180).second
@@ -229,7 +265,7 @@ object Pemasang {
         val x = ssh.run("[ -x $h/bin/xray ] || echo tiadaxray").second
         if (x.contains("tiadaxray")) {
             log(Bhs.t("Memasang Xray sendiri untuk VLESS Pro (sekitar 20 MB) ..."))
-            ssh.put("$h/bin/xray", xray("Xray-linux-arm64-v8a.zip"))
+            hantarXray(ssh, "$h/bin/xray", "Xray-linux-arm64-v8a.zip")
         }
         log(Bhs.t("[3/4] Memasang ..."))
         val o = ssh.run("sh $h/install.sh", null, 180).second

@@ -68,6 +68,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 
 class MainActivity : ComponentActivity() {
+    override fun onStart() { super.onStart(); St.depan = true }
+    override fun onStop() { St.depan = false; super.onStop() }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.statusBarColor = 0xFF080B1A.toInt()
@@ -129,7 +132,7 @@ fun Pemasangan(edisi: Edisi, ip: String, ubahEdisi: (Edisi) -> Unit, ubahIp: (St
     }
 
     var rangkaian by remember { mutableStateOf("wifi") }
-    LaunchedEffect(Unit) { while (true) { rangkaian = Rangkaian.jenis(ctx); kotlinx.coroutines.delay(3000) } }
+    LaunchedEffect(Unit) { while (true) { while (!St.depan) kotlinx.coroutines.delay(1000); rangkaian = Rangkaian.jenis(ctx); kotlinx.coroutines.delay(3000) } }
 
     fun kerja(ikat: Boolean = true, tugas: () -> Unit) {
         if (sibuk) return

@@ -195,6 +195,8 @@ object St {
     var perluLog by mutableStateOf(false)
     var aplBaru by mutableStateOf("")
     var jamOfset = 0L
+    /** Benar bila apl kelihatan di skrin; semakan berkala dijeda bila apl di latar belakang. */
+    @Volatile var depan = true
 
     fun toast(m: String) { mesej = m }
 
