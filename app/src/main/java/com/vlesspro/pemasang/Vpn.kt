@@ -233,11 +233,12 @@ class VpnPerkhidmatan : VpnService() {
 
         val b = Builder().setSession("VLESS Pro").setMtu(1500).addAddress("26.26.26.1", 30)
             .addRoute("0.0.0.0", 0).addDnsServer("1.1.1.1").addDnsServer("8.8.8.8")
+            .addAddress("fd00:26:26::1", 126).addRoute("::", 0)
         try { b.addDisallowedApplication(packageName) } catch (_: Exception) {}
         val fd = b.establish() ?: throw RuntimeException(Bhs.t("Kebenaran VPN tidak diberi."))
         tun = fd
         val yml = File(filesDir, "vpn-hev.yml")
-        yml.writeText("tunnel:\n  mtu: 1500\n  ipv4: 26.26.26.1\nsocks5:\n  port: $PORT\n  address: 127.0.0.1\n  udp: 'udp'\nmisc:\n  log-level: warn\n")
+        yml.writeText("tunnel:\n  mtu: 1500\n  ipv4: 26.26.26.1\n  ipv6: 'fd00:26:26::1'\nsocks5:\n  port: $PORT\n  address: 127.0.0.1\n  udp: 'udp'\nmisc:\n  log-level: warn\n")
         HevLib.muat()
         if (!TProxyService.TProxyStartService(yml.path, fd.fd)) throw RuntimeException(Bhs.t("Penerowong gagal dimulakan."))
         jalan = true; sibuk = false; masa0 = System.currentTimeMillis()
