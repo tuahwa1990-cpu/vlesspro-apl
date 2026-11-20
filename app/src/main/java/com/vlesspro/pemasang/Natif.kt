@@ -274,10 +274,10 @@ fun fB(n: Double): String {
 }
 
 @Composable
-fun KadWr(modifier: Modifier = Modifier, klik: (() -> Unit)? = null, isi: @Composable ColumnScope.() -> Unit) {
+fun KadWr(modifier: Modifier = Modifier, klik: (() -> Unit)? = null, warna: Color? = null, isi: @Composable ColumnScope.() -> Unit) {
     val m = modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp))
-        .background(Brush.linearGradient(listOf(Wr.kad2, Wr.kad)))
-        .border(1.dp, Wr.garis, RoundedCornerShape(24.dp))
+        .background(if (warna != null) Brush.linearGradient(listOf(warna.copy(alpha = 0.14f), Wr.kad)) else Brush.linearGradient(listOf(Wr.kad2, Wr.kad)))
+        .border(1.dp, warna?.copy(alpha = 0.55f) ?: Wr.garis, RoundedCornerShape(24.dp))
     Column((if (klik != null) m.clickable { klik() } else m).padding(16.dp), content = isi)
 }
 
@@ -877,15 +877,32 @@ fun Lagi(buka: (String) -> Unit) {
     )
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 130.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Lagi", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx,
+        Text("Lagi", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold,
+            style = TextStyle(brush = Brush.linearGradient(listOf(Color(0xFFFACC15), Color(0xFFFB923C), Color(0xFFF87171)))),
             textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        val warnaLagi = listOf(Color(0xFF38BDF8), Color(0xFFA78BFA), Color(0xFFFB7185), Color(0xFF4ADE80),
+            Color(0xFFFACC15), Color(0xFFFF8A65), Color(0xFF22D3EE), Color(0xFFE879F9), Color(0xFF818CF8),
+            Color(0xFFF87171), Color(0xFF34D399), Color(0xFFFBBF24), Color(0xFF60A5FA), Color(0xFFF472B6),
+            Color(0xFF2DD4BF), Color(0xFFC084FC))
+        var idxLagi = 0
         item.chunked(2).forEach { baris ->
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 baris.forEach { (id, t, d) ->
-                    Box(Modifier.weight(1f)) { KadWr(klik = { buka(id) }) {
-                        Text(t, color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                        Text(d, color = Wr.mu, fontSize = 12.sp)
-                    } }
+                    val w = warnaLagi[idxLagi % warnaLagi.size]; idxLagi++
+                    Box(Modifier.weight(1f)) {
+                        KadWr(klik = { buka(id) }, warna = w) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(Modifier.size(34.dp).clip(CircleShape)
+                                    .background(Brush.linearGradient(listOf(w, w.copy(alpha = 0.55f)))),
+                                    contentAlignment = Alignment.Center) {
+                                    Text(t.take(1).uppercase(), color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
+                                }
+                                Spacer(Modifier.width(10.dp))
+                                Column { Text(t, color = w, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                                    Text(d, color = Wr.mu, fontSize = 11.sp) }
+                            }
+                        }
+                    }
                 }
                 if (baris.size == 1) Spacer(Modifier.weight(1f))
             }

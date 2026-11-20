@@ -21,10 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -242,7 +244,9 @@ private fun SkrinUtama(ke: (String) -> Unit) {
 
     val keadaan = if (memulih) 1 else if (jalan) 2 else if (sibuk) 1 else 0
     Halaman {
-        Text("VPN telefon", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        Text("VPN Telefon", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold,
+            style = TextStyle(brush = Brush.linearGradient(listOf(Color(0xFF4ADE80), Color(0xFF22D3EE), Color(0xFFA78BFA)))),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             BtnKecil(Bhs.t("Tetapan"), Modifier.weight(1f)) { ke("tetapan") }
             BtnKecil(Bhs.t("Per-apl"), Modifier.weight(1f)) { ke("apl") }
