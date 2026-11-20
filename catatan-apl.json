@@ -1,10 +1,21 @@
 {
-  "title": "Pembetulan paparan & bahasa lalai",
+  "title": "Skrin VPN Telefon lebih menarik",
   "items": [
-    "Betulkan tajuk kad menu di skrin Lagi (seperti \"Penghalaan\", \"Langganan\") yang terbelah tengah perkataan.",
-    "Bahasa lalai apl kini English untuk pemasangan baharu. Pengguna sedia ada yang sudah memilih bahasa lain akan kekal seperti pilihan mereka."
+    "Butang sambung/putus di VPN Telefon kini guna gaya animasi yang sama seperti anda pilih di skrin Utama.",
+    "Senarai pelayan kini ada aksen warna ikut jenis sambungan (VLESS, VMess, Trojan, Shadowsocks, SSH) supaya mudah dibezakan.",
+    "Kad pelayan yang dipilih kini bercahaya lembut berdenyut, dan status Bersambung/Menyambung kini berwarna-warni.",
+    "Butang Tetapan, Per-apl, Panduan dan Tentang kini berwarna berbeza-beza."
   ],
   "history": [
+    {
+      "version": "1.0.52",
+      "date": "2026-11-21",
+      "title": "Pembetulan paparan & bahasa lalai",
+      "items": [
+        "Betulkan tajuk kad menu di skrin Lagi (seperti \"Penghalaan\", \"Langganan\") yang terbelah tengah perkataan.",
+        "Bahasa lalai apl kini English untuk pemasangan baharu. Pengguna sedia ada yang sudah memilih bahasa lain akan kekal seperti pilihan mereka."
+      ]
+    },
     {
       "version": "1.0.51",
       "date": "2026-11-20",

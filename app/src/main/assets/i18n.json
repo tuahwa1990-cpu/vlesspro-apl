@@ -1248,7 +1248,12 @@
     "Setiap menu dalam skrin Lagi (Lesen, Feature Plus, Tetapan dan lain-lain) kini ada aksen warna dan avatar berbeza-beza untuk paparan lebih menarik.": "Each menu on the More screen (License, Feature Plus, Settings and others) now has its own color accent and avatar for a more engaging look.",
     "Pembetulan paparan & bahasa lalai": "Display fixes & default language",
     "Betulkan tajuk kad menu di skrin Lagi (seperti \"Penghalaan\", \"Langganan\") yang terbelah tengah perkataan.": "Fixed menu card titles on the More screen (e.g. \"Routing\", \"Subscription\") that were breaking mid-word.",
-    "Bahasa lalai apl kini English untuk pemasangan baharu. Pengguna sedia ada yang sudah memilih bahasa lain akan kekal seperti pilihan mereka.": "The app's default language is now English for new installs. Existing users who already chose another language will stay on their choice."
+    "Bahasa lalai apl kini English untuk pemasangan baharu. Pengguna sedia ada yang sudah memilih bahasa lain akan kekal seperti pilihan mereka.": "The app's default language is now English for new installs. Existing users who already chose another language will stay on their choice.",
+    "Skrin VPN Telefon lebih menarik": "Phone VPN screen is more lively",
+    "Butang sambung/putus di VPN Telefon kini guna gaya animasi yang sama seperti anda pilih di skrin Utama.": "The connect/disconnect button on Phone VPN now uses the same animated style you picked on the Home screen.",
+    "Senarai pelayan kini ada aksen warna ikut jenis sambungan (VLESS, VMess, Trojan, Shadowsocks, SSH) supaya mudah dibezakan.": "The server list now has color accents by connection type (VLESS, VMess, Trojan, Shadowsocks, SSH) so they're easier to tell apart.",
+    "Kad pelayan yang dipilih kini bercahaya lembut berdenyut, dan status Bersambung/Menyambung kini berwarna-warni.": "The selected server card now has a soft pulsing glow, and the Connected/Connecting status is now colorful.",
+    "Butang Tetapan, Per-apl, Panduan dan Tentang kini berwarna berbeza-beza.": "The Settings, Per-app, Guide and About buttons now each have their own color."
   },
   "zh": {
     "Mod VPN": "VPN 模式",
