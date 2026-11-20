@@ -1176,7 +1176,11 @@
   "SHA-256 fail APK yang dipasang": "SHA-256 of the installed APK file",
   "Tidak dapat membaca fail APK.": "Could not read the APK file.",
   "Semakan di dalam apl hanyalah petunjuk, kerana apl yang diubah suai boleh memalsukan paparan ini. Sahkan juga dengan admin dalam group support jika ragu-ragu.": "The check inside the app is only an indicator, since a modified app can fake this display. Also confirm with the admin in the support group if in doubt.",
-  "Tekan \\\"Semak sekarang\\\" di atas untuk banding dengan keluaran rasmi terkini.": "Tap \"Check now\" above to compare with the latest official release."
+  "Tekan \\\"Semak sekarang\\\" di atas untuk banding dengan keluaran rasmi terkini.": "Tap \"Check now\" above to compare with the latest official release.",
+  "Versi apl ini ({0}) berbeza daripada keluaran rasmi terkini ({1}), jadi tidak dapat dibandingkan terus.": "This app's version ({0}) differs from the latest official release ({1}), so it can't be compared directly.",
+  "Membanding ...": "Comparing ...",
+  "Banding dengan keluaran rasmi": "Compare with official release",
+  "Gagal menyemak": "Could not check"
  },
  "zh": {
   "Mod VPN": "VPN 模式",

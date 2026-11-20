@@ -931,13 +931,24 @@ fun SubApl() {
 }
 
 @Composable
-private fun SahkanApl(ctx: Context, info: InfoApl?) {
+private fun SahkanApl(ctx: Context, infoLuar: InfoApl?) {
     var sijil by remember { mutableStateOf<String?>(null) }
     var apk by remember { mutableStateOf<String?>(null) }
+    var info by remember { mutableStateOf(infoLuar) }
+    var membanding by remember { mutableStateOf(false) }
+    var ralat by remember { mutableStateOf("") }
     LaunchedEffect(Unit) { withContext(Dispatchers.IO) {
         sijil = Sahkan.sijilSemasa(ctx) ?: ""
         apk = try { Sahkan.apkSha256(ctx) } catch (_: Exception) { "" }
     } }
+    LaunchedEffect(infoLuar) { if (infoLuar != null) info = infoLuar }
+    fun banding() {
+        membanding = true; ralat = ""
+        bg {
+            try { info = Kemas.terkini() } catch (e: Exception) { ralat = e.message ?: Bhs.t("Gagal menyemak") }
+            membanding = false
+        }
+    }
     val semasa = Kemas.versiSemasa(ctx)
     KadWr {
         Text("Sahkan apl ini", color = Wr.tx, fontWeight = FontWeight.Bold)
@@ -959,10 +970,19 @@ private fun SahkanApl(ctx: Context, info: InfoApl?) {
         else if (a.isEmpty()) Text("Tidak dapat membaca fail APK.", color = Wr.bad, fontSize = 13.sp)
         else {
             Text(a.chunked(32).joinToString("\n"), color = Wr.tx, fontSize = 12.sp, fontFamily = FontFamily.Monospace, lineHeight = 17.sp)
-            if (info != null && info.code == semasa) {
-                if (a.equals(info.sha, ignoreCase = true)) Text("✔ Sama dengan keluaran rasmi v${info.name}.", color = Wr.ok, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                else Text("✖ TIDAK sama dengan keluaran rasmi v${info.name}. Fail ini mungkin telah diubah suai.", color = Wr.bad, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-            } else Text("Tekan \"Semak sekarang\" di atas untuk banding dengan keluaran rasmi terkini.", color = Wr.mu, fontSize = 12.sp)
+            val k = info
+            if (k != null && k.code == semasa) {
+                if (a.equals(k.sha, ignoreCase = true)) Text("✔ Sama dengan keluaran rasmi v${k.name}.", color = Wr.ok, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                else Text("✖ TIDAK sama dengan keluaran rasmi v${k.name}. Fail ini mungkin telah diubah suai.", color = Wr.bad, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            } else {
+                if (k != null) Text(Bhs.f("Versi apl ini ({0}) berbeza daripada keluaran rasmi terkini ({1}), jadi tidak dapat dibandingkan terus.", Kemas.namaSemasa(ctx), k.name), color = Wr.mu, fontSize = 12.sp)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedButton(onClick = { banding() }, enabled = !membanding, border = androidx.compose.foundation.BorderStroke(1.dp, Wr.ac)) {
+                        Text(if (membanding) Bhs.t("Membanding ...") else Bhs.t("Banding dengan keluaran rasmi"), color = Wr.ac)
+                    }
+                }
+                if (ralat.isNotEmpty()) Text(ralat, color = Wr.bad, fontSize = 12.sp)
+            }
         }
         Text("Semakan di dalam apl hanyalah petunjuk, kerana apl yang diubah suai boleh memalsukan paparan ini. Sahkan juga dengan admin dalam group support jika ragu-ragu.", color = Wr.mu, fontSize = 11.sp, modifier = Modifier.padding(top = 6.dp))
     }
