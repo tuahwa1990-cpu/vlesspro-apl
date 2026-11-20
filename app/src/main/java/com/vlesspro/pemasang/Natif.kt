@@ -72,6 +72,10 @@ object Gaya {
         G("nafas", "Nafas", "Bulat yang mengembang-kecut perlahan macam nafas."),
         G("cincin", "Cincin Berputar", "Gelang penuh berputar berterusan sekeliling bulat."),
         G("kapsul", "Kapsul", "Bentuk kapsul melintang dengan cahaya meluncur."),
+        G("pelangi", "Pelangi", "Gelang warna-warni berputar yang sentiasa bertukar warna."),
+        G("neon", "Neon", "Cahaya neon berdenyut pelbagai warna di sekeliling bulat."),
+        G("ombak", "Ombak Riak", "Riak bulatan berwarna mengembang keluar tanpa henti."),
+        G("bintang", "Bintang Berkilau", "Kilauan kecil pelbagai warna berputar mengelilingi bulat."),
     )
     var id by mutableStateOf("bulat")
     fun muat(ctx: Context) { id = ctx.getSharedPreferences("vp", Context.MODE_PRIVATE).getString("gaya_butang", "bulat") ?: "bulat" }
@@ -86,9 +90,13 @@ fun ButangKuasa(on: Boolean, sibuk: Boolean, siap: Boolean, teksSibuk: String, t
     val putarLaju by tr.animateFloat(0f, 360f, infiniteRepeatable(tween(2600, easing = LinearEasing)), label = "pl")
     val nafas by tr.animateFloat(0.9f, 1f, infiniteRepeatable(tween(1600, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "n")
     val luncur by tr.animateFloat(-1f, 1f, infiniteRepeatable(tween(1800, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "l")
+    val riak1 by tr.animateFloat(0f, 1f, infiniteRepeatable(tween(2400, easing = LinearEasing)), label = "r1")
+    val nafas2 by tr.animateFloat(0.8f, 1f, infiniteRepeatable(tween(1100, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "n2")
     val teks = if (sibuk) teksSibuk else if (on) teksOn else teksOff
     val gradAktif = Brush.radialGradient(listOf(Color(0xFF7DE7F7), Wr.ac, Wr.ac2))
     val gradTidakAktif = Brush.radialGradient(listOf(Color(0xFF4A5380), Color(0xFF232A4A)))
+    val pelangi = listOf(Color(0xFFFF5370), Color(0xFFFFB454), Color(0xFFF5E663), Color(0xFF4ADE80), Color(0xFF38BDF8), Color(0xFFA78BFA), Color(0xFFFF5370))
+    fun riak(fasa: Float) = (riak1 + fasa) % 1f
 
     when (Gaya.id) {
         "nafas" -> Box(Modifier.fillMaxWidth().height(260.dp), contentAlignment = Alignment.Center) {
@@ -142,6 +150,90 @@ fun ButangKuasa(on: Boolean, sibuk: Boolean, siap: Boolean, teksSibuk: String, t
                     IkonKuasa(if (on) Wr.on else Color(0xFFCFD5E8), 40)
                     Spacer(Modifier.width(12.dp))
                     Text(teks, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, color = if (on) Wr.on else Color(0xFFCFD5E8))
+                }
+            }
+        }
+        "pelangi" -> Box(Modifier.fillMaxWidth().height(260.dp), contentAlignment = Alignment.Center) {
+            Canvas(Modifier.size(250.dp)) {
+                val w = size.width
+                drawCircle(Wr.garis, w / 2 - 6f, style = Stroke(2f))
+                rotate(if (on || sibuk) putarLaju else putarLaju * 0.25f) {
+                    drawArc(Brush.sweepGradient(pelangi), 0f, 360f, false,
+                        topLeft = Offset(6f, 6f), size = Size(w - 12f, w - 12f),
+                        alpha = if (on || sibuk) 1f else 0.35f, style = Stroke(10f, cap = StrokeCap.Round))
+                }
+            }
+            Box(Modifier.size(172.dp).clip(CircleShape)
+                .background(if (on) gradAktif else gradTidakAktif)
+                .clickable(enabled = !sibuk && siap) { klik() }, contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    IkonKuasa(if (on) Wr.on else Color(0xFFCFD5E8), 56)
+                    Spacer(Modifier.height(6.dp))
+                    Text(teks, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, color = if (on) Wr.on else Color(0xFFCFD5E8))
+                }
+            }
+        }
+        "neon" -> Box(Modifier.fillMaxWidth().height(260.dp), contentAlignment = Alignment.Center) {
+            Canvas(Modifier.size(250.dp)) {
+                val w = size.width; val cx = w / 2
+                if (on || sibuk) {
+                    drawCircle(Color(0xFFFF5AD2).copy(alpha = 0.22f * nafas), cx * 0.98f, center = Offset(cx, cx))
+                    drawCircle(Color(0xFF38E8FF).copy(alpha = 0.22f * nafas2), cx * 0.86f, center = Offset(cx, cx))
+                    drawCircle(Color(0xFFB07CFF).copy(alpha = 0.20f * nafas), cx * 0.74f, center = Offset(cx, cx))
+                } else drawCircle(Wr.garis, cx - 6f, style = Stroke(2f))
+            }
+            Box(Modifier.size(172.dp).clip(CircleShape)
+                .background(if (on) gradAktif else gradTidakAktif)
+                .border(2.dp, if (on || sibuk) Color(0xFF38E8FF).copy(alpha = 0.8f) else Wr.garis, CircleShape)
+                .clickable(enabled = !sibuk && siap) { klik() }, contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    IkonKuasa(if (on) Wr.on else Color(0xFFCFD5E8), 56)
+                    Spacer(Modifier.height(6.dp))
+                    Text(teks, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, color = if (on) Wr.on else Color(0xFFCFD5E8))
+                }
+            }
+        }
+        "ombak" -> Box(Modifier.fillMaxWidth().height(260.dp), contentAlignment = Alignment.Center) {
+            Canvas(Modifier.size(250.dp)) {
+                val w = size.width; val cx = w / 2
+                drawCircle(Wr.garis, cx - 6f, style = Stroke(2f))
+                if (on || sibuk) {
+                    val warna = listOf(Wr.ac, Wr.ac2, Color(0xFFFF5AD2))
+                    listOf(riak(0f), riak(0.34f), riak(0.67f)).forEachIndexed { i, t ->
+                        drawCircle(warna[i].copy(alpha = (1f - t) * 0.5f), cx * (0.52f + t * 0.46f), center = Offset(cx, cx), style = Stroke(4f))
+                    }
+                }
+            }
+            Box(Modifier.size(172.dp).clip(CircleShape)
+                .background(if (on) gradAktif else gradTidakAktif)
+                .clickable(enabled = !sibuk && siap) { klik() }, contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    IkonKuasa(if (on) Wr.on else Color(0xFFCFD5E8), 56)
+                    Spacer(Modifier.height(6.dp))
+                    Text(teks, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, color = if (on) Wr.on else Color(0xFFCFD5E8))
+                }
+            }
+        }
+        "bintang" -> Box(Modifier.fillMaxWidth().height(260.dp), contentAlignment = Alignment.Center) {
+            Canvas(Modifier.size(250.dp)) {
+                val w = size.width; val cx = w / 2; val r = cx - 14f
+                drawCircle(Wr.garis, cx - 6f, style = Stroke(2f))
+                if (on || sibuk) {
+                    val warna = listOf(Color(0xFFFF5370), Color(0xFFFFB454), Color(0xFF4ADE80), Color(0xFF38BDF8), Color(0xFFA78BFA), Color(0xFFFF5AD2))
+                    for (i in 0 until 6) {
+                        val sudut = Math.toRadians((putarLaju + i * 60f).toDouble())
+                        val px = cx + r * Math.cos(sudut).toFloat(); val py = cx + r * Math.sin(sudut).toFloat()
+                        drawCircle(warna[i], 7f + 3f * nafas, center = Offset(px, py))
+                    }
+                }
+            }
+            Box(Modifier.size(172.dp).clip(CircleShape)
+                .background(if (on) gradAktif else gradTidakAktif)
+                .clickable(enabled = !sibuk && siap) { klik() }, contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    IkonKuasa(if (on) Wr.on else Color(0xFFCFD5E8), 56)
+                    Spacer(Modifier.height(6.dp))
+                    Text(teks, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, color = if (on) Wr.on else Color(0xFFCFD5E8))
                 }
             }
         }
