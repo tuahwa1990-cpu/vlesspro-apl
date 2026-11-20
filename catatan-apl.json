@@ -1,10 +1,19 @@
 {
- "title": "Pembetulan kecil antara muka",
+ "title": "Istilah lebih tepat",
  "items": [
-  "Betulkan paparan pilihan \"Kemas Kini Automatik\" di skrin Kemas kini modem supaya tidak lagi terbalit.",
+  "Status \"VPN asal\" ditukar kepada \"Xray Sedia Ada\" di seluruh apl supaya lebih tepat menggambarkan keadaan sebenar.",
   "Penambahbaikan dalaman. Semua fungsi sama."
  ],
  "history": [
+  {
+   "version": "1.0.48",
+   "date": "2026-11-20",
+   "title": "Pembetulan kecil antara muka",
+   "items": [
+    "Betulkan paparan pilihan \"Kemas Kini Automatik\" di skrin Kemas kini modem supaya tidak lagi terbalit.",
+    "Penambahbaikan dalaman. Semua fungsi sama."
+   ]
+  },
   {
    "version": "1.0.47",
    "date": "2026-11-20",

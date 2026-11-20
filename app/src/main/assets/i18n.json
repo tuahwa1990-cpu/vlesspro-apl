@@ -1235,7 +1235,9 @@
   "Xray Sedia Ada dihentikan sementara. Internet terhenti seketika.": "Existing Xray is stopped temporarily. The internet pauses briefly.",
   "VLESS Pro tidak aktif. Trafik guna Xray Sedia Ada atau SIM asal.": "VLESS Pro is inactive. Traffic uses the Existing Xray or the original SIM.",
   "Xray Sedia Ada tidak diubah. Mod semasa: {0}": "Existing Xray is unchanged. Current mode: {0}",
-  "Xray Sedia Ada: ada ({0})": "Existing Xray: present ({0})"
+  "Xray Sedia Ada: ada ({0})": "Existing Xray: present ({0})",
+  "Istilah lebih tepat": "More accurate wording",
+  "Status \"VPN asal\" ditukar kepada \"Xray Sedia Ada\" di seluruh apl supaya lebih tepat menggambarkan keadaan sebenar.": "The \"Original VPN\" status is now called \"Existing Xray\" throughout the app, to better reflect what it actually is."
  },
  "zh": {
   "Mod VPN": "VPN 模式",
