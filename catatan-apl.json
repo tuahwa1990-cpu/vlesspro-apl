@@ -1,312 +1,321 @@
 {
- "title": "Paparan lebih berwarna-warni",
- "items": [
-  "Tajuk skrin Profil, VPN Telefon dan Lagi kini bergradien warna-warni.",
-  "Setiap menu dalam skrin Lagi (Lesen, Feature Plus, Tetapan dan lain-lain) kini ada aksen warna dan avatar berbeza-beza untuk paparan lebih menarik."
- ],
- "history": [
-  {
-   "version": "1.0.50",
-   "date": "2026-11-20",
-   "title": "Kemaskan antara muka Utama",
-   "items": [
-    "Tajuk skrin Profil dan Lagi kini ditengahkan.",
-    "Status sambungan di skrin Utama kini lebih kemas — \"Aktif\" atau \"Tidak Aktif\" dengan warna gradien dan kilauan lembut."
-   ]
-  },
-  {
-   "version": "1.0.49",
-   "date": "2026-11-20",
-   "title": "Istilah lebih tepat",
-   "items": [
-    "Status \"VPN asal\" ditukar kepada \"Xray Sedia Ada\" di seluruh apl supaya lebih tepat menggambarkan keadaan sebenar.",
-    "Penambahbaikan dalaman. Semua fungsi sama."
-   ]
-  },
-  {
-   "version": "1.0.48",
-   "date": "2026-11-20",
-   "title": "Pembetulan kecil antara muka",
-   "items": [
-    "Betulkan paparan pilihan \"Kemas Kini Automatik\" di skrin Kemas kini modem supaya tidak lagi terbalit.",
-    "Penambahbaikan dalaman. Semua fungsi sama."
-   ]
-  },
-  {
-   "version": "1.0.47",
-   "date": "2026-11-20",
-   "title": "Pilih gaya butang sambung",
-   "items": [
-    "Baharu di Lagi > Gaya Butang: pilih bentuk dan pergerakan butang sambung/putuskan di skrin Utama.",
-    "8 gaya tersedia — Bulat Klasik, Nafas, Cincin Berputar, Kapsul, Pelangi, Neon, Ombak Riak dan Bintang Berkilau — dengan pratonton boleh cuba sebelum pilih.",
-    "Pilihan disimpan terus pada telefon anda."
-   ]
-  },
-  {
-   "version": "1.0.46",
-   "date": "2026-11-20",
-   "title": "Urus profil lebih pantas",
-   "items": [
-    "Setiap profil kini ada butang Aktifkan, Edit dan Hapus terus kelihatan, tak perlu buka menu lagi."
-   ]
-  },
-  {
-   "version": "1.0.45",
-   "date": "2026-11-20",
-   "title": "Sahkan keaslian apl dan profil SSH/WireGuard lebih mudah",
-   "items": [
-    "Ciri baharu \"Sahkan apl ini\": semak cap jari sijil tandatangan dan SHA-256 fail APK, serta banding terus dengan keluaran rasmi terkini.",
-    "Tambah profil kini ada bahagian berasingan: VLESS/Lain, SSH (borang penuh dengan mod sambungan, SNI, payload dan proksi) dan WireGuard.",
-    "Lebih mudah sediakan profil SSH tanpa perlu tahu format pautan."
-   ]
-  },
-  {
-   "version": "1.0.43",
-   "date": "2026-11-20",
-   "title": "Penambahbaikan keselamatan dan prestasi",
-   "items": [
-    "Penambahbaikan keselamatan dalaman apl.",
-    "Saiz apl lebih kecil dan pemasangan lebih pantas."
-   ]
-  },
-  {
-   "version": "1.0.42",
-   "date": "2026-11-20",
-   "title": "Profil lebih lengkap dan panduan VPN telefon",
-   "items": [
-    "Profil: failover automatik, ujian dan susunan ikut laju, butang Guna terpantas.",
-    "Profil: kegemaran, tag, namakan semula, kod QR, eksport dan import profil.",
-    "Hantar profil antara modem dan VPN telefon dengan satu ketikan.",
-    "Paparan jumlah data dan data setiap profil.",
-    "Panduan cara guna VPN telefon dalam apl.",
-    "Tajuk halaman Utama dan VPN telefon di tengah, dengan status modem yang lebih jelas."
-   ]
-  },
-  {
-   "version": "1.0.41",
-   "date": "2026-11-20",
-   "title": "Penambahbaikan umum",
-   "items": [
-    "Syarat penggunaan dan resit persetujuan kini boleh dibaca di Lagi > Perjanjian.",
-    "Penambahbaikan dalaman untuk kestabilan dan penyelenggaraan VPN telefon."
-   ]
-  },
-  {
-   "version": "1.0.40",
-   "date": "2026-11-20",
-   "title": "Auto-tukar lebih pantas",
-   "items": [
-    "Auto-tukar VPN telefon dan VLESS modem kini bertindak lebih cepat, dan cuba semula setiap 5 saat jika modem belum dapat dicapai (contohnya bila telefon kembali ke WiFi modem)."
-   ]
-  },
-  {
-   "version": "1.0.39",
-   "date": "2026-11-20",
-   "title": "VPN telefon lebih mudah",
-   "items": [
-    "VPN telefon kini di bar bawah (menggantikan Statistik, yang dipindah ke Lagi) supaya mudah diakses.",
-    "Auto-tukar: bila VPN telefon dihidupkan, VLESS modem dimatikan automatik, dan sebaliknya, supaya trafik tidak melalui dua lapisan. Boleh dimatikan dalam Tetapan VPN."
-   ]
-  },
-  {
-   "version": "1.0.38",
-   "date": "2026-11-20",
-   "title": "VPN telefon lebih lengkap",
-   "items": [
-    "Sambung semula automatik apabila sambungan terputus atau rangkaian bertukar (WiFi/data), serta pilihan kill switch.",
-    "Protokol baharu (percubaan): Trojan, Shadowsocks dan SSH (termasuk SSL/TLS dan payload WebSocket).",
-    "Tambah pelayan dengan imbas kod QR, gambar QR atau pautan langganan. Ujian ping, pilihan pelayan terpantas dan ping sebenar.",
-    "VPN per-apl, jubin Tetapan Pantas, widget skrin utama dan pilihan sambung semasa telefon dihidupkan.",
-    "Skrin Tentang dengan versi apl dan butang hantar log."
-   ]
-  },
-  {
-   "version": "1.0.37",
-   "date": "2026-11-20",
-   "title": "VPN telefon baharu",
-   "items": [
-    "Fungsi baharu: VPN terus dari telefon (seperti v2rayNG) tanpa memerlukan modem. Buka dari skrin log masuk (VPN telefon (tanpa modem)) atau Lagi > VPN telefon.",
-    "Tampal pautan vless:// atau vmess:// dari papan klip, pilih pelayan, kemudian sentuh butang kuasa untuk sambung.",
-    "Paparan masa sambungan, kelajuan dan jumlah data, serta ujian ping untuk setiap pelayan.",
-    "Saiz apl lebih besar kerana enjin Xray disertakan, jadi kemas kini kali ini lebih lama dimuat turun."
-   ]
-  },
-  {
-   "version": "1.0.36",
-   "date": "2026-11-20",
-   "title": "Lebih ringan dan stabil",
-   "items": [
-    "Tip SQM kini menjelaskan bahawa had yang lebih tinggi daripada kelajuan muat naik sebenar tidak memberi kesan, dan mencadangkan 80 hingga 90% kelajuan sebenar.",
-    "Pemasangan Xray menggunakan fail sementara dan bukan memori, jadi telefon dengan RAM kecil kurang berisiko ranap semasa memasang.",
-    "Apl berhenti menyemak modem secara berkala apabila berada di latar belakang, menjimatkan bateri dan trafik."
-   ]
-  },
-  {
-   "version": "1.0.35",
-   "date": "2026-11-20",
-   "title": "SQM lebih jelas",
-   "items": [
-    "Skrin SQM kini hanya menunjukkan had muat naik, kerana had muat turun tidak boleh dikawal pada modem ini. Ini dijelaskan dalam skrin.",
-    "Butang pantas 5, 10, 20, 50 dan 100 Mbit/s, serta tip untuk memilih nilai.",
-    "Status jelas: SQM aktif atau tidak, dengan had muat naik yang digunakan.",
-    "Amaran jika SQM dihidupkan tanpa had muat naik."
-   ]
-  },
-  {
-   "version": "1.0.34",
-   "date": "2026-11-20",
-   "title": "Kurang beban semakan IP",
-   "items": [
-    "Semakan IP keluar kini lebih jarang (setiap 2 minit, bukan setiap 12 saat), mengurangkan trafik dan catatan amaran pada modem.",
-    "Hantar diagnosis menyembunyikan amaran jinak daripada semakan IP supaya masalah sebenar mudah dilihat."
-   ]
-  },
-  {
-   "version": "1.0.33",
-   "date": "2026-11-20",
-   "title": "Kestabilan lebih baik",
-   "items": [
-    "Jika apl ranap, jejak ralat terakhir disimpan dan disertakan dalam Hantar diagnosis.",
-    "Panggilan ke modem cuba semula sekali jika sambungan terputus seketika.",
-    "Semakan terjemahan automatik ditambah semasa binaan supaya teks English tidak tertinggal."
-   ]
-  },
-  {
-   "version": "1.0.32",
-   "date": "2026-11-20",
-   "title": "Diagnosis lebih selamat dan berguna",
-   "items": [
-    "Hantar diagnosis kini tidak mendedahkan laman yang dilayari: nama domain dan IP destinasi disorok.",
-    "Log dalam diagnosis menunjukkan amaran dan ralat sahaja, dengan ringkasan bilangan sambungan.",
-    "Masa telefon dan masa UTC ditunjukkan supaya mudah menyelaraskan masa log."
-   ]
-  },
-  {
-   "version": "1.0.31",
-   "date": "2026-11-20",
-   "title": "Hantar diagnosis",
-   "items": [
-    "Butang baharu Hantar diagnosis di Lagi > Sistem: menyalin versi apl dan modem, status VLESS Pro, ujian sambungan dan log terakhir, kemudian membuka senarai kongsi (WhatsApp, Telegram dan lain-lain).",
-    "Maklumat itu tidak mengandungi kata laluan, kunci lesen atau UUID nod."
-   ]
-  },
-  {
-   "version": "1.0.30",
-   "date": "2026-11-20",
-   "title": "Kemajuan pemasangan dan Uji sambungan",
-   "items": [
-    "Bar kemajuan untuk muat turun, penghantaran ke modem dan langkah pemasangan, termasuk kemas kini apl.",
-    "Amaran jika telefon guna data mudah alih, dan pemasangan diikat kepada WiFi modem supaya tidak terputus.",
-    "Jika sambungan ke modem terputus, pemasangan cuba sekali lagi secara automatik.",
-    "Butang Uji sambungan di skrin utama: semak WiFi, status VLESS Pro, IP telefon dan sama ada trafik melalui VLESS Pro.",
-    "Uji sambungan kini menguji melalui WiFi modem secara khusus dan memberi amaran jika apl lain guna data mudah alih.",
-    "Butang jenis peraturan laluan (domain, keyword, ip, geosite, geoip) tidak lagi terpotong.",
-    "Semakan kemas kini apl kini cuba semula sehingga 3 kali jika sambungan terputus (contohnya semasa VLESS Pro hidup), tanpa perlu diputuskan dahulu."
-   ]
-  },
-  {
-   "version": "1.0.26",
-   "date": "2026-11-20",
-   "title": "Semakan bahasa Melayu dan English",
-   "items": [
-    "Nota keluaran, log Pemasang dan mesej kini diterjemah sepenuhnya apabila bahasa English dipilih.",
-    "Beberapa istilah Melayu diseragamkan (laluan, tetapkan semula, dimulakan semula) dan terjemahan English yang tidak sepadan dibetulkan.",
-    "Masa lalu dan bilangan hari lesen dipaparkan dengan betul dalam English (contoh 1 day)."
-   ]
-  },
-  {
-   "version": "1.0.25",
-   "date": "2026-11-20",
-   "title": "Butang Kembali dalam Feature Plus",
-   "items": [
-    "Dalam Feature Plus, butang Kembali kini kembali ke senarai Feature Plus, bukan terus ke menu Lagi.",
-    "Berlaku untuk SQM, Sekat iklan, Peranti, Kuota, Tukar IP WAN dan Failover."
-   ]
-  },
-  {
-   "version": "1.0.24",
-   "date": "2026-11-20",
-   "title": "Skrin Pemasang lebih jelas",
-   "items": [
-    "Tulisan pada skrin Pemasang kini jelas dibaca pada semua tema telefon.",
-    "Pemasang memasang Xray sendiri untuk VLESS Pro pada pemasangan baharu."
-   ]
-  },
-  {
-   "version": "1.0.23",
-   "date": "2026-11-20",
-   "title": "Xray sendiri untuk VLESS Pro",
-   "items": [
-    "Pemasang kini memasang Xray sendiri untuk VLESS Pro, jadi VLESS Pro berfungsi walaupun modem tiada VPN asal.",
-    "Pemasangan baharu dan naik taraf sama-sama memastikan Xray VLESS Pro ada pada modem."
-   ]
-  },
-  {
-   "version": "1.0.22",
-   "date": "2026-11-20",
-   "title": "Sokongan edisi apl sahaja",
-   "items": [
-    "Menyokong edisi VLESS Pro apl sahaja (tanpa antara muka web). Suis web disorokkan pada edisi itu.",
-    "Pemasang: nyahtanda \"Pasang antara muka web\" untuk memasang edisi apl sahaja yang tiada UI web langsung pada modem."
-   ]
-  },
-  {
-   "version": "1.0.20",
-   "date": "2026-11-20",
-   "title": "Pilih apl sahaja atau apl dan Chrome",
-   "items": [
-    "Semasa memasang, pilih apl sahaja atau apl bersama antara muka web (Chrome).",
-    "Lagi > Tetapan: suis Antara muka web (Chrome) untuk hidup atau matikan bila-bila masa.",
-    "VLESS Pro berfungsi seperti biasa dalam kedua-dua pilihan."
-   ]
-  },
-  {
-   "version": "1.0.19",
-   "date": "2026-11-20",
-   "title": "Istilah diseragamkan",
-   "items": [
-    "Sambungan lama kini dipanggil \"VPN asal\" dalam seluruh apl.",
-    "Tarikh dan lesen dipaparkan mengikut waktu Malaysia."
-   ]
-  },
-  {
-   "version": "1.0.18",
-   "date": "2026-11-20",
-   "title": "Apl natif penuh: kemas kini, tema dan bahasa",
-   "items": [
-    "Skrin Kemas kini modem kini seperti panel Chrome: nota keluaran, mod automatik, pelayan dan pulih versi.",
-    "Selepas kemas kini modem, apl log masuk semula sendiri dan memaparkan versi baharu.",
-    "Pasang dari fail .tgz dengan semakan seni bina (armv7 atau arm64).",
-    "Tema dan jenis tulisan (11 tema), bahasa Melayu, English, 中文 dan தமிழ்.",
-    "Cip Mod VPN pada skrin Utama."
-   ]
-  },
-  {
-   "version": "1.0.14",
-   "date": "2026-11-20",
-   "title": "Mod VPN pada skrin Utama",
-   "items": [
-    "Cip mod VPN (redirect, tproxy atau tun) semasa disambung."
-   ]
-  },
-  {
-   "version": "1.0.13",
-   "date": "2026-11-19",
-   "title": "Feature Plus dan penghalaan",
-   "items": [
-    "SQM, sekat iklan, kuota, peranti, tukar IP WAN, failover.",
-    "Penghalaan, kumpulan, langganan dan tetapan.",
-    "Edit profil dan kemas kini modem dari fail .tgz."
-   ]
-  },
-  {
-   "version": "1.0.12",
-   "date": "2026-11-19",
-   "title": "Apl natif pertama",
-   "items": [
-    "Utama, Profil, Statistik dan Lagi tanpa paparan web.",
-    "Aktifkan lesen dari apl."
-   ]
-  }
- ]
+  "title": "Pembetulan paparan & bahasa lalai",
+  "items": [
+    "Betulkan tajuk kad menu di skrin Lagi (seperti \"Penghalaan\", \"Langganan\") yang terbelah tengah perkataan.",
+    "Bahasa lalai apl kini English untuk pemasangan baharu. Pengguna sedia ada yang sudah memilih bahasa lain akan kekal seperti pilihan mereka."
+  ],
+  "history": [
+    {
+      "version": "1.0.51",
+      "date": "2026-11-20",
+      "title": "Paparan lebih berwarna-warni",
+      "items": [
+        "Tajuk skrin Profil, VPN Telefon dan Lagi kini bergradien warna-warni.",
+        "Setiap menu dalam skrin Lagi (Lesen, Feature Plus, Tetapan dan lain-lain) kini ada aksen warna dan avatar berbeza-beza untuk paparan lebih menarik."
+      ]
+    },
+    {
+      "version": "1.0.50",
+      "date": "2026-11-20",
+      "title": "Kemaskan antara muka Utama",
+      "items": [
+        "Tajuk skrin Profil dan Lagi kini ditengahkan.",
+        "Status sambungan di skrin Utama kini lebih kemas — \"Aktif\" atau \"Tidak Aktif\" dengan warna gradien dan kilauan lembut."
+      ]
+    },
+    {
+      "version": "1.0.49",
+      "date": "2026-11-20",
+      "title": "Istilah lebih tepat",
+      "items": [
+        "Status \"VPN asal\" ditukar kepada \"Xray Sedia Ada\" di seluruh apl supaya lebih tepat menggambarkan keadaan sebenar.",
+        "Penambahbaikan dalaman. Semua fungsi sama."
+      ]
+    },
+    {
+      "version": "1.0.48",
+      "date": "2026-11-20",
+      "title": "Pembetulan kecil antara muka",
+      "items": [
+        "Betulkan paparan pilihan \"Kemas Kini Automatik\" di skrin Kemas kini modem supaya tidak lagi terbalit.",
+        "Penambahbaikan dalaman. Semua fungsi sama."
+      ]
+    },
+    {
+      "version": "1.0.47",
+      "date": "2026-11-20",
+      "title": "Pilih gaya butang sambung",
+      "items": [
+        "Baharu di Lagi > Gaya Butang: pilih bentuk dan pergerakan butang sambung/putuskan di skrin Utama.",
+        "8 gaya tersedia — Bulat Klasik, Nafas, Cincin Berputar, Kapsul, Pelangi, Neon, Ombak Riak dan Bintang Berkilau — dengan pratonton boleh cuba sebelum pilih.",
+        "Pilihan disimpan terus pada telefon anda."
+      ]
+    },
+    {
+      "version": "1.0.46",
+      "date": "2026-11-20",
+      "title": "Urus profil lebih pantas",
+      "items": [
+        "Setiap profil kini ada butang Aktifkan, Edit dan Hapus terus kelihatan, tak perlu buka menu lagi."
+      ]
+    },
+    {
+      "version": "1.0.45",
+      "date": "2026-11-20",
+      "title": "Sahkan keaslian apl dan profil SSH/WireGuard lebih mudah",
+      "items": [
+        "Ciri baharu \"Sahkan apl ini\": semak cap jari sijil tandatangan dan SHA-256 fail APK, serta banding terus dengan keluaran rasmi terkini.",
+        "Tambah profil kini ada bahagian berasingan: VLESS/Lain, SSH (borang penuh dengan mod sambungan, SNI, payload dan proksi) dan WireGuard.",
+        "Lebih mudah sediakan profil SSH tanpa perlu tahu format pautan."
+      ]
+    },
+    {
+      "version": "1.0.43",
+      "date": "2026-11-20",
+      "title": "Penambahbaikan keselamatan dan prestasi",
+      "items": [
+        "Penambahbaikan keselamatan dalaman apl.",
+        "Saiz apl lebih kecil dan pemasangan lebih pantas."
+      ]
+    },
+    {
+      "version": "1.0.42",
+      "date": "2026-11-20",
+      "title": "Profil lebih lengkap dan panduan VPN telefon",
+      "items": [
+        "Profil: failover automatik, ujian dan susunan ikut laju, butang Guna terpantas.",
+        "Profil: kegemaran, tag, namakan semula, kod QR, eksport dan import profil.",
+        "Hantar profil antara modem dan VPN telefon dengan satu ketikan.",
+        "Paparan jumlah data dan data setiap profil.",
+        "Panduan cara guna VPN telefon dalam apl.",
+        "Tajuk halaman Utama dan VPN telefon di tengah, dengan status modem yang lebih jelas."
+      ]
+    },
+    {
+      "version": "1.0.41",
+      "date": "2026-11-20",
+      "title": "Penambahbaikan umum",
+      "items": [
+        "Syarat penggunaan dan resit persetujuan kini boleh dibaca di Lagi > Perjanjian.",
+        "Penambahbaikan dalaman untuk kestabilan dan penyelenggaraan VPN telefon."
+      ]
+    },
+    {
+      "version": "1.0.40",
+      "date": "2026-11-20",
+      "title": "Auto-tukar lebih pantas",
+      "items": [
+        "Auto-tukar VPN telefon dan VLESS modem kini bertindak lebih cepat, dan cuba semula setiap 5 saat jika modem belum dapat dicapai (contohnya bila telefon kembali ke WiFi modem)."
+      ]
+    },
+    {
+      "version": "1.0.39",
+      "date": "2026-11-20",
+      "title": "VPN telefon lebih mudah",
+      "items": [
+        "VPN telefon kini di bar bawah (menggantikan Statistik, yang dipindah ke Lagi) supaya mudah diakses.",
+        "Auto-tukar: bila VPN telefon dihidupkan, VLESS modem dimatikan automatik, dan sebaliknya, supaya trafik tidak melalui dua lapisan. Boleh dimatikan dalam Tetapan VPN."
+      ]
+    },
+    {
+      "version": "1.0.38",
+      "date": "2026-11-20",
+      "title": "VPN telefon lebih lengkap",
+      "items": [
+        "Sambung semula automatik apabila sambungan terputus atau rangkaian bertukar (WiFi/data), serta pilihan kill switch.",
+        "Protokol baharu (percubaan): Trojan, Shadowsocks dan SSH (termasuk SSL/TLS dan payload WebSocket).",
+        "Tambah pelayan dengan imbas kod QR, gambar QR atau pautan langganan. Ujian ping, pilihan pelayan terpantas dan ping sebenar.",
+        "VPN per-apl, jubin Tetapan Pantas, widget skrin utama dan pilihan sambung semasa telefon dihidupkan.",
+        "Skrin Tentang dengan versi apl dan butang hantar log."
+      ]
+    },
+    {
+      "version": "1.0.37",
+      "date": "2026-11-20",
+      "title": "VPN telefon baharu",
+      "items": [
+        "Fungsi baharu: VPN terus dari telefon (seperti v2rayNG) tanpa memerlukan modem. Buka dari skrin log masuk (VPN telefon (tanpa modem)) atau Lagi > VPN telefon.",
+        "Tampal pautan vless:// atau vmess:// dari papan klip, pilih pelayan, kemudian sentuh butang kuasa untuk sambung.",
+        "Paparan masa sambungan, kelajuan dan jumlah data, serta ujian ping untuk setiap pelayan.",
+        "Saiz apl lebih besar kerana enjin Xray disertakan, jadi kemas kini kali ini lebih lama dimuat turun."
+      ]
+    },
+    {
+      "version": "1.0.36",
+      "date": "2026-11-20",
+      "title": "Lebih ringan dan stabil",
+      "items": [
+        "Tip SQM kini menjelaskan bahawa had yang lebih tinggi daripada kelajuan muat naik sebenar tidak memberi kesan, dan mencadangkan 80 hingga 90% kelajuan sebenar.",
+        "Pemasangan Xray menggunakan fail sementara dan bukan memori, jadi telefon dengan RAM kecil kurang berisiko ranap semasa memasang.",
+        "Apl berhenti menyemak modem secara berkala apabila berada di latar belakang, menjimatkan bateri dan trafik."
+      ]
+    },
+    {
+      "version": "1.0.35",
+      "date": "2026-11-20",
+      "title": "SQM lebih jelas",
+      "items": [
+        "Skrin SQM kini hanya menunjukkan had muat naik, kerana had muat turun tidak boleh dikawal pada modem ini. Ini dijelaskan dalam skrin.",
+        "Butang pantas 5, 10, 20, 50 dan 100 Mbit/s, serta tip untuk memilih nilai.",
+        "Status jelas: SQM aktif atau tidak, dengan had muat naik yang digunakan.",
+        "Amaran jika SQM dihidupkan tanpa had muat naik."
+      ]
+    },
+    {
+      "version": "1.0.34",
+      "date": "2026-11-20",
+      "title": "Kurang beban semakan IP",
+      "items": [
+        "Semakan IP keluar kini lebih jarang (setiap 2 minit, bukan setiap 12 saat), mengurangkan trafik dan catatan amaran pada modem.",
+        "Hantar diagnosis menyembunyikan amaran jinak daripada semakan IP supaya masalah sebenar mudah dilihat."
+      ]
+    },
+    {
+      "version": "1.0.33",
+      "date": "2026-11-20",
+      "title": "Kestabilan lebih baik",
+      "items": [
+        "Jika apl ranap, jejak ralat terakhir disimpan dan disertakan dalam Hantar diagnosis.",
+        "Panggilan ke modem cuba semula sekali jika sambungan terputus seketika.",
+        "Semakan terjemahan automatik ditambah semasa binaan supaya teks English tidak tertinggal."
+      ]
+    },
+    {
+      "version": "1.0.32",
+      "date": "2026-11-20",
+      "title": "Diagnosis lebih selamat dan berguna",
+      "items": [
+        "Hantar diagnosis kini tidak mendedahkan laman yang dilayari: nama domain dan IP destinasi disorok.",
+        "Log dalam diagnosis menunjukkan amaran dan ralat sahaja, dengan ringkasan bilangan sambungan.",
+        "Masa telefon dan masa UTC ditunjukkan supaya mudah menyelaraskan masa log."
+      ]
+    },
+    {
+      "version": "1.0.31",
+      "date": "2026-11-20",
+      "title": "Hantar diagnosis",
+      "items": [
+        "Butang baharu Hantar diagnosis di Lagi > Sistem: menyalin versi apl dan modem, status VLESS Pro, ujian sambungan dan log terakhir, kemudian membuka senarai kongsi (WhatsApp, Telegram dan lain-lain).",
+        "Maklumat itu tidak mengandungi kata laluan, kunci lesen atau UUID nod."
+      ]
+    },
+    {
+      "version": "1.0.30",
+      "date": "2026-11-20",
+      "title": "Kemajuan pemasangan dan Uji sambungan",
+      "items": [
+        "Bar kemajuan untuk muat turun, penghantaran ke modem dan langkah pemasangan, termasuk kemas kini apl.",
+        "Amaran jika telefon guna data mudah alih, dan pemasangan diikat kepada WiFi modem supaya tidak terputus.",
+        "Jika sambungan ke modem terputus, pemasangan cuba sekali lagi secara automatik.",
+        "Butang Uji sambungan di skrin utama: semak WiFi, status VLESS Pro, IP telefon dan sama ada trafik melalui VLESS Pro.",
+        "Uji sambungan kini menguji melalui WiFi modem secara khusus dan memberi amaran jika apl lain guna data mudah alih.",
+        "Butang jenis peraturan laluan (domain, keyword, ip, geosite, geoip) tidak lagi terpotong.",
+        "Semakan kemas kini apl kini cuba semula sehingga 3 kali jika sambungan terputus (contohnya semasa VLESS Pro hidup), tanpa perlu diputuskan dahulu."
+      ]
+    },
+    {
+      "version": "1.0.26",
+      "date": "2026-11-20",
+      "title": "Semakan bahasa Melayu dan English",
+      "items": [
+        "Nota keluaran, log Pemasang dan mesej kini diterjemah sepenuhnya apabila bahasa English dipilih.",
+        "Beberapa istilah Melayu diseragamkan (laluan, tetapkan semula, dimulakan semula) dan terjemahan English yang tidak sepadan dibetulkan.",
+        "Masa lalu dan bilangan hari lesen dipaparkan dengan betul dalam English (contoh 1 day)."
+      ]
+    },
+    {
+      "version": "1.0.25",
+      "date": "2026-11-20",
+      "title": "Butang Kembali dalam Feature Plus",
+      "items": [
+        "Dalam Feature Plus, butang Kembali kini kembali ke senarai Feature Plus, bukan terus ke menu Lagi.",
+        "Berlaku untuk SQM, Sekat iklan, Peranti, Kuota, Tukar IP WAN dan Failover."
+      ]
+    },
+    {
+      "version": "1.0.24",
+      "date": "2026-11-20",
+      "title": "Skrin Pemasang lebih jelas",
+      "items": [
+        "Tulisan pada skrin Pemasang kini jelas dibaca pada semua tema telefon.",
+        "Pemasang memasang Xray sendiri untuk VLESS Pro pada pemasangan baharu."
+      ]
+    },
+    {
+      "version": "1.0.23",
+      "date": "2026-11-20",
+      "title": "Xray sendiri untuk VLESS Pro",
+      "items": [
+        "Pemasang kini memasang Xray sendiri untuk VLESS Pro, jadi VLESS Pro berfungsi walaupun modem tiada VPN asal.",
+        "Pemasangan baharu dan naik taraf sama-sama memastikan Xray VLESS Pro ada pada modem."
+      ]
+    },
+    {
+      "version": "1.0.22",
+      "date": "2026-11-20",
+      "title": "Sokongan edisi apl sahaja",
+      "items": [
+        "Menyokong edisi VLESS Pro apl sahaja (tanpa antara muka web). Suis web disorokkan pada edisi itu.",
+        "Pemasang: nyahtanda \"Pasang antara muka web\" untuk memasang edisi apl sahaja yang tiada UI web langsung pada modem."
+      ]
+    },
+    {
+      "version": "1.0.20",
+      "date": "2026-11-20",
+      "title": "Pilih apl sahaja atau apl dan Chrome",
+      "items": [
+        "Semasa memasang, pilih apl sahaja atau apl bersama antara muka web (Chrome).",
+        "Lagi > Tetapan: suis Antara muka web (Chrome) untuk hidup atau matikan bila-bila masa.",
+        "VLESS Pro berfungsi seperti biasa dalam kedua-dua pilihan."
+      ]
+    },
+    {
+      "version": "1.0.19",
+      "date": "2026-11-20",
+      "title": "Istilah diseragamkan",
+      "items": [
+        "Sambungan lama kini dipanggil \"VPN asal\" dalam seluruh apl.",
+        "Tarikh dan lesen dipaparkan mengikut waktu Malaysia."
+      ]
+    },
+    {
+      "version": "1.0.18",
+      "date": "2026-11-20",
+      "title": "Apl natif penuh: kemas kini, tema dan bahasa",
+      "items": [
+        "Skrin Kemas kini modem kini seperti panel Chrome: nota keluaran, mod automatik, pelayan dan pulih versi.",
+        "Selepas kemas kini modem, apl log masuk semula sendiri dan memaparkan versi baharu.",
+        "Pasang dari fail .tgz dengan semakan seni bina (armv7 atau arm64).",
+        "Tema dan jenis tulisan (11 tema), bahasa Melayu, English, 中文 dan தமிழ்.",
+        "Cip Mod VPN pada skrin Utama."
+      ]
+    },
+    {
+      "version": "1.0.14",
+      "date": "2026-11-20",
+      "title": "Mod VPN pada skrin Utama",
+      "items": [
+        "Cip mod VPN (redirect, tproxy atau tun) semasa disambung."
+      ]
+    },
+    {
+      "version": "1.0.13",
+      "date": "2026-11-19",
+      "title": "Feature Plus dan penghalaan",
+      "items": [
+        "SQM, sekat iklan, kuota, peranti, tukar IP WAN, failover.",
+        "Penghalaan, kumpulan, langganan dan tetapan.",
+        "Edit profil dan kemas kini modem dari fail .tgz."
+      ]
+    },
+    {
+      "version": "1.0.12",
+      "date": "2026-11-19",
+      "title": "Apl natif pertama",
+      "items": [
+        "Utama, Profil, Statistik dan Lagi tanpa paparan web.",
+        "Aktifkan lesen dari apl."
+      ]
+    }
+  ]
 }
