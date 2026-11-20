@@ -1,10 +1,18 @@
 {
- "title": "VPN telefon lebih mudah",
+ "title": "Auto-tukar lebih pantas",
  "items": [
-  "VPN telefon kini di bar bawah (menggantikan Statistik, yang dipindah ke Lagi) supaya mudah diakses.",
-  "Auto-tukar: bila VPN telefon dihidupkan, VLESS modem dimatikan automatik, dan sebaliknya, supaya trafik tidak melalui dua lapisan. Boleh dimatikan dalam Tetapan VPN."
+  "Auto-tukar VPN telefon dan VLESS modem kini bertindak lebih cepat, dan cuba semula setiap 5 saat jika modem belum dapat dicapai (contohnya bila telefon kembali ke WiFi modem)."
  ],
  "history": [
+  {
+   "version": "1.0.39",
+   "date": "2026-11-20",
+   "title": "VPN telefon lebih mudah",
+   "items": [
+    "VPN telefon kini di bar bawah (menggantikan Statistik, yang dipindah ke Lagi) supaya mudah diakses.",
+    "Auto-tukar: bila VPN telefon dihidupkan, VLESS modem dimatikan automatik, dan sebaliknya, supaya trafik tidak melalui dua lapisan. Boleh dimatikan dalam Tetapan VPN."
+   ]
+  },
   {
    "version": "1.0.38",
    "date": "2026-11-20",

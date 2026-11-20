@@ -1059,7 +1059,9 @@
   "Trafik dan penggunaan": "Traffic and usage",
   "VPN telefon lebih mudah": "Easier phone VPN",
   "VPN telefon kini di bar bawah (menggantikan Statistik, yang dipindah ke Lagi) supaya mudah diakses.": "The phone VPN is now in the bottom bar (replacing Statistics, which moved to More) for easy access.",
-  "Auto-tukar: bila VPN telefon dihidupkan, VLESS modem dimatikan automatik, dan sebaliknya, supaya trafik tidak melalui dua lapisan. Boleh dimatikan dalam Tetapan VPN.": "Auto-switch: when the phone VPN is turned on, modem VLESS is turned off automatically, and vice versa, so traffic does not pass through two layers. Can be turned off in VPN settings."
+  "Auto-tukar: bila VPN telefon dihidupkan, VLESS modem dimatikan automatik, dan sebaliknya, supaya trafik tidak melalui dua lapisan. Boleh dimatikan dalam Tetapan VPN.": "Auto-switch: when the phone VPN is turned on, modem VLESS is turned off automatically, and vice versa, so traffic does not pass through two layers. Can be turned off in VPN settings.",
+  "Auto-tukar lebih pantas": "Faster auto-switch",
+  "Auto-tukar VPN telefon dan VLESS modem kini bertindak lebih cepat, dan cuba semula setiap 5 saat jika modem belum dapat dicapai (contohnya bila telefon kembali ke WiFi modem).": "Auto-switch between the phone VPN and modem VLESS now reacts faster and retries every 5 seconds if the modem cannot be reached yet (for example when the phone returns to the modem WiFi)."
  },
  "zh": {
   "Mod VPN": "VPN 模式",
