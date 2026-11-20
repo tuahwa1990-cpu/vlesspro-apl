@@ -71,7 +71,7 @@ fun ButangKuasa(keadaan: Int, klik: () -> Unit) {
 }
 
 @Composable
-private fun Cip(t: String, w: Color) {
+private fun CipVpn(t: String, w: Color) {
     Text(t, color = w, fontSize = 11.sp, fontWeight = FontWeight.Bold,
         modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(w.copy(alpha = 0.14f)).padding(horizontal = 8.dp, vertical = 3.dp))
 }
@@ -218,8 +218,8 @@ fun SubVpn() {
                     Text(h?.nama ?: p.take(30), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 15.sp, maxLines = 2)
                     Spacer(Modifier.height(4.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                        if (h != null) Cip(h.ringkas, Wr.ac2)
-                        ping[i]?.let { ms -> if (ms >= 0) Cip("$ms ms", if (ms < 150) Wr.ac else Wr.wn) else Cip(Bhs.t("Gagal"), Wr.bad) }
+                        if (h != null) CipVpn(h.ringkas, Wr.ac2)
+                        ping[i]?.let { ms -> if (ms >= 0) CipVpn("$ms ms", if (ms < 150) Wr.ac else Wr.wn) else CipVpn(Bhs.t("Gagal"), Wr.bad) }
                     }
                 }
                 TextButton({
