@@ -1,10 +1,19 @@
 {
- "title": "Kemaskan antara muka Utama",
+ "title": "Paparan lebih berwarna-warni",
  "items": [
-  "Tajuk skrin Profil dan Lagi kini ditengahkan.",
-  "Status sambungan di skrin Utama kini lebih kemas — \"Aktif\" atau \"Tidak Aktif\" dengan warna gradien dan kilauan lembut."
+  "Tajuk skrin Profil, VPN Telefon dan Lagi kini bergradien warna-warni.",
+  "Setiap menu dalam skrin Lagi (Lesen, Feature Plus, Tetapan dan lain-lain) kini ada aksen warna dan avatar berbeza-beza untuk paparan lebih menarik."
  ],
  "history": [
+  {
+   "version": "1.0.50",
+   "date": "2026-11-20",
+   "title": "Kemaskan antara muka Utama",
+   "items": [
+    "Tajuk skrin Profil dan Lagi kini ditengahkan.",
+    "Status sambungan di skrin Utama kini lebih kemas — \"Aktif\" atau \"Tidak Aktif\" dengan warna gradien dan kilauan lembut."
+   ]
+  },
   {
    "version": "1.0.49",
    "date": "2026-11-20",
