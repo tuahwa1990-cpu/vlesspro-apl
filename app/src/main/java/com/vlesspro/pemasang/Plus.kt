@@ -261,21 +261,105 @@ fun SubWan() {
 
 @Composable
 fun SubFailover() {
-    val d = muat { Modem.obj("/api/failover") }
+    var d by remember { mutableStateOf<JSONObject?>(null) }
+    var senarai by remember { mutableStateOf<List<Nod>>(emptyList()) }
+    var ping by remember { mutableStateOf<List<Int>>(emptyList()) }
     var on by remember { mutableStateOf(false) }
-    LaunchedEffect(d.value) { on = d.value?.optJSONObject("cfg")?.optBoolean("on") ?: false }
+    var segarKunci by remember { mutableStateOf(0) }
+    var segar by remember { mutableStateOf(false) }
+
+    LaunchedEffect(segarKunci) {
+        while (true) {
+            while (!St.depan) delay(1000)
+            segar = true
+            withContext(Dispatchers.IO) {
+                try {
+                    val dd = Modem.obj("/api/failover")
+                    d = dd
+                    on = dd.optJSONObject("cfg")?.optBoolean("on") ?: false
+                    senarai = Modem.nodes()
+                    ping = Modem.ping()
+                } catch (_: Exception) {}
+            }
+            segar = false
+            delay(8000)
+        }
+    }
+
     Halaman {
-        Judul("Failover")
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Judul("Failover")
+            Spacer(Modifier.weight(1f))
+            IconButton(onClick = { segarKunci++ }) { Text("⟳", fontSize = 22.sp, color = Wr.ac) }
+        }
+        val v = d
+        val grp = v?.optBoolean("grp") ?: false
+        val autoAktif = v?.optBoolean("auto") ?: false
+        val fails = (v?.optInt("fails") ?: 0).coerceIn(0, 3)
         KadWr {
             Text("Jika nod semasa gagal, tukar ke nod lain secara automatik.", color = Wr.mu, fontSize = 13.sp)
             Suis("Hidupkan failover", on) { on = it }
             Btn("Simpan") { bg { lapor(Modem.tindak("/api/failover", JSONObject().put("on", on).toString())) } }
-            d.value?.let { Baris("Nod semasa", it.optString("cur").ifEmpty { "-" }); Baris("Jumlah nod", it.optInt("n").toString()) }
+            Spacer(Modifier.height(6.dp))
+            when {
+                !on -> Text("Failover dimatikan.", color = Wr.mu, fontSize = 12.sp)
+                grp -> Text("Tidak aktif sekarang: profil KUMPULAN sedang digunakan. Pilih satu nod individu (bukan kumpulan) untuk mengaktifkan failover.", color = Wr.wn, fontSize = 12.sp)
+                !autoAktif -> Text("Tidak akan bertindak sekarang: hidupkan Sambung semula automatik dalam Tetapan, dan pastikan VLESS Pro sedang bersambung.", color = Wr.wn, fontSize = 12.sp)
+                else -> Text("Aktif dan sedang memantau sambungan.", color = Wr.ok, fontSize = 12.sp)
+            }
+            if (on && !grp && autoAktif) {
+                Spacer(Modifier.height(8.dp))
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text("Ujian gagal berturut" + ": $fails/3", color = if (fails > 0) Wr.wn else Wr.mu, fontSize = 12.sp, modifier = Modifier.weight(1f))
+                    Row {
+                        repeat(3) { i -> Box(Modifier.padding(start = 3.dp).size(8.dp).clip(androidx.compose.foundation.shape.CircleShape).background(if (i < fails) Wr.wn else Wr.garis)) }
+                    }
+                }
+            }
+            Spacer(Modifier.height(4.dp))
+            v?.let { Baris("Nod semasa", it.optString("cur").ifEmpty { "-" }); Baris("Jumlah nod", it.optInt("n").toString()) }
         }
-        val log = d.value?.optJSONArray("log")
+        if (senarai.isNotEmpty()) KadWr {
+            Text("Status setiap nod", color = Wr.tx, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(6.dp))
+            senarai.forEachIndexed { i, nd ->
+                val p = ping.getOrElse(i) { -1 }
+                val (warna, teks) = when {
+                    nd.pilih -> Wr.ac to "Digunakan sekarang"
+                    p == -2 -> Wr.mu to "Tidak diuji"
+                    p < 0 -> Wr.bad to "Tidak boleh dicapai"
+                    p < 300 -> Wr.ok to "$p ms"
+                    else -> Wr.wn to "$p ms"
+                }
+                Row(Modifier.fillMaxWidth().padding(vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.size(8.dp).clip(androidx.compose.foundation.shape.CircleShape).background(warna))
+                    Spacer(Modifier.width(8.dp))
+                    Text(nd.nama, color = Wr.tx, fontSize = 13.sp, modifier = Modifier.weight(1f), maxLines = 1)
+                    Text(teks, color = warna, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                }
+            }
+            if (segar) Text("Menyegarkan...", color = Wr.mu, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
+        }
+        val log = v?.optJSONArray("log")
         if (log != null && log.length() > 0) KadWr {
             Text("Rekod terkini", color = Wr.mu, fontSize = 12.sp)
-            for (i in 0 until minOf(log.length(), 8)) { val o = log.getJSONObject(i); Text(ProfilAlat.waktu(o.optLong("t")) + "  " + o.optString("from") + " → " + o.optString("to"), color = Wr.tx, fontSize = 12.sp) }
+            for (i in 0 until minOf(log.length(), 8)) {
+                val o = log.getJSONObject(i)
+                Column(Modifier.padding(vertical = 4.dp)) {
+                    Text(ProfilAlat.waktu(o.optLong("t")) + "  " + o.optString("from") + " → " + o.optString("to"), color = Wr.tx, fontSize = 12.sp)
+                    val sebab = o.optString("why")
+                    if (sebab.isNotEmpty()) Text(sebab, color = Wr.mu, fontSize = 11.sp)
+                }
+            }
+        }
+        KadWr {
+            Text("Bagaimana failover berfungsi", color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            listOf(
+                "Hanya memantau semasa VLESS Pro bersambung dan sedang digunakan.",
+                "Perlu beberapa ujian gagal berturut-turut dahulu sebelum bertukar, supaya tidak tukar nod akibat gangguan sekejap sahaja.",
+                "Tidak aktif jika profil KUMPULAN sedang dipilih; pilih satu nod untuk mengaktifkan.",
+                "Hanya bertukar ke nod lain yang disahkan boleh dicapai."
+            ).forEach { Text("•  " + it, color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp)) }
         }
     }
 }

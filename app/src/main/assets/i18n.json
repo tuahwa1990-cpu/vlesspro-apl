@@ -1272,7 +1272,22 @@
     "Pembetulan ranap Statistik": "Statistics crash fix",
     "Betulkan ranap apabila membuka skrin Statistik (disebabkan tetapan jarak dalaman yang tidak sah).": "Fixed a crash when opening the Statistics screen (caused by an invalid internal spacing setting).",
     "Pembetulan bahasa skrin Lagi": "More screen language fix",
-    "Betulkan tajuk kad menu di skrin Lagi (Lesen, Penghalaan, Kumpulan dan lain-lain) yang tidak bertukar ke bahasa yang dipilih.": "Fixed menu card titles on the More screen (License, Routing, Groups and others) that were not switching to the chosen language."
+    "Betulkan tajuk kad menu di skrin Lagi (Lesen, Penghalaan, Kumpulan dan lain-lain) yang tidak bertukar ke bahasa yang dipilih.": "Fixed menu card titles on the More screen (License, Routing, Groups and others) that were not switching to the chosen language.",
+    "Failover dimatikan.": "Failover is off.",
+    "Tidak aktif sekarang: profil KUMPULAN sedang digunakan. Pilih satu nod individu (bukan kumpulan) untuk mengaktifkan failover.": "Not active right now: a GROUP profile is in use. Select a single node (not a group) to enable failover.",
+    "Aktif dan sedang memantau sambungan.": "Active and monitoring the connection.",
+    "Ujian gagal berturut": "Consecutive failed checks",
+    "Status setiap nod": "Status of each node",
+    "Digunakan sekarang": "In use now",
+    "Tidak diuji": "Not tested",
+    "Tidak boleh dicapai": "Unreachable",
+    "Menyegarkan...": "Refreshing...",
+    "Bagaimana failover berfungsi": "How failover works",
+    "Hanya memantau semasa VLESS Pro bersambung dan sedang digunakan.": "Only monitors while VLESS Pro is connected and in use.",
+    "Perlu beberapa ujian gagal berturut-turut dahulu sebelum bertukar, supaya tidak tukar nod akibat gangguan sekejap sahaja.": "Needs several consecutive failed checks before switching, so it doesn't switch nodes over a brief blip.",
+    "Tidak aktif jika profil KUMPULAN sedang dipilih; pilih satu nod untuk mengaktifkan.": "Not active if a GROUP profile is selected; select a single node to enable it.",
+    "Hanya bertukar ke nod lain yang disahkan boleh dicapai.": "Only switches to another node confirmed to be reachable.",
+    "Tidak akan bertindak sekarang: hidupkan Sambung semula automatik dalam Tetapan, dan pastikan VLESS Pro sedang bersambung.": "Won't take action right now: turn on Auto reconnect in Settings, and make sure VLESS Pro is connected."
   },
   "zh": {
     "Mod VPN": "VPN 模式",
