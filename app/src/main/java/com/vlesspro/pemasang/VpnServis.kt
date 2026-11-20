@@ -172,12 +172,8 @@ class VpnPerkhidmatan : VpnService() {
         jalan = true; sibuk = false; masa0 = System.currentTimeMillis()
         catat("Bersambung")
         notif(Bhs.f("Bersambung ke {0}", h.nama))
-        if (VpnTetapan.tukar(this) && Modem.ip.isNotBlank()) Thread {
-            try {
-                val st = Modem.status()
-                if (st.optString("mode") == "vless" && st.optBoolean("vless")) { Modem.mod(false); catat("VLESS modem dimatikan (auto-tukar)") }
-            } catch (_: Throwable) {}
-        }.start()
+        tukarPending = true
+        cubaMatiModem()
         VpnKongsi.kemaskini(this)
         daftarRangkaian()
         mulaPengawas()
@@ -213,6 +209,24 @@ class VpnPerkhidmatan : VpnService() {
         }.start()
     }
 
+    @Volatile private var tukarPending = false
+    @Volatile private var tukarJalan = false
+
+    /** Matikan VLESS modem (auto-tukar). Jika modem tak dapat dicapai (bukan WiFi modem), cuba lagi kemudian. */
+    private fun cubaMatiModem() {
+        if (!tukarPending || tukarJalan || !VpnTetapan.tukar(this)) return
+        tukarJalan = true
+        Thread {
+            try {
+                if (Modem.ip.isNotBlank()) {
+                    val st = Modem.status()
+                    if (st.optString("mode") == "vless" && st.optBoolean("vless")) { Modem.mod(false); catat("VLESS modem dimatikan (auto-tukar)") }
+                    tukarPending = false
+                }
+            } catch (_: Throwable) {} finally { tukarJalan = false }
+        }.start()
+    }
+
     private fun mulaPengawas() {
         Thread {
             var gagalBerturut = 0
@@ -223,6 +237,7 @@ class VpnPerkhidmatan : VpnService() {
                 val x = xray
                 if (x == null || !x.isAlive || (hasil?.ssh != null && ssh?.sihat != true)) { pulih("Teras tidak aktif"); continue }
                 kitar++
+                if (kitar % 3 == 0) cubaMatiModem()
                 if (kitar % 4 == 0) {
                     if (VpnAlat.pingSebenar() < 0) gagalBerturut++ else gagalBerturut = 0
                     if (gagalBerturut >= 4) { gagalBerturut = 0; pulih("Pelayan tidak membalas") }
