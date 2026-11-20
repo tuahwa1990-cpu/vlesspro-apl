@@ -304,11 +304,12 @@ private fun SkrinUtama(ke: (String) -> Unit) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             BtnKecil(Bhs.t("Tampal"), Modifier.weight(1f)) { tampal() }
             BtnKecil(Bhs.t("Imbas QR"), Modifier.weight(1f)) {
+                if (!VpnLesen.berlesen(ctx)) { St.toast(VpnLesen.mesej()); return@BtnKecil }
                 imbas.launch(ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE).setPrompt(Bhs.t("Halakan kamera ke kod QR"))
                     .setBeepEnabled(false).setOrientationLocked(false).setCaptureActivity(ImbasQr::class.java))
             }
-            BtnKecil(Bhs.t("Imej QR"), Modifier.weight(1f)) { galeri.launch("image/*") }
-            BtnKecil("+ SSH", Modifier.weight(1f)) { ke("ssh") }
+            BtnKecil(Bhs.t("Imej QR"), Modifier.weight(1f)) { if (VpnLesen.berlesen(ctx)) galeri.launch("image/*") else St.toast(VpnLesen.mesej()) }
+            BtnKecil("+ SSH", Modifier.weight(1f)) { if (VpnLesen.berlesen(ctx)) ke("ssh") else St.toast(VpnLesen.mesej()) }
         }
         if (sedangImport) Text(Bhs.t("Mengimport..."), color = Wr.mu, fontSize = 12.sp)
         if (senarai.isEmpty()) {
@@ -416,7 +417,7 @@ private fun SkrinApl(kembali: () -> Unit) {
     Halaman {
         Judul(Bhs.t("VPN per-apl"))
         pilihan.forEachIndexed { i, t ->
-            KadWr(klik = { mod = i; VpnTetapan.setModApl(ctx, i) }) {
+            KadWr(klik = { if (i != 0 && !VpnLesen.berlesen(ctx)) St.toast(VpnLesen.mesej()) else { mod = i; VpnTetapan.setModApl(ctx, i) } }) {
                 Text((if (mod == i) "◉  " else "○  ") + t, color = if (mod == i) Wr.ac else Wr.tx, fontWeight = FontWeight.Bold)
             }
         }

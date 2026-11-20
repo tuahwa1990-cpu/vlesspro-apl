@@ -306,6 +306,7 @@ fun Utama2(pref: android.content.SharedPreferences, keluar: () -> Unit) {
                     val s = Modem.status()
                     St.status = s
                     St.jamOfset = s.optLong("now") - System.currentTimeMillis() / 1000
+                    s.optJSONObject("lic")?.let { VpnLesen.tetap(ctx0, it.optString("state") == "active") }
                     St.luar = false
                     val kini = System.currentTimeMillis()
                     if (s.optBoolean("vless") && kini - ipMasa > (if (St.ipInfo == null) 15000L else 120000L)) {

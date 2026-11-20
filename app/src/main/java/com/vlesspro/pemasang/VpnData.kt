@@ -64,6 +64,48 @@ object VpnTetapan {
     fun setApl(ctx: Context, s: Set<String>) { p(ctx).edit().putStringSet("vpn_apl", HashSet(s)).apply() }
 }
 
+class SekatanVpn(m: String) : RuntimeException(m)
+
+/** Pelanggan berlesen = apl pernah melihat lesen modem berstatus aktif (disimpan dalam telefon). */
+object VpnLesen {
+    const val HAD_PERCUMA = 3
+    private fun p(ctx: Context) = ctx.getSharedPreferences("vp", Context.MODE_PRIVATE)
+    fun berlesen(ctx: Context) = p(ctx).getBoolean("vpn_berlesen", false)
+    fun tetap(ctx: Context, v: Boolean) { if (berlesen(ctx) != v) p(ctx).edit().putBoolean("vpn_berlesen", v).apply() }
+    fun berbayar(h: VlessPautan.Hasil) = h.jenis == "SSH" || h.jenis == "TROJAN" || h.jenis == "SS"
+    fun mesej() = Bhs.t("Ciri ini untuk pelanggan VLESS Pro berlesen. Log masuk modem anda dalam apl ini sekali untuk membukanya.")
+}
+
+/** Suis jauh: fail kawal.json di GitHub. Jika gagal dimuat turun, VPN dibenarkan (fail-open). */
+object VpnKawal {
+    private const val URL_KAWAL = "https://raw.githubusercontent.com/tuahwa1990-cpu/vlesspro-apl/main/kawal.json"
+    private fun p(ctx: Context) = ctx.getSharedPreferences("vp", Context.MODE_PRIVATE)
+
+    /** Pulangkan mesej sekatan, atau null jika dibenarkan. Panggil dari benang latar. */
+    fun semak(ctx: Context): String? {
+        var teks = p(ctx).getString("kawal_json", "") ?: ""
+        val masa = p(ctx).getLong("kawal_masa", 0L)
+        if (System.currentTimeMillis() - masa > 3_600_000L) {
+            try {
+                val c = URL(URL_KAWAL).openConnection() as HttpURLConnection
+                c.connectTimeout = 4000; c.readTimeout = 4000
+                val t = c.inputStream.use { it.readBytes().toString(Charsets.UTF_8) }
+                JSONObject(t)
+                teks = t
+                p(ctx).edit().putString("kawal_json", t).putLong("kawal_masa", System.currentTimeMillis()).apply()
+            } catch (_: Exception) {}
+        }
+        return try {
+            val j = JSONObject(teks)
+            when {
+                !j.optBoolean("vpn_telefon", true) -> j.optString("mesej").ifEmpty { Bhs.t("VPN telefon dihentikan buat sementara.") }
+                j.optLong("versi_min", 0L) > Kemas.versiSemasa(ctx) -> Bhs.t("Sila kemas kini apl untuk terus guna VPN telefon.")
+                else -> null
+            }
+        } catch (_: Exception) { null }
+    }
+}
+
 object VpnAlat {
     fun pingTcp(host: String, port: Int, had: Int = 3000): Long = try {
         val t0 = System.nanoTime(); Socket().use { it.connect(InetSocketAddress(host, port), had) }; (System.nanoTime() - t0) / 1_000_000
@@ -145,6 +187,7 @@ object VpnImport {
     }
 
     fun segarkan(ctx: Context): String {
+        if (!VpnLesen.berlesen(ctx)) return VpnLesen.mesej()
         val lama = SimpanVpn.langganan(ctx)
         if (lama.isEmpty()) return Bhs.t("Tiada langganan.")
         var ok = 0; var gagal = 0
@@ -160,13 +203,21 @@ object VpnImport {
         if (pautan.isEmpty() && url.isEmpty()) return Bhs.t("Tiada pautan pelayan atau langganan ditemui.")
         var tambah = 0; var ralat = ""
         val m = SimpanVpn.manual(ctx).toMutableList()
+        val lesen = VpnLesen.berlesen(ctx)
         for (l in pautan) {
-            try { VlessPautan.hurai(l); if (l !in m) { m.add(l); tambah++ } } catch (e: Exception) { ralat = e.message ?: "" }
+            try {
+                val h = VlessPautan.hurai(l)
+                if (l in m) continue
+                if (!lesen && VpnLesen.berbayar(h)) { ralat = VpnLesen.mesej(); continue }
+                if (!lesen && m.size >= VpnLesen.HAD_PERCUMA) { ralat = Bhs.f("Had {0} pelayan untuk pengguna percuma. Padam satu dahulu.", VpnLesen.HAD_PERCUMA.toString()); continue }
+                m.add(l); tambah++
+            } catch (e: Exception) { ralat = e.message ?: "" }
         }
         SimpanVpn.simpanManual(ctx, m)
         var sub = 0
         val ls = SimpanVpn.langganan(ctx).toMutableList()
         for (u in url) {
+            if (!lesen) { ralat = VpnLesen.mesej(); break }
             try {
                 val l = ambilLangganan(u)
                 val i = ls.indexOfFirst { it.first == u }

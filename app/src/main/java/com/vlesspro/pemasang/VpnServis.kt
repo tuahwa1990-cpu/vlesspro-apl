@@ -79,7 +79,7 @@ class VpnPerkhidmatan : VpnService() {
                 cuba++
                 try { sambung(pautan, auto); return@Thread } catch (e: Throwable) {
                     catat("Gagal: " + (e.message ?: e.javaClass.simpleName))
-                    if (cuba >= maks || tamat) { gagal(huraiRalat(e)); return@Thread }
+                    if (cuba >= maks || tamat || e is SekatanVpn) { gagal(if (e is SekatanVpn) (e.message ?: "") else huraiRalat(e)); return@Thread }
                     bersihTeras()
                     try { if (tun != null) TProxyService.TProxyStopService() } catch (_: Throwable) {}
                     try { tun?.close() } catch (_: Exception) {}
@@ -146,6 +146,9 @@ class VpnPerkhidmatan : VpnService() {
             }
         }
         val h = VlessPautan.hurai(pautan)
+        VpnKawal.semak(this)?.let { throw SekatanVpn(it) }
+        val lesen = VpnLesen.berlesen(this)
+        if (!lesen && VpnLesen.berbayar(h)) throw SekatanVpn(VpnLesen.mesej())
         hasil = h
         nama = h.nama
         notif(Bhs.f("Menyambung ke {0}", h.nama))
@@ -155,7 +158,7 @@ class VpnPerkhidmatan : VpnService() {
         val b = Builder().setSession("VLESS Pro").setMtu(1500).addAddress("26.26.26.1", 30)
             .addRoute("0.0.0.0", 0).addDnsServer("1.1.1.1").addDnsServer("8.8.8.8")
             .addAddress("fd00:26:26::1", 126).addRoute("::", 0)
-        val mod = VpnTetapan.modApl(this)
+        val mod = if (lesen) VpnTetapan.modApl(this) else 0
         val apl = VpnTetapan.apl(this)
         if (mod == 1 && apl.isNotEmpty()) {
             for (a in apl) try { b.addAllowedApplication(a) } catch (_: Exception) {}
