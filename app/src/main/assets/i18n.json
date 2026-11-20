@@ -1270,7 +1270,9 @@
     "Baharu: Sambungan gagal (24 jam) di samping (1 jam), dan memori bebas kini bar progres berwarna.": "New: Failed connections (24h) alongside (1h), and free memory is now a colored progress bar.",
     "Butang segar semula dan masa dikemas kini ditambah supaya mudah pantau data terkini.": "A refresh button and an updated-at time were added so the latest data is easy to track.",
     "Pembetulan ranap Statistik": "Statistics crash fix",
-    "Betulkan ranap apabila membuka skrin Statistik (disebabkan tetapan jarak dalaman yang tidak sah).": "Fixed a crash when opening the Statistics screen (caused by an invalid internal spacing setting)."
+    "Betulkan ranap apabila membuka skrin Statistik (disebabkan tetapan jarak dalaman yang tidak sah).": "Fixed a crash when opening the Statistics screen (caused by an invalid internal spacing setting).",
+    "Pembetulan bahasa skrin Lagi": "More screen language fix",
+    "Betulkan tajuk kad menu di skrin Lagi (Lesen, Penghalaan, Kumpulan dan lain-lain) yang tidak bertukar ke bahasa yang dipilih.": "Fixed menu card titles on the More screen (License, Routing, Groups and others) that were not switching to the chosen language."
   },
   "zh": {
     "Mod VPN": "VPN 模式",

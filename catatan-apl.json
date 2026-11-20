@@ -1,9 +1,17 @@
 {
-  "title": "Pembetulan ranap Statistik",
+  "title": "Pembetulan bahasa skrin Lagi",
   "items": [
-    "Betulkan ranap apabila membuka skrin Statistik (disebabkan tetapan jarak dalaman yang tidak sah)."
+    "Betulkan tajuk kad menu di skrin Lagi (Lesen, Penghalaan, Kumpulan dan lain-lain) yang tidak bertukar ke bahasa yang dipilih."
   ],
   "history": [
+    {
+      "version": "1.0.55",
+      "date": "2026-11-21",
+      "title": "Pembetulan ranap Statistik",
+      "items": [
+        "Betulkan ranap apabila membuka skrin Statistik (disebabkan tetapan jarak dalaman yang tidak sah)."
+      ]
+    },
     {
       "version": "1.0.54",
       "date": "2026-11-21",
