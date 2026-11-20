@@ -6,7 +6,7 @@ on:
     branches: [fungsi2]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -37,3 +37,11 @@ jobs:
         with:
           name: VLESSPro-Ujian
           path: VLESSPro-Ujian-*.apk
+      - name: Terbit pra-keluaran ujian
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Pra-keluaran (prerelease) bernama "ujian": tidak dikira sebagai "latest", jadi tidak menyentuh kemas kini pelanggan.
+          gh release delete ujian --cleanup-tag -y || true
+          gh release create ujian "VLESSPro-Ujian-${{ github.run_number }}.apk" --prerelease --target "${{ github.sha }}" --title "VLESS Pro Ujian ${{ github.run_number }}" --notes "Binaan ujian Fungsi 2. Bukan untuk pelanggan."
+          for i in 1 2 3 4 5; do sleep 3; gh release edit ujian --draft=false --prerelease && break || true; done
