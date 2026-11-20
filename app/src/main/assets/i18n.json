@@ -1155,7 +1155,14 @@
   "Tetapan berguna": "Useful settings",
   "Sambung semula automatik memulihkan VPN jika rangkaian terputus. Kill switch menyekat internet jika VPN terputus. Per-apl memilih apl yang menggunakan VPN.": "Auto-reconnect restores the VPN if the network drops. Kill switch blocks the internet if the VPN drops. Per-app chooses which apps use the VPN.",
   "Modem tidak dicapai": "Modem not reachable",
-  "Sambung telefon ke WiFi modem": "Connect the phone to the modem WiFi"
+  "Sambung telefon ke WiFi modem": "Connect the phone to the modem WiFi",
+  "Profil lebih lengkap dan panduan VPN telefon": "Fuller profiles and a phone VPN guide",
+  "Profil: failover automatik, ujian dan susunan ikut laju, butang Guna terpantas.": "Profiles: automatic failover, testing and fastest-first sorting, a Use fastest button.",
+  "Profil: kegemaran, tag, namakan semula, kod QR, eksport dan import profil.": "Profiles: favourites, tags, rename, QR code, export and import.",
+  "Hantar profil antara modem dan VPN telefon dengan satu ketikan.": "Send profiles between the modem and the phone VPN with one tap.",
+  "Paparan jumlah data dan data setiap profil.": "Total data and per-profile data display.",
+  "Panduan cara guna VPN telefon dalam apl.": "How-to guide for the phone VPN inside the app.",
+  "Tajuk halaman Utama dan VPN telefon di tengah, dengan status modem yang lebih jelas.": "Home and phone VPN titles are centred, with a clearer modem status."
  },
  "zh": {
   "Mod VPN": "VPN 模式",

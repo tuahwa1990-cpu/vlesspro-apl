@@ -1,10 +1,23 @@
 {
- "title": "Penambahbaikan umum",
+ "title": "Profil lebih lengkap dan panduan VPN telefon",
  "items": [
-  "Syarat penggunaan dan resit persetujuan kini boleh dibaca di Lagi > Perjanjian.",
-  "Penambahbaikan dalaman untuk kestabilan dan penyelenggaraan VPN telefon."
+  "Profil: failover automatik, ujian dan susunan ikut laju, butang Guna terpantas.",
+  "Profil: kegemaran, tag, namakan semula, kod QR, eksport dan import profil.",
+  "Hantar profil antara modem dan VPN telefon dengan satu ketikan.",
+  "Paparan jumlah data dan data setiap profil.",
+  "Panduan cara guna VPN telefon dalam apl.",
+  "Tajuk halaman Utama dan VPN telefon di tengah, dengan status modem yang lebih jelas."
  ],
  "history": [
+  {
+   "version": "1.0.41",
+   "date": "2026-11-20",
+   "title": "Penambahbaikan umum",
+   "items": [
+    "Syarat penggunaan dan resit persetujuan kini boleh dibaca di Lagi > Perjanjian.",
+    "Penambahbaikan dalaman untuk kestabilan dan penyelenggaraan VPN telefon."
+   ]
+  },
   {
    "version": "1.0.40",
    "date": "2026-11-20",
