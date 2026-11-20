@@ -1056,7 +1056,10 @@
   "VPN telefon dimatikan kerana VLESS modem hidup": "Phone VPN turned off because modem VLESS is on",
   "Auto-tukar dengan VLESS modem": "Auto-switch with modem VLESS",
   "Bila VPN telefon dihidupkan, VLESS modem dimatikan automatik, dan sebaliknya, supaya trafik tidak melalui dua lapisan.": "When the phone VPN is turned on, modem VLESS is turned off automatically, and vice versa, so traffic does not pass through two layers.",
-  "Trafik dan penggunaan": "Traffic and usage"
+  "Trafik dan penggunaan": "Traffic and usage",
+  "VPN telefon lebih mudah": "Easier phone VPN",
+  "VPN telefon kini di bar bawah (menggantikan Statistik, yang dipindah ke Lagi) supaya mudah diakses.": "The phone VPN is now in the bottom bar (replacing Statistics, which moved to More) for easy access.",
+  "Auto-tukar: bila VPN telefon dihidupkan, VLESS modem dimatikan automatik, dan sebaliknya, supaya trafik tidak melalui dua lapisan. Boleh dimatikan dalam Tetapan VPN.": "Auto-switch: when the phone VPN is turned on, modem VLESS is turned off automatically, and vice versa, so traffic does not pass through two layers. Can be turned off in VPN settings."
  },
  "zh": {
   "Mod VPN": "VPN 模式",

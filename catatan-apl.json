@@ -1,13 +1,22 @@
 {
- "title": "VPN telefon lebih lengkap",
+ "title": "VPN telefon lebih mudah",
  "items": [
-  "Sambung semula automatik apabila sambungan terputus atau rangkaian bertukar (WiFi/data), serta pilihan kill switch.",
-  "Protokol baharu (percubaan): Trojan, Shadowsocks dan SSH (termasuk SSL/TLS dan payload WebSocket).",
-  "Tambah pelayan dengan imbas kod QR, gambar QR atau pautan langganan. Ujian ping, pilihan pelayan terpantas dan ping sebenar.",
-  "VPN per-apl, jubin Tetapan Pantas, widget skrin utama dan pilihan sambung semasa telefon dihidupkan.",
-  "Skrin Tentang dengan versi apl dan butang hantar log."
+  "VPN telefon kini di bar bawah (menggantikan Statistik, yang dipindah ke Lagi) supaya mudah diakses.",
+  "Auto-tukar: bila VPN telefon dihidupkan, VLESS modem dimatikan automatik, dan sebaliknya, supaya trafik tidak melalui dua lapisan. Boleh dimatikan dalam Tetapan VPN."
  ],
  "history": [
+  {
+   "version": "1.0.38",
+   "date": "2026-11-20",
+   "title": "VPN telefon lebih lengkap",
+   "items": [
+    "Sambung semula automatik apabila sambungan terputus atau rangkaian bertukar (WiFi/data), serta pilihan kill switch.",
+    "Protokol baharu (percubaan): Trojan, Shadowsocks dan SSH (termasuk SSL/TLS dan payload WebSocket).",
+    "Tambah pelayan dengan imbas kod QR, gambar QR atau pautan langganan. Ujian ping, pilihan pelayan terpantas dan ping sebenar.",
+    "VPN per-apl, jubin Tetapan Pantas, widget skrin utama dan pilihan sambung semasa telefon dihidupkan.",
+    "Skrin Tentang dengan versi apl dan butang hantar log."
+   ]
+  },
   {
    "version": "1.0.37",
    "date": "2026-11-20",
