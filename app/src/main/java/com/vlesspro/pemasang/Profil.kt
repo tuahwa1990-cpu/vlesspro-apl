@@ -66,6 +66,26 @@ object ProfilMeta {
     }
 }
 
+/**
+ * Pembina pautan SSH mengikut format yang difahami MODEM (vless-pro-b618 proto.go parseSSH):
+ * ssh://pengguna:kata@hos:port?mode=ws|tls|tlsws&sni=..&payload=..&proxy=hos:port#nama
+ * Ini BERBEZA daripada format SSH apl VPN telefon (SshPautan dalam VpnSsh.kt), yang tiada medan "mode"/"proxy".
+ */
+object ModemSsh {
+    private fun e(s: String) = java.net.URLEncoder.encode(s, "UTF-8").replace("+", "%20")
+
+    fun bina(nama: String, host: String, port: Int, pengguna: String, kata: String, mod: String, sni: String, payload: String, proksi: String): String {
+        val q = buildList {
+            add("mode=" + mod)
+            if (sni.isNotBlank()) add("sni=" + e(sni))
+            if (payload.isNotBlank()) add("payload=" + e(payload))
+            if (proksi.isNotBlank()) add("proxy=" + e(proksi))
+        }.joinToString("&")
+        val n = nama.trim().ifEmpty { "SSH $host" }
+        return "ssh://" + e(pengguna) + ":" + e(kata) + "@" + host + ":" + port + "?" + q + "#" + e(n)
+    }
+}
+
 object ProfilAlat {
     /** Tukar nama paparan dalam pautan (vmess: medan ps; lain-lain: serpihan #nama). */
     fun namaSemula(link: String, nama: String): String {
@@ -302,23 +322,93 @@ fun Profil(ke: (String) -> Unit) {
     }
 
     if (tambah) {
+        var tab by remember { mutableIntStateOf(0) }
         var teks by remember { mutableStateOf("") }
+        var tajukWg by remember { mutableStateOf("") }
+        var nama by remember { mutableStateOf("") }
+        var host by remember { mutableStateOf("") }
+        var port by remember { mutableStateOf("22") }
+        var pengguna by remember { mutableStateOf("") }
+        var kata by remember { mutableStateOf("") }
+        var mod by remember { mutableStateOf("ws") }
+        var sni by remember { mutableStateOf("") }
+        var payload by remember { mutableStateOf("") }
+        var proksi by remember { mutableStateOf("") }
+        var ralat by remember { mutableStateOf("") }
+
+        fun pasteKe(set: (String) -> Unit) {
+            val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            set(cm.primaryClip?.getItemAt(0)?.text?.toString().orEmpty())
+        }
+
         AlertDialog(onDismissRequest = { tambah = false }, containerColor = Wr.kad,
             title = { Text("Tambah profil", color = Wr.tx) },
             text = {
-                Column {
-                    OutlinedTextField(teks, { teks = it }, minLines = 4, maxLines = 8, modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Tampal pautan (satu baris setiap profil)") }, colors = medan())
-                    TextButton(onClick = {
-                        val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        teks = cm.primaryClip?.getItemAt(0)?.text?.toString().orEmpty()
-                    }) { Text("Tampal dari papan klip", color = Wr.ac) }
+                Column(Modifier.heightIn(max = 480.dp).verticalScroll(rememberScrollState())) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        FilterChip(tab == 0, { tab = 0; ralat = "" }, label = { Text("VLESS / Lain", fontSize = 12.sp) })
+                        FilterChip(tab == 1, { tab = 1; ralat = "" }, label = { Text("SSH", fontSize = 12.sp) })
+                        FilterChip(tab == 2, { tab = 2; ralat = "" }, label = { Text("WireGuard", fontSize = 12.sp) })
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    when (tab) {
+                        0 -> {
+                            Text("Tampal pautan vless://, vmess://, trojan:// atau ss:// (satu baris setiap profil).", color = Wr.mu, fontSize = 12.sp)
+                            OutlinedTextField(teks, { teks = it }, minLines = 4, maxLines = 8, modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                                label = { Text("Tampal pautan di sini") }, colors = medan())
+                            TextButton(onClick = { pasteKe { teks = it } }) { Text("Tampal dari papan klip", color = Wr.ac) }
+                        }
+                        1 -> {
+                            Text("Isi butiran pelayan SSH. Jika menggunakan IP \"bug\" (bukan IP pelayan sebenar), isi dalam ruangan Proksi.", color = Wr.mu, fontSize = 12.sp)
+                            OutlinedTextField(nama, { nama = it }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(top = 8.dp), label = { Text("Nama (pilihan)") }, colors = medan())
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
+                                OutlinedTextField(host, { host = it }, singleLine = true, modifier = Modifier.weight(2f), label = { Text("Host / IP") }, colors = medan())
+                                OutlinedTextField(port, { port = it.filter(Char::isDigit).take(5) }, singleLine = true, modifier = Modifier.weight(1f), label = { Text("Port") }, colors = medan())
+                            }
+                            OutlinedTextField(pengguna, { pengguna = it }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(top = 8.dp), label = { Text("Nama pengguna") }, colors = medan())
+                            OutlinedTextField(kata, { kata = it }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(top = 8.dp), label = { Text("Kata laluan") }, colors = medan())
+                            Text("Mod sambungan", color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 10.dp))
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                listOf("ws" to "WS (payload)", "tls" to "TLS/SSL", "tlsws" to "TLS + payload").forEach { (k, t) ->
+                                    FilterChip(mod == k, { mod = k }, label = { Text(t, fontSize = 11.sp) })
+                                }
+                            }
+                            if (mod == "tls" || mod == "tlsws") OutlinedTextField(sni, { sni = it }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                                label = { Text("SNI (kosong = guna host)") }, colors = medan())
+                            if (mod == "ws" || mod == "tlsws") {
+                                OutlinedTextField(payload, { payload = it }, minLines = 2, maxLines = 4, modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                                    label = { Text("Payload (kosong = guna lalai)") }, colors = medan())
+                                TextButton(onClick = { payload = SshPautan.PAYLOAD_WS }) { Text("Isi payload lalai", color = Wr.ac) }
+                            }
+                            OutlinedTextField(proksi, { proksi = it }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                                label = { Text("Proksi / IP bug (pilihan, format host:port)") }, colors = medan())
+                            Text("Dibiarkan kosong jika tiada guna IP bug. Sambungan terus ke Host/IP di atas.", color = Wr.mu, fontSize = 11.sp, modifier = Modifier.padding(top = 2.dp))
+                            if (ralat.isNotEmpty()) Text(ralat, color = Wr.bad, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+                        }
+                        else -> {
+                            Text("Tampal kandungan fail .conf WireGuard, atau pautan wireguard://.", color = Wr.mu, fontSize = 12.sp)
+                            OutlinedTextField(tajukWg, { tajukWg = it }, minLines = 6, maxLines = 10, modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                                label = { Text("Tampal di sini") }, colors = medan())
+                            TextButton(onClick = { pasteKe { tajukWg = it } }) { Text("Tampal dari papan klip", color = Wr.ac) }
+                        }
+                    }
                 }
             },
             confirmButton = {
-                TextButton(enabled = teks.isNotBlank(), onClick = {
-                    val t = teks; tambah = false
-                    bg { lapor(Modem.tambahNod(t)); muat() }
+                val aktif = when (tab) { 0 -> teks.isNotBlank(); 1 -> host.isNotBlank() && pengguna.isNotBlank(); else -> tajukWg.isNotBlank() }
+                TextButton(enabled = aktif, onClick = {
+                    when (tab) {
+                        0 -> { val t = teks; tambah = false; bg { lapor(Modem.tambahNod(t)); muat() } }
+                        1 -> {
+                            val p = port.toIntOrNull()
+                            if (p == null || p !in 1..65535) { ralat = Bhs.t("Port tidak sah."); return@TextButton }
+                            if (proksi.isNotBlank() && !proksi.contains(':')) { ralat = Bhs.t("Format proksi mesti host:port."); return@TextButton }
+                            val link = ModemSsh.bina(nama, host.trim(), p, pengguna.trim(), kata, mod, sni.trim(), payload, proksi.trim())
+                            tambah = false
+                            bg { lapor(Modem.tambahNod(link)); muat() }
+                        }
+                        else -> { val t = tajukWg; tambah = false; bg { lapor(Modem.tambahNod(t)); muat() } }
+                    }
                 }) { Text("Tambah", color = Wr.ac) }
             },
             dismissButton = { TextButton(onClick = { tambah = false }) { Text("Batal", color = Wr.mu) } })
