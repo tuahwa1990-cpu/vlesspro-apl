@@ -5,8 +5,10 @@ import java.io.File
 
 /** Menyimpan jejak ralat ranap terakhir supaya ia boleh disertakan dalam Hantar diagnosis. */
 class VpApp : Application() {
+    companion object { lateinit var ctx: Application }
     override fun onCreate() {
         super.onCreate()
+        ctx = this
         val asal = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { t, e ->
             try {

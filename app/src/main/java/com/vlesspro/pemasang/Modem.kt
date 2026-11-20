@@ -197,6 +197,8 @@ object St {
     var jamOfset = 0L
     /** Benar bila apl kelihatan di skrin; semakan berkala dijeda bila apl di latar belakang. */
     @Volatile var depan = true
+    /** Masa terakhir VLESS modem dihidupkan melalui apl ini (untuk auto-tukar dengan VPN telefon). */
+    @Volatile var masaModOn = 0L
 
     fun toast(m: String) { mesej = m }
 

@@ -1050,7 +1050,12 @@
   "Protokol baharu (percubaan): Trojan, Shadowsocks dan SSH (termasuk SSL/TLS dan payload WebSocket).": "New protocols (experimental): Trojan, Shadowsocks and SSH (including SSL/TLS and WebSocket payload).",
   "Tambah pelayan dengan imbas kod QR, gambar QR atau pautan langganan. Ujian ping, pilihan pelayan terpantas dan ping sebenar.": "Add servers by scanning a QR code, a QR image or a subscription link. Ping test, fastest-server pick and real ping.",
   "VPN per-apl, jubin Tetapan Pantas, widget skrin utama dan pilihan sambung semasa telefon dihidupkan.": "Per-app VPN, Quick Settings tile, home-screen widget and connect-on-boot option.",
-  "Skrin Tentang dengan versi apl dan butang hantar log.": "About screen with the app version and a send-log button."
+  "Skrin Tentang dengan versi apl dan butang hantar log.": "About screen with the app version and a send-log button.",
+  "VPN telefon dimatikan kerana VLESS modem dihidupkan": "Phone VPN turned off because modem VLESS was turned on",
+  "VLESS modem dimatikan kerana VPN telefon hidup": "Modem VLESS turned off because phone VPN is on",
+  "VPN telefon dimatikan kerana VLESS modem hidup": "Phone VPN turned off because modem VLESS is on",
+  "Auto-tukar dengan VLESS modem": "Auto-switch with modem VLESS",
+  "Bila VPN telefon dihidupkan, VLESS modem dimatikan automatik, dan sebaliknya, supaya trafik tidak melalui dua lapisan.": "When the phone VPN is turned on, modem VLESS is turned off automatically, and vice versa, so traffic does not pass through two layers."
  },
  "zh": {
   "Mod VPN": "VPN 模式",

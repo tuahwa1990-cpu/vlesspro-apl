@@ -374,8 +374,11 @@ private fun SkrinTetapan(kembali: () -> Unit) {
     var kill by remember { mutableStateOf(VpnTetapan.kill(ctx)) }
     var boot by remember { mutableStateOf(VpnTetapan.boot(ctx)) }
     var cepat by remember { mutableStateOf(VpnTetapan.terpantas(ctx)) }
+    var tukar by remember { mutableStateOf(VpnTetapan.tukar(ctx)) }
     Halaman {
         Judul(Bhs.t("Tetapan VPN"))
+        Suis(Bhs.t("Auto-tukar dengan VLESS modem"), tukar) { tukar = it; VpnTetapan.set(ctx, "vpn_tukar", it) }
+        Text(Bhs.t("Bila VPN telefon dihidupkan, VLESS modem dimatikan automatik, dan sebaliknya, supaya trafik tidak melalui dua lapisan."), color = Wr.mu, fontSize = 12.sp)
         Suis(Bhs.t("Sambung semula automatik"), auto) { auto = it; VpnTetapan.set(ctx, "vpn_auto", it) }
         Text(Bhs.t("Jika sambungan terputus atau rangkaian bertukar (WiFi/data), VPN cuba menyambung semula sendiri."), color = Wr.mu, fontSize = 12.sp)
         Suis(Bhs.t("Kill switch"), kill) { kill = it; VpnTetapan.set(ctx, "vpn_kill", it) }

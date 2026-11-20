@@ -283,6 +283,7 @@ fun Utama2(pref: android.content.SharedPreferences, keluar: () -> Unit) {
 
     LaunchedEffect(Unit) {
         var n = 0
+        var tukarMasa = 0L
         var ipMasa = 0L // semakan IP keluar: jarang, kerana modem menghantar beberapa permintaan melalui VLESS setiap kali
         while (true) {
             while (!St.depan) delay(1000) // jeda bila apl di latar belakang
@@ -296,6 +297,16 @@ fun Utama2(pref: android.content.SharedPreferences, keluar: () -> Unit) {
                     if (s.optBoolean("vless") && kini - ipMasa > (if (St.ipInfo == null) 15000L else 120000L)) {
                         ipMasa = kini
                         St.ipInfo = Modem.ipInfo().takeIf { it.optBoolean("ok") }
+                    }
+                    if (VpnTetapan.tukar(ctx0) && VpnPerkhidmatan.jalan && !VpnPerkhidmatan.memulih && St.on() && !St.sibuk && kini - tukarMasa > 60000) {
+                        tukarMasa = kini
+                        if (VpnPerkhidmatan.masa0 > St.masaModOn) {
+                            Modem.mod(false)
+                            St.toast("VLESS modem dimatikan kerana VPN telefon hidup")
+                        } else {
+                            VpnPerkhidmatan.henti(ctx0)
+                            St.toast("VPN telefon dimatikan kerana VLESS modem hidup")
+                        }
                     }
                     if (n % 4 == 0 || St.nod.isEmpty()) St.nod = Modem.nodes()
                     if (n % 4 == 0) St.vpnMod = Modem.obj("/api/opts").optString("vpnmode_eff")
@@ -388,6 +399,13 @@ fun pindahMod() {
     val s = St.status ?: return
     if (s.optBoolean("locked")) { St.toast("Aktifkan lesen dahulu (Lagi > Lesen)"); return }
     val hidup = St.on()
+    if (!hidup) {
+        St.masaModOn = System.currentTimeMillis()
+        if (VpnTetapan.tukar(VpApp.ctx) && (VpnPerkhidmatan.jalan || VpnPerkhidmatan.sibuk)) {
+            VpnPerkhidmatan.henti(VpApp.ctx)
+            St.toast("VPN telefon dimatikan kerana VLESS modem dihidupkan")
+        }
+    }
     St.sibuk = true
     bg {
         try {

@@ -172,6 +172,12 @@ class VpnPerkhidmatan : VpnService() {
         jalan = true; sibuk = false; masa0 = System.currentTimeMillis()
         catat("Bersambung")
         notif(Bhs.f("Bersambung ke {0}", h.nama))
+        if (VpnTetapan.tukar(this) && Modem.ip.isNotBlank()) Thread {
+            try {
+                val st = Modem.status()
+                if (st.optString("mode") == "vless" && st.optBoolean("vless")) { Modem.mod(false); catat("VLESS modem dimatikan (auto-tukar)") }
+            } catch (_: Throwable) {}
+        }.start()
         VpnKongsi.kemaskini(this)
         daftarRangkaian()
         mulaPengawas()

@@ -52,6 +52,8 @@ object VpnTetapan {
     private fun p(ctx: Context) = ctx.getSharedPreferences("vp", Context.MODE_PRIVATE)
     fun auto(ctx: Context) = p(ctx).getBoolean("vpn_auto", true)
     fun kill(ctx: Context) = p(ctx).getBoolean("vpn_kill", false)
+    /** Auto-tukar: VPN telefon dan VLESS modem tidak hidup serentak. */
+    fun tukar(ctx: Context) = p(ctx).getBoolean("vpn_tukar", true)
     fun boot(ctx: Context) = p(ctx).getBoolean("vpn_boot", false)
     fun terpantas(ctx: Context) = p(ctx).getBoolean("vpn_terpantas", false)
     fun set(ctx: Context, k: String, v: Boolean) { p(ctx).edit().putBoolean(k, v).apply() }
