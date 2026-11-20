@@ -77,6 +77,7 @@ class MainActivity : ComponentActivity() {
         window.navigationBarColor = 0xFF080B1A.toInt()
         Bhs.muat(this)
         Temas.muat(this)
+        Gaya.muat(this)
         setContent {
             val cs = if (Wr.terang) lightColorScheme(primary = Wr.ac) else darkColorScheme(primary = Wr.ac)
             LaunchedEffect(Wr.id) {

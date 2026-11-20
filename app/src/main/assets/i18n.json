@@ -1202,7 +1202,19 @@
   "Tambah profil kini ada bahagian berasingan: VLESS/Lain, SSH (borang penuh dengan mod sambungan, SNI, payload dan proksi) dan WireGuard.": "Add profile now has separate sections: VLESS/Other, SSH (full form with connection mode, SNI, payload and proxy) and WireGuard.",
   "Lebih mudah sediakan profil SSH tanpa perlu tahu format pautan.": "Easier to set up an SSH profile without needing to know the link format.",
   "Urus profil lebih pantas": "Manage profiles faster",
-  "Setiap profil kini ada butang Aktifkan, Edit dan Hapus terus kelihatan, tak perlu buka menu lagi.": "Each profile now has Activate, Edit and Delete buttons visible directly, no need to open a menu."
+  "Setiap profil kini ada butang Aktifkan, Edit dan Hapus terus kelihatan, tak perlu buka menu lagi.": "Each profile now has Activate, Edit and Delete buttons visible directly, no need to open a menu.",
+  "Gaya Butang": "Button Style",
+  "Bentuk butang sambung": "Connect button shape",
+  "Pilih bentuk dan pergerakan butang sambung/putuskan pada skrin Utama. Disimpan pada telefon ini.": "Choose the shape and motion of the connect/disconnect button on the Home screen. Saved on this phone.",
+  "Pratonton — sentuh untuk cuba animasi": "Preview — tap to try the animation",
+  "Bulat Klasik": "Classic Circle",
+  "Bulat dengan gelang bersinar separuh bila disambung.": "A circle with a glowing half-ring when connected.",
+  "Nafas": "Breathe",
+  "Bulat yang mengembang-kecut perlahan macam nafas.": "A circle that slowly expands and contracts like breathing.",
+  "Cincin Berputar": "Spinning Ring",
+  "Gelang penuh berputar berterusan sekeliling bulat.": "A full ring spinning continuously around the circle.",
+  "Kapsul": "Capsule",
+  "Bentuk kapsul melintang dengan cahaya meluncur.": "A horizontal capsule shape with a sliding light."
  },
  "zh": {
   "Mod VPN": "VPN 模式",

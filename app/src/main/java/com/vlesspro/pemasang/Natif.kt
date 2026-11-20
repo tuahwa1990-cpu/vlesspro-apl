@@ -21,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -28,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -60,6 +62,107 @@ object Wr {
     val wn = Color(0xFFF59E0B)
     val ok = Color(0xFF4ADE80)
     val grad get() = Brush.linearGradient(listOf(ac, ac2))
+}
+
+/** Gaya butang sambung/putuskan pada skrin Utama. Disimpan pada telefon ini. */
+object Gaya {
+    class G(val id: String, val nama: String, val huraian: String)
+    val semua = listOf(
+        G("bulat", "Bulat Klasik", "Bulat dengan gelang bersinar separuh bila disambung."),
+        G("nafas", "Nafas", "Bulat yang mengembang-kecut perlahan macam nafas."),
+        G("cincin", "Cincin Berputar", "Gelang penuh berputar berterusan sekeliling bulat."),
+        G("kapsul", "Kapsul", "Bentuk kapsul melintang dengan cahaya meluncur."),
+    )
+    var id by mutableStateOf("bulat")
+    fun muat(ctx: Context) { id = ctx.getSharedPreferences("vp", Context.MODE_PRIVATE).getString("gaya_butang", "bulat") ?: "bulat" }
+    fun tetap(ctx: Context, g: String) { id = g; ctx.getSharedPreferences("vp", Context.MODE_PRIVATE).edit().putString("gaya_butang", g).apply() }
+}
+
+/** Butang sambung/putuskan utama, bentuk/animasi ikut Gaya.id dipilih pengguna. */
+@Composable
+fun ButangKuasa(on: Boolean, sibuk: Boolean, siap: Boolean, teksSibuk: String, teksOn: String, teksOff: String, klik: () -> Unit) {
+    val tr = rememberInfiniteTransition(label = "bk")
+    val putar by tr.animateFloat(0f, 360f, infiniteRepeatable(tween(if (sibuk) 900 else 3200, easing = LinearEasing)), label = "p")
+    val putarLaju by tr.animateFloat(0f, 360f, infiniteRepeatable(tween(2600, easing = LinearEasing)), label = "pl")
+    val nafas by tr.animateFloat(0.9f, 1f, infiniteRepeatable(tween(1600, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "n")
+    val luncur by tr.animateFloat(-1f, 1f, infiniteRepeatable(tween(1800, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "l")
+    val teks = if (sibuk) teksSibuk else if (on) teksOn else teksOff
+    val gradAktif = Brush.radialGradient(listOf(Color(0xFF7DE7F7), Wr.ac, Wr.ac2))
+    val gradTidakAktif = Brush.radialGradient(listOf(Color(0xFF4A5380), Color(0xFF232A4A)))
+
+    when (Gaya.id) {
+        "nafas" -> Box(Modifier.fillMaxWidth().height(260.dp), contentAlignment = Alignment.Center) {
+            Canvas(Modifier.size(250.dp)) {
+                val w = size.width
+                drawCircle(Wr.garis, w / 2 - 6f, style = Stroke(2f))
+                if (on || sibuk) drawCircle(Wr.ac.copy(alpha = 0.35f), w / 2 - 6f, style = Stroke(9f))
+            }
+            Box(Modifier.size(172.dp).scale(if (on || sibuk) nafas else 1f).clip(CircleShape)
+                .background(if (on) gradAktif else gradTidakAktif)
+                .clickable(enabled = !sibuk && siap) { klik() }, contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    IkonKuasa(if (on) Wr.on else Color(0xFFCFD5E8), 56)
+                    Spacer(Modifier.height(6.dp))
+                    Text(teks, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, color = if (on) Wr.on else Color(0xFFCFD5E8))
+                }
+            }
+        }
+        "cincin" -> Box(Modifier.fillMaxWidth().height(260.dp), contentAlignment = Alignment.Center) {
+            Canvas(Modifier.size(250.dp)) {
+                val w = size.width
+                drawCircle(Wr.garis, w / 2 - 6f, style = Stroke(2f))
+                if (on || sibuk) rotate(putarLaju) {
+                    drawArc(Brush.sweepGradient(listOf(Wr.ac, Wr.ac2, Wr.ac)), 0f, 360f, false,
+                        topLeft = Offset(6f, 6f), size = Size(w - 12f, w - 12f), style = Stroke(9f, cap = StrokeCap.Round))
+                }
+            }
+            Box(Modifier.size(172.dp).clip(CircleShape)
+                .background(if (on) gradAktif else gradTidakAktif)
+                .clickable(enabled = !sibuk && siap) { klik() }, contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    IkonKuasa(if (on) Wr.on else Color(0xFFCFD5E8), 56)
+                    Spacer(Modifier.height(6.dp))
+                    Text(teks, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, color = if (on) Wr.on else Color(0xFFCFD5E8))
+                }
+            }
+        }
+        "kapsul" -> Box(Modifier.fillMaxWidth().height(170.dp).padding(horizontal = 16.dp), contentAlignment = Alignment.Center) {
+            Box(Modifier.fillMaxWidth().height(96.dp).clip(RoundedCornerShape(50))
+                .background(if (on) gradAktif else gradTidakAktif)
+                .border(2.dp, if (on || sibuk) Wr.ac.copy(alpha = 0.6f) else Wr.garis, RoundedCornerShape(50))
+                .clickable(enabled = !sibuk && siap) { klik() }) {
+                if (on || sibuk) Box(Modifier.fillMaxSize().clip(RoundedCornerShape(50))) {
+                    Canvas(Modifier.fillMaxSize()) {
+                        val x = size.width * (0.5f + luncur * 0.5f)
+                        drawCircle(Color.White.copy(alpha = 0.18f), size.height * 0.9f, center = Offset(x, size.height / 2))
+                    }
+                }
+                Row(Modifier.fillMaxSize().padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center) {
+                    IkonKuasa(if (on) Wr.on else Color(0xFFCFD5E8), 40)
+                    Spacer(Modifier.width(12.dp))
+                    Text(teks, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, color = if (on) Wr.on else Color(0xFFCFD5E8))
+                }
+            }
+        }
+        else -> Box(Modifier.fillMaxWidth().height(260.dp), contentAlignment = Alignment.Center) { // bulat (asal)
+            Canvas(Modifier.size(250.dp)) {
+                val w = size.width
+                drawCircle(Wr.garis, w / 2 - 6f, style = Stroke(2f))
+                if (on || sibuk) drawArc(Brush.sweepGradient(listOf(Color.Transparent, Wr.ac, Wr.ac2, Color.Transparent)), putar, 200f, false,
+                    topLeft = Offset(6f, 6f), size = Size(w - 12f, w - 12f), style = Stroke(9f, cap = StrokeCap.Round))
+            }
+            Box(Modifier.size(172.dp).clip(CircleShape)
+                .background(if (on) gradAktif else gradTidakAktif)
+                .clickable(enabled = !sibuk && siap) { klik() }, contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    IkonKuasa(if (on) Wr.on else Color(0xFFCFD5E8), 56)
+                    Spacer(Modifier.height(6.dp))
+                    Text(teks, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, color = if (on) Wr.on else Color(0xFFCFD5E8))
+                }
+            }
+        }
+    }
 }
 
 fun bg(blok: () -> Unit) {
@@ -451,10 +554,6 @@ fun Utama() {
     var kini by remember { mutableLongStateOf(System.currentTimeMillis() / 1000) }
     LaunchedEffect(Unit) { while (true) { kini = System.currentTimeMillis() / 1000; delay(1000) } }
 
-    val tr = rememberInfiniteTransition(label = "u")
-    val putar by tr.animateFloat(0f, 360f, infiniteRepeatable(tween(if (sibuk) 900 else 3200, easing = LinearEasing)), label = "p")
-    val nafas by tr.animateFloat(0.85f, 1f, infiniteRepeatable(tween(2200, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "n")
-
     val jam = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     val sapa = if (jam < 11) "Selamat pagi" else if (jam < 15) "Selamat tengah hari" else if (jam < 19) "Selamat petang" else "Selamat malam"
 
@@ -472,27 +571,7 @@ fun Utama() {
                 color = Wr.mu, fontSize = 14.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
         }
 
-        Box(Modifier.fillMaxWidth().height(260.dp), contentAlignment = Alignment.Center) {
-            Canvas(Modifier.size(250.dp)) {
-                val w = size.width
-                drawCircle(Wr.garis, w / 2 - 6f, style = Stroke(2f))
-                if (on || sibuk) {
-                    drawArc(Brush.sweepGradient(listOf(Color.Transparent, Wr.ac, Wr.ac2, Color.Transparent)), putar, 200f, false,
-                        topLeft = Offset(6f, 6f), size = Size(w - 12f, w - 12f), style = Stroke(9f, cap = StrokeCap.Round))
-                }
-            }
-            Box(Modifier.size(172.dp).clip(CircleShape)
-                .background(if (on) Brush.radialGradient(listOf(Color(0xFF7DE7F7), Wr.ac, Wr.ac2)) else Brush.radialGradient(listOf(Color(0xFF4A5380), Color(0xFF232A4A))))
-                .clickable(enabled = !sibuk && s != null) { sahkan = true }
-                .padding(if (on) 0.dp else 0.dp), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    IkonKuasa(if (on) Wr.on else Color(0xFFCFD5E8), 56)
-                    Spacer(Modifier.height(6.dp))
-                    Text(if (sibuk) "Sila tunggu" else if (on) "Putuskan" else "Sambung", fontWeight = FontWeight.ExtraBold, fontSize = 17.sp,
-                        color = if (on) Wr.on else Color(0xFFCFD5E8))
-                }
-            }
-        }
+        ButangKuasa(on, sibuk, s != null, "Sila tunggu", "Putuskan", "Sambung") { sahkan = true }
 
         val since = s?.optLong("since") ?: 0L
         val saat = if (on && since > 0) (kini + St.jamOfset - since).coerceAtLeast(0) else 0L
@@ -567,6 +646,32 @@ fun Cip(t: String, w: Color) {
         Box(Modifier.size(7.dp).clip(CircleShape).background(w))
         Spacer(Modifier.width(7.dp))
         Text(t, color = Wr.tx, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
+    }
+}
+
+@Composable
+fun SubGaya() {
+    val ctx = LocalContext.current
+    var demo by remember { mutableStateOf(false) }
+    Halaman {
+        Judul("Gaya Butang")
+        Text("Pilih bentuk dan pergerakan butang sambung/putuskan pada skrin Utama. Disimpan pada telefon ini.", color = Wr.mu, fontSize = 13.sp)
+        KadWr {
+            Text("Pratonton — sentuh untuk cuba animasi", color = Wr.mu, fontSize = 12.sp)
+            ButangKuasa(demo, false, true, "Sila tunggu", "Putuskan", "Sambung") { demo = !demo }
+        }
+        Gaya.semua.forEach { g ->
+            val dipilih = Gaya.id == g.id
+            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Wr.kad)
+                .border(2.dp, if (dipilih) Wr.ac else Wr.garis, RoundedCornerShape(20.dp))
+                .clickable { Gaya.tetap(ctx, g.id) }.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(g.nama, color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                    Text(g.huraian, color = Wr.mu, fontSize = 13.sp)
+                }
+                if (dipilih) Text("✓", color = Wr.ac, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+            }
+        }
     }
 }
 
@@ -665,6 +770,7 @@ fun Lagi(buka: (String) -> Unit) {
         Triple("pasang", "Pasang / urus", "Pemasang SSH"),
         Triple("apl", "Kemas kini apl", "Versi apl ini"),
         Triple("tema", "Tema", "Rupa dan jenis tulisan"),
+        Triple("gaya", "Gaya Butang", "Bentuk butang sambung"),
         Triple("bhs", "Bahasa", "Bahasa paparan apl"),
     )
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 130.dp),
@@ -704,6 +810,7 @@ fun Sub(id: String, pref: android.content.SharedPreferences, keluar: () -> Unit,
                 "apl" -> SubApl()
                 "plus" -> SubPlus(ke)
                 "tema" -> SubTema()
+                "gaya" -> SubGaya()
                 "bhs" -> SubBahasa()
                 "sqm" -> SubSqm()
                 "vpn" -> SubVpn()
