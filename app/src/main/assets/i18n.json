@@ -1238,7 +1238,10 @@
   "Xray Sedia Ada: ada ({0})": "Existing Xray: present ({0})",
   "Istilah lebih tepat": "More accurate wording",
   "Status \"VPN asal\" ditukar kepada \"Xray Sedia Ada\" di seluruh apl supaya lebih tepat menggambarkan keadaan sebenar.": "The \"Original VPN\" status is now called \"Existing Xray\" throughout the app, to better reflect what it actually is.",
-  "Tidak Aktif": "Inactive"
+  "Tidak Aktif": "Inactive",
+  "Kemaskan antara muka Utama": "Polished Home screen interface",
+  "Tajuk skrin Profil dan Lagi kini ditengahkan.": "The Profile and More screen titles are now centered.",
+  "Status sambungan di skrin Utama kini lebih kemas — \"Aktif\" atau \"Tidak Aktif\" dengan warna gradien dan kilauan lembut.": "The connection status on the Home screen is now tidier — \"Active\" or \"Inactive\" with a gradient color and a soft glow."
  },
  "zh": {
   "Mod VPN": "VPN 模式",
