@@ -75,33 +75,20 @@ private fun masaStr(ms: Long): String {
     return String.format("%02d:%02d:%02d", s / 3600, (s / 60) % 60, s % 60)
 }
 
-/** Butang kuasa bulat besar: kelabu = putus, kuning berdenyut = menyambung, biru = bersambung. */
-@Composable
-fun ButangKuasa(keadaan: Int, klik: () -> Unit) {
-    val warna = when (keadaan) { 2 -> Wr.ac; 1 -> Wr.wn; else -> Wr.mu }
-    val t = rememberInfiniteTransition(label = "kuasa")
-    val denyut by t.animateFloat(1f, if (keadaan == 1) 1.14f else 1.04f,
-        infiniteRepeatable(tween(if (keadaan == 1) 700 else 1800), RepeatMode.Reverse), label = "denyut")
-    Box(Modifier.size(190.dp).clip(CircleShape).clickable { klik() }, contentAlignment = Alignment.Center) {
-        Canvas(Modifier.fillMaxSize()) {
-            val c = center
-            val r = size.minDimension / 2
-            val ikon = r * 0.26f
-            drawCircle(warna.copy(alpha = if (keadaan == 0) 0.07f else 0.16f), radius = r * 0.88f * denyut)
-            drawCircle(Wr.kad, radius = r * 0.78f)
-            drawCircle(warna, radius = r * 0.78f, style = Stroke(width = 5.dp.toPx()))
-            drawArc(warna, startAngle = -58f, sweepAngle = 296f, useCenter = false,
-                topLeft = Offset(c.x - ikon, c.y - ikon + 4.dp.toPx()), size = Size(ikon * 2, ikon * 2),
-                style = Stroke(width = 6.dp.toPx(), cap = StrokeCap.Round))
-            drawLine(warna, Offset(c.x, c.y - ikon * 1.05f), Offset(c.x, c.y + 2.dp.toPx()), strokeWidth = 6.dp.toPx(), cap = StrokeCap.Round)
-        }
-    }
-}
-
 @Composable
 private fun CipVpn(t: String, w: Color) {
     Text(t, color = w, fontSize = 11.sp, fontWeight = FontWeight.Bold,
         modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(w.copy(alpha = 0.14f)).padding(horizontal = 8.dp, vertical = 3.dp))
+}
+
+/** Warna aksen ikut jenis protokol pelayan, supaya senarai lebih mudah dibezakan sepintas lalu. */
+private fun warnaJenis(jenis: String): Color = when (jenis.uppercase()) {
+    "VLESS" -> Color(0xFFA78BFA)
+    "VMESS" -> Color(0xFF60A5FA)
+    "TROJAN" -> Color(0xFFFB7185)
+    "SS" -> Color(0xFF2DD4BF)
+    "SSH" -> Color(0xFFFB923C)
+    else -> Wr.ac2
 }
 
 @Composable
@@ -113,9 +100,10 @@ private fun Angka(label: String, nilai: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun BtnKecil(t: String, modifier: Modifier = Modifier, klik: () -> Unit) {
+private fun BtnKecil(t: String, modifier: Modifier = Modifier, warna: Color = Wr.ac, klik: () -> Unit) {
     OutlinedButton(onClick = klik, modifier = modifier, contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = Wr.ac)) { Text(t, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1) }
+        border = androidx.compose.foundation.BorderStroke(1.dp, warna.copy(alpha = 0.55f)),
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = warna)) { Text(t, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1) }
 }
 
 @Composable
@@ -248,21 +236,37 @@ private fun SkrinUtama(ke: (String) -> Unit) {
             style = TextStyle(brush = Brush.linearGradient(listOf(Color(0xFF4ADE80), Color(0xFF22D3EE), Color(0xFFA78BFA)))),
             textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            BtnKecil(Bhs.t("Tetapan"), Modifier.weight(1f)) { ke("tetapan") }
-            BtnKecil(Bhs.t("Per-apl"), Modifier.weight(1f)) { ke("apl") }
-            BtnKecil(Bhs.t("Panduan"), Modifier.weight(1f)) { ke("panduan") }
-            BtnKecil(Bhs.t("Tentang"), Modifier.weight(1f)) { ke("tentang") }
+            BtnKecil(Bhs.t("Tetapan"), Modifier.weight(1f), Color(0xFF60A5FA)) { ke("tetapan") }
+            BtnKecil(Bhs.t("Per-apl"), Modifier.weight(1f), Color(0xFFA78BFA)) { ke("apl") }
+            BtnKecil(Bhs.t("Panduan"), Modifier.weight(1f), Color(0xFFFACC15)) { ke("panduan") }
+            BtnKecil(Bhs.t("Tentang"), Modifier.weight(1f), Color(0xFF2DD4BF)) { ke("tentang") }
         }
         Column(Modifier.fillMaxWidth().padding(top = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            ButangKuasa(keadaan) { togol() }
+            val trS = rememberInfiniteTransition(label = "stVpn")
+            val kilau by trS.animateFloat(0.75f, 1f, infiniteRepeatable(tween(1300, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "kVpn")
+            if (keadaan == 2) {
+                Text(Bhs.t("Bersambung"), fontSize = 22.sp, fontWeight = FontWeight.ExtraBold,
+                    style = TextStyle(brush = Brush.linearGradient(listOf(Color(0xFF4ADE80), Color(0xFF22D3EE))), alpha = kilau),
+                    textAlign = TextAlign.Center)
+            } else if (keadaan == 1) {
+                Text(if (memulih) Bhs.t("Menyambung semula...") else Bhs.t("Menyambung..."), fontSize = 20.sp, fontWeight = FontWeight.ExtraBold,
+                    style = TextStyle(brush = Brush.linearGradient(listOf(Color(0xFFFACC15), Color(0xFFFB923C))), alpha = kilau),
+                    textAlign = TextAlign.Center)
+            } else {
+                Text(Bhs.t("Sentuh untuk sambung"), color = Wr.tx, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, textAlign = TextAlign.Center)
+            }
             Spacer(Modifier.height(10.dp))
-            Text(
-                when { memulih -> Bhs.t("Menyambung semula..."); keadaan == 2 -> Bhs.t("Bersambung"); keadaan == 1 -> Bhs.t("Menyambung..."); else -> Bhs.t("Sentuh untuk sambung") },
-                color = if (keadaan == 2) Wr.ac else Wr.tx, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp
-            )
+            ButangKuasa(jalan, sibuk || memulih, true, Bhs.t("Sila tunggu"), Bhs.t("Putuskan"), Bhs.t("Sambung")) { togol() }
             if (jalan) {
+                Spacer(Modifier.height(6.dp))
+                Row(Modifier.clip(RoundedCornerShape(50)).background(Wr.kad).border(1.dp, Wr.garis, RoundedCornerShape(50)).padding(horizontal = 18.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.size(8.dp).clip(CircleShape).background(Wr.ac))
+                    Spacer(Modifier.width(10.dp))
+                    Text(masaStr(tempoh), color = Wr.ac, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                }
+                Spacer(Modifier.height(6.dp))
                 Text(VpnPerkhidmatan.nama, color = Wr.mu, fontSize = 13.sp, textAlign = TextAlign.Center)
-                Text(masaStr(tempoh), color = Wr.tx, fontSize = 26.sp, fontWeight = FontWeight.Light, modifier = Modifier.padding(top = 4.dp))
             }
             if (ralat.isNotEmpty() && keadaan == 0) Text(ralat, color = Wr.bad, fontSize = 12.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 6.dp))
         }
@@ -331,17 +335,22 @@ private fun SkrinUtama(ke: (String) -> Unit) {
         senarai.forEachIndexed { i, p ->
             val h = hasil.getOrNull(i)
             val dipilih = i == pilih
+            val wj = warnaJenis(h?.jenis ?: "")
+            val trKad = rememberInfiniteTransition(label = "kad$i")
+            val kilauKad by trKad.animateFloat(0.55f, 1f, infiniteRepeatable(tween(1400, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "kk$i")
             Row(
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(if (dipilih) Wr.kad2 else Wr.kad)
-                    .border(1.5.dp, if (dipilih) Wr.ac else Wr.garis, RoundedCornerShape(18.dp))
+                    .border(if (dipilih) 2.dp else 1.5.dp, if (dipilih) Wr.ac.copy(alpha = kilauKad) else Wr.garis, RoundedCornerShape(18.dp))
                     .clickable { pilih = i; SimpanVpn.setPilih(ctx, i) }.padding(horizontal = 14.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Box(Modifier.width(4.dp).height(34.dp).clip(RoundedCornerShape(50)).background(wj))
+                Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(h?.nama ?: p.take(30), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 15.sp, maxLines = 2)
                     Spacer(Modifier.height(4.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                        if (h != null) CipVpn(h.ringkas, Wr.ac2)
+                        if (h != null) CipVpn(h.ringkas, wj)
                         ping[i]?.let { ms -> if (ms >= 0) CipVpn("$ms ms", if (ms < 150) Wr.ac else Wr.wn) else CipVpn(Bhs.t("Gagal"), Wr.bad) }
                     }
                 }
