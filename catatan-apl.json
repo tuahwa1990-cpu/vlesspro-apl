@@ -1,10 +1,20 @@
 {
- "title": "Penambahbaikan keselamatan dan prestasi",
+ "title": "Sahkan keaslian apl dan profil SSH/WireGuard lebih mudah",
  "items": [
-  "Penambahbaikan keselamatan dalaman apl.",
-  "Saiz apl lebih kecil dan pemasangan lebih pantas."
+  "Ciri baharu \"Sahkan apl ini\": semak cap jari sijil tandatangan dan SHA-256 fail APK, serta banding terus dengan keluaran rasmi terkini.",
+  "Tambah profil kini ada bahagian berasingan: VLESS/Lain, SSH (borang penuh dengan mod sambungan, SNI, payload dan proksi) dan WireGuard.",
+  "Lebih mudah sediakan profil SSH tanpa perlu tahu format pautan."
  ],
  "history": [
+  {
+   "version": "1.0.43",
+   "date": "2026-11-20",
+   "title": "Penambahbaikan keselamatan dan prestasi",
+   "items": [
+    "Penambahbaikan keselamatan dalaman apl.",
+    "Saiz apl lebih kecil dan pemasangan lebih pantas."
+   ]
+  },
   {
    "version": "1.0.42",
    "date": "2026-11-20",
