@@ -970,7 +970,14 @@
   "+ Tampal pautan": "+ Paste link",
   "Belum ada pelayan.": "No servers yet.",
   "Salin pautan vless:// atau vmess:// kemudian tekan Tampal pautan.": "Copy a vless:// or vmess:// link, then tap Paste link.",
-  "Penerowong gagal dimulakan.": "The tunnel failed to start."
+  "Penerowong gagal dimulakan.": "The tunnel failed to start.",
+  "Semak IP keluar": "Check exit IP",
+  "Menyemak...": "Checking...",
+  "Semak IP": "Check IP",
+  "IP telefon (tanpa VPN): {0}": "Phone IP (without VPN): {0}",
+  "IP melalui pelayan: {0}": "IP through server: {0}",
+  "IP sama: trafik mungkin tidak melalui pelayan.": "Same IP: traffic may not be going through the server.",
+  "IP berbeza: trafik melalui pelayan.": "Different IP: traffic goes through the server."
  },
  "zh": {
   "Mod VPN": "VPN 模式",

@@ -42,6 +42,15 @@ private fun saizB(b: Long): String = when {
     else -> String.format("%.2f GB", b / 1073741824.0)
 }
 
+private suspend fun ambilIp(proksi: java.net.Proxy?): String = withContext(Dispatchers.IO) {
+    try {
+        val url = java.net.URL("https://api.ipify.org")
+        val c = (if (proksi != null) url.openConnection(proksi) else url.openConnection()) as java.net.HttpURLConnection
+        c.connectTimeout = 7000; c.readTimeout = 7000
+        c.inputStream.bufferedReader().readText().trim()
+    } catch (_: Exception) { "?" }
+}
+
 private fun masaStr(ms: Long): String {
     val s = ms / 1000
     return String.format("%02d:%02d:%02d", s / 3600, (s / 60) % 60, s % 60)
@@ -100,6 +109,9 @@ fun SubVpn() {
     var lajuNaik by remember { mutableStateOf(0L) }
     var ping by remember { mutableStateOf<Map<Int, Long>>(emptyMap()) }
     var mengujiPing by remember { mutableStateOf(false) }
+    var ipTel by remember { mutableStateOf("") }
+    var ipVpn by remember { mutableStateOf("") }
+    var menyemakIp by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         var lt = 0L; var ln = 0L; var lm = 0L
@@ -165,6 +177,16 @@ fun SubVpn() {
         }
     }
 
+    fun semakIp() {
+        if (menyemakIp) return
+        menyemakIp = true; ipTel = ""; ipVpn = ""
+        skop.launch {
+            // Apl ini dikecualikan daripada VPN: sambungan terus = IP telefon sebenar; melalui SOCKS Xray = IP pelayan.
+            ipTel = ambilIp(null)
+            ipVpn = ambilIp(java.net.Proxy(java.net.Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", VpnPerkhidmatan.PORT)))
+            menyemakIp = false
+        }
+    }
     val keadaan = if (jalan) 2 else if (sibuk) 1 else 0
     Halaman {
         Judul("VPN telefon")
@@ -191,6 +213,22 @@ fun SubVpn() {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                     Angka(Bhs.t("Jumlah turun"), saizB(turun), Modifier.weight(1f))
                     Angka(Bhs.t("Jumlah naik"), saizB(naik), Modifier.weight(1f))
+                }
+            }
+        }
+        if (keadaan == 2) {
+            KadWr {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text("Semak IP keluar", color = Wr.tx, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    TextButton({ semakIp() }, enabled = !menyemakIp) { Text(if (menyemakIp) "Menyemak..." else "Semak IP", color = Wr.ac) }
+                }
+                if (ipTel.isNotEmpty() || ipVpn.isNotEmpty()) {
+                    Text(Bhs.f("IP telefon (tanpa VPN): {0}", ipTel.ifEmpty { "..." }), color = Wr.mu, fontSize = 13.sp)
+                    Text(Bhs.f("IP melalui pelayan: {0}", ipVpn.ifEmpty { "..." }), color = Wr.tx, fontSize = 13.sp)
+                    if (ipTel.isNotEmpty() && ipVpn.isNotEmpty() && ipTel != "?" && ipVpn != "?") {
+                        if (ipTel == ipVpn) Text("IP sama: trafik mungkin tidak melalui pelayan.", color = Wr.wn, fontSize = 12.sp)
+                        else Text("IP berbeza: trafik melalui pelayan.", color = Wr.ac, fontSize = 12.sp)
+                    }
                 }
             }
         }
