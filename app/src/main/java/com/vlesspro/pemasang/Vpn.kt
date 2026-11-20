@@ -31,11 +31,24 @@ import java.net.URLDecoder
 // ───────────────────── Fungsi 2: VPN terus dari telefon ─────────────────────
 
 /** JNI hev-socks5-tunnel (tun2socks). Nama kelas ini dipadankan semasa binaan CI (tools/sedia-vpn.sh). */
-object TProxyService {
-    init { System.loadLibrary("hev-socks5-tunnel") }
-    @JvmStatic external fun TProxyStartService(configPath: String, fd: Int)
-    @JvmStatic external fun TProxyStopService()
-    @JvmStatic external fun TProxyGetStats(): LongArray
+object HevLib {
+    @Volatile private var dimuat = false
+    /** Muat pustaka asli DI LUAR initialiser kelas TProxyService supaya FindClass dalam JNI_OnLoad menemui kelas yang sudah siap. */
+    @Synchronized fun muat() {
+        if (dimuat) return
+        Class.forName("com.vlesspro.pemasang.TProxyService")
+        System.loadLibrary("hev-socks5-tunnel")
+        dimuat = true
+    }
+}
+
+/** JNI hev-socks5-tunnel (tun2socks). Nama kelas ini dipadankan semasa binaan CI (tools/sedia-vpn.sh). */
+class TProxyService {
+    companion object {
+        @JvmStatic external fun TProxyStartService(configPath: String, fd: Int)
+        @JvmStatic external fun TProxyStopService()
+        @JvmStatic external fun TProxyGetStats(): LongArray
+    }
 }
 
 /** Pautan vless:// dan vmess:// kepada konfigurasi Xray. */
@@ -159,7 +172,7 @@ class VpnPerkhidmatan : VpnService() {
         @Volatile var ralat = ""
         @Volatile var nama = ""
         @Volatile var masa0 = 0L
-        fun statistik(): LongArray? = if (!jalan) null else try { TProxyService.TProxyGetStats() } catch (_: Throwable) { null }
+        fun statistik(): LongArray? = if (!jalan) null else try { HevLib.muat(); TProxyService.TProxyGetStats() } catch (_: Throwable) { null }
         const val HENTI = "com.vlesspro.pemasang.VPN_HENTI"
         const val PORT = 10808
         private const val SALURAN = "vpn"
@@ -181,7 +194,7 @@ class VpnPerkhidmatan : VpnService() {
         val pautan = intent?.getStringExtra("pautan") ?: return START_NOT_STICKY
         if (sibuk || jalan) return START_NOT_STICKY
         sibuk = true; ralat = ""
-        Thread { try { sambung(pautan) } catch (e: Throwable) { gagal(e.message ?: e.toString()) } }.start()
+        Thread { try { sambung(pautan) } catch (e: Throwable) { gagal(huraiRalat(e)) } }.start()
         return START_NOT_STICKY
     }
 
@@ -223,9 +236,18 @@ class VpnPerkhidmatan : VpnService() {
         tun = fd
         val yml = File(filesDir, "vpn-hev.yml")
         yml.writeText("tunnel:\n  mtu: 1500\n  ipv4: 26.26.26.1\nsocks5:\n  port: $PORT\n  address: 127.0.0.1\n  udp: 'udp'\nmisc:\n  log-level: warn\n")
+        HevLib.muat()
         TProxyService.TProxyStartService(yml.path, fd.fd)
         jalan = true; sibuk = false; masa0 = System.currentTimeMillis()
         notif(Bhs.f("Bersambung ke {0}", h.nama))
+    }
+
+    private fun huraiRalat(e: Throwable): String {
+        val b = StringBuilder(e.javaClass.simpleName + ": " + (e.message ?: ""))
+        var c = e.cause; var n = 0
+        while (c != null && n < 3) { b.append(" <- ").append(c.javaClass.simpleName).append(": ").append(c.message ?: ""); c = c.cause; n++ }
+        e.stackTrace.take(3).forEach { b.append("\n  ").append(it.toString()) }
+        return b.toString()
     }
 
     private fun gagal(m: String) {
