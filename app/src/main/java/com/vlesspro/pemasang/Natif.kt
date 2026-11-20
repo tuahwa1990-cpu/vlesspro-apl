@@ -891,16 +891,15 @@ fun Lagi(buka: (String) -> Unit) {
                     val w = warnaLagi[idxLagi % warnaLagi.size]; idxLagi++
                     Box(Modifier.weight(1f)) {
                         KadWr(klik = { buka(id) }, warna = w) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(Modifier.size(34.dp).clip(CircleShape)
-                                    .background(Brush.linearGradient(listOf(w, w.copy(alpha = 0.55f)))),
-                                    contentAlignment = Alignment.Center) {
-                                    Text(t.take(1).uppercase(), color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
-                                }
-                                Spacer(Modifier.width(10.dp))
-                                Column { Text(t, color = w, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                                    Text(d, color = Wr.mu, fontSize = 11.sp) }
+                            Box(Modifier.size(32.dp).clip(CircleShape)
+                                .background(Brush.linearGradient(listOf(w, w.copy(alpha = 0.55f)))),
+                                contentAlignment = Alignment.Center) {
+                                Text(t.take(1).uppercase(), color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
                             }
+                            Spacer(Modifier.height(8.dp))
+                            Text(t, color = w, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 2, softWrap = true,
+                                modifier = Modifier.fillMaxWidth())
+                            Text(d, color = Wr.mu, fontSize = 11.sp, maxLines = 2, modifier = Modifier.fillMaxWidth())
                         }
                     }
                 }
