@@ -267,6 +267,7 @@ fun SubFailover() {
     var on by remember { mutableStateOf(false) }
     var segarKunci by remember { mutableStateOf(0) }
     var segar by remember { mutableStateOf(false) }
+    val ctx = LocalContext.current
 
     LaunchedEffect(segarKunci) {
         while (true) {
@@ -360,6 +361,20 @@ fun SubFailover() {
                 "Tidak aktif jika profil KUMPULAN sedang dipilih; pilih satu nod untuk mengaktifkan.",
                 "Hanya bertukar ke nod lain yang disahkan boleh dicapai."
             ).forEach { Text("•  " + it, color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp)) }
+        }
+        KadWr {
+            OutlinedButton(onClick = {
+                val dSnap = v; val nodSnap = senarai; val pingSnap = ping
+                St.toast("Mengumpul maklumat ...")
+                Thread {
+                    val t = try { Diagnosis.kumpulFailover(ctx, dSnap, nodSnap, pingSnap) } catch (e: Exception) { "Diagnosis gagal: " + (e.message ?: e.javaClass.simpleName) }
+                    (ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(ClipData.newPlainText("Diagnosis", t))
+                    St.toast("Diagnosis disalin dan sedia dihantar")
+                    val i = android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain").putExtra(android.content.Intent.EXTRA_TEXT, t)
+                    ctx.startActivity(android.content.Intent.createChooser(i, null).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
+                }.start()
+            }, modifier = Modifier.fillMaxWidth()) { Text("Hantar diagnosis failover", color = Wr.ac) }
+            Text("Menyalin status failover, kelayakan setiap nod dan rekod penuh tukar nod, bersama maklumat am apl dan modem.", color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
         }
     }
 }

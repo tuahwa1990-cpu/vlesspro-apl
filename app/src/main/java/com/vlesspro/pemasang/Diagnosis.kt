@@ -58,4 +58,33 @@ object Diagnosis {
         sb.append(if (ranap.isEmpty()) "(tiada)\n" else bersih(ranap) + "\n")
         return sb.toString()
     }
+
+    /** Diagnosis am + fokus Failover (cfg, kelayakan setiap nod, rekod penuh), guna data yang sudah dimuat di skrin. */
+    fun kumpulFailover(ctx: Context, d: org.json.JSONObject?, nod: List<Nod>, ping: List<Int>): String {
+        val sb = StringBuilder(kumpul(ctx))
+        sb.append("\n--- FOKUS: FAILOVER ---\n")
+        fun b(k: String, v: String) { sb.append(k).append(": ").append(v).append('\n') }
+        if (d == null) { sb.append("(data failover tidak dapat dimuat)\n"); return sb.toString() }
+        b("Failover hidup", d.optJSONObject("cfg")?.optBoolean("on").toString())
+        b("Profil kumpulan sedang digunakan", d.optBoolean("grp").toString())
+        b("Pemantauan aktif sekarang (auto)", d.optBoolean("auto").toString())
+        b("Ujian gagal berturut", d.optInt("fails").toString() + "/3")
+        b("Nod semasa", d.optString("cur").ifEmpty { "-" })
+        b("Jumlah nod", d.optInt("n").toString())
+        sb.append("Status setiap nod:\n")
+        nod.forEachIndexed { i, nd ->
+            val p = ping.getOrElse(i) { -1 }
+            val status = if (nd.pilih) "digunakan sekarang" else when { p == -2 -> "tidak diuji"; p < 0 -> "tidak boleh dicapai"; else -> "$p ms" }
+            sb.append("- ").append(nd.nama).append(": ").append(status).append('\n')
+        }
+        val log = d.optJSONArray("log")
+        sb.append("Rekod tukar nod (terbaharu dahulu):\n")
+        if (log == null || log.length() == 0) sb.append("(tiada)\n")
+        else for (i in 0 until log.length()) {
+            val o = log.getJSONObject(i)
+            sb.append("- ").append(ProfilAlat.waktu(o.optLong("t"))).append("  ").append(o.optString("from")).append(" -> ").append(o.optString("to"))
+                .append(" (").append(o.optString("why")).append(")\n")
+        }
+        return sb.toString()
+    }
 }
