@@ -275,7 +275,7 @@ fun SubFailover() {
         val log = d.value?.optJSONArray("log")
         if (log != null && log.length() > 0) KadWr {
             Text("Rekod terkini", color = Wr.mu, fontSize = 12.sp)
-            for (i in 0 until minOf(log.length(), 8)) { val o = log.getJSONObject(i); Text(o.optString("msg").ifEmpty { o.toString() }, color = Wr.tx, fontSize = 12.sp) }
+            for (i in 0 until minOf(log.length(), 8)) { val o = log.getJSONObject(i); Text(ProfilAlat.waktu(o.optLong("t")) + "  " + o.optString("from") + " → " + o.optString("to"), color = Wr.tx, fontSize = 12.sp) }
         }
     }
 }

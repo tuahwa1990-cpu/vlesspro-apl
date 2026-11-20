@@ -337,6 +337,9 @@ private fun SkrinUtama(ke: (String) -> Unit) {
                     }
                 }
                 if (p in manual) {
+                    if (!p.startsWith("ssh://")) TextButton({
+                        bg { lapor(Modem.tambahNod(p)) }
+                    }) { Text("↗", color = Wr.ac, fontSize = 16.sp) }
                     TextButton({
                         SimpanVpn.simpanManual(ctx, manual.filter { it != p })
                         muatSemula()
@@ -363,6 +366,7 @@ private fun SkrinUtama(ke: (String) -> Unit) {
                 }
             }
         }
+        if (manual.any { !it.startsWith("ssh://") }) Text(Bhs.t("Tekan ↗ untuk menghantar pelayan ke modem (perlu disambung ke WiFi modem)."), color = Wr.mu, fontSize = 12.sp)
         Text(Bhs.t("Ping TCP hanyalah anggaran (nod D1G1 menunjukkan ping palsu). Ping sebenar boleh diuji selepas bersambung."), color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
         Text(Bhs.t("Jika WiFi modem anda sudah menjalankan VLESS Pro, matikan salah satu supaya trafik tidak melalui dua lapisan (lebih perlahan)."), color = Wr.mu, fontSize = 12.sp)
         Text(Bhs.f("Apl {0} · Xray {1}", Kemas.namaSemasa(ctx), VpnPerkhidmatan.VERSI_XRAY), color = Wr.mu, fontSize = 11.sp)

@@ -365,7 +365,7 @@ fun Utama2(pref: android.content.SharedPreferences, keluar: () -> Unit) {
                 if (sub != null) Sub(sub!!, pref, keluar, { sub = it }) { sub = indukSub(sub) }
                 else when (tab) {
                     0 -> Utama()
-                    1 -> Profil()
+                    1 -> Profil { sub = it }
                     2 -> SubVpn()
                     else -> Lagi { sub = it }
                 }
@@ -566,114 +566,6 @@ fun Cip(t: String, w: Color) {
         Box(Modifier.size(7.dp).clip(CircleShape).background(w))
         Spacer(Modifier.width(7.dp))
         Text(t, color = Wr.tx, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
-    }
-}
-
-// ───────────────────────── Profil ─────────────────────────
-
-@Composable
-fun Profil() {
-    var tambah by remember { mutableStateOf(false) }
-    var padam by remember { mutableStateOf<Nod?>(null) }
-    var edit by remember { mutableStateOf<Pair<Nod, String>?>(null) }
-    val ctx = LocalContext.current
-
-    Box(Modifier.fillMaxSize()) {
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 140.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Profil", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                OutlinedButton(onClick = {
-                    St.toast("Menguji semua profil ...")
-                    bg { val r = Modem.ping(); St.ping = r.mapIndexed { i, v -> i to v }.toMap(); St.toast("Ujian siap") }
-                }, border = androidx.compose.foundation.BorderStroke(1.dp, Wr.ac)) { Text("Uji semua", color = Wr.ac) }
-                Spacer(Modifier.weight(1f))
-                Text(Bhs.f("{0} profil", St.nod.size), color = Wr.mu, fontSize = 13.sp)
-            }
-            if (St.nod.isEmpty()) {
-                KadWr { Text("Belum ada profil. Tekan + untuk menambah pautan vless://, vmess://, trojan://, ss:// atau WireGuard.", color = Wr.mu) }
-            }
-            St.nod.forEach { n ->
-                val ms = St.ping[n.i]
-                KadWr(klik = {
-                    if (!n.pilih) bg { val (ok, m) = Modem.pilihNod(n.i); St.toast(m.ifEmpty { if (ok) "Dipilih" else "Gagal" }); St.nod = Modem.nodes() }
-                }) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.size(44.dp).clip(CircleShape).background(if (n.pilih) Wr.grad else Brush.linearGradient(listOf(Wr.garis, Wr.garis))),
-                            contentAlignment = Alignment.Center) {
-                            Text(if (n.pilih) "✓" else n.nama.take(1).uppercase(), color = if (n.pilih) Wr.on else Wr.tx, fontWeight = FontWeight.ExtraBold)
-                        }
-                        Spacer(Modifier.width(12.dp))
-                        Column(Modifier.weight(1f)) {
-                            Text(n.nama, color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 16.sp, maxLines = 1)
-                            Text("${n.host}:${n.port} · ${n.net} · ${n.sec}", color = Wr.mu, fontSize = 12.sp, maxLines = 1)
-                        }
-                        if (ms != null) {
-                            val t = if (ms > 0) "$ms ms" else if (ms == -2) "UDP" else "Tamat"
-                            val w = if (ms in 1..250) Wr.ok else if (ms > 250) Wr.wn else if (ms == -2) Wr.mu else Wr.bad
-                            Text(t, color = w, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                            Spacer(Modifier.width(8.dp))
-                        }
-                        Box {
-                            var m by remember { mutableStateOf(false) }
-                            Text("⋮", color = Wr.mu, fontSize = 22.sp, modifier = Modifier.clickable { m = true }.padding(horizontal = 10.dp, vertical = 4.dp))
-                            DropdownMenu(m, { m = false }) {
-                                DropdownMenuItem({ Text("Salin pautan") }, { m = false; bg {
-                                    val l = Modem.obj("/api/node/link?i=${n.i}").optString("link")
-                                    (ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(ClipData.newPlainText("pautan", l)); St.toast("Pautan disalin") } })
-                                DropdownMenuItem({ Text("Edit") }, { m = false; bg { edit = n to Modem.obj("/api/node/link?i=${n.i}").optString("link") } })
-                                DropdownMenuItem({ Text("Padam", color = Wr.bad) }, { m = false; padam = n })
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        Box(Modifier.align(Alignment.BottomEnd).padding(end = 22.dp, bottom = 112.dp).size(58.dp).clip(RoundedCornerShape(20.dp)).background(Wr.grad)
-            .clickable { tambah = true }, contentAlignment = Alignment.Center) {
-            Text("+", fontSize = 32.sp, color = Wr.on, fontWeight = FontWeight.Bold)
-        }
-    }
-
-    if (tambah) {
-        var teks by remember { mutableStateOf("") }
-        AlertDialog(onDismissRequest = { tambah = false }, containerColor = Wr.kad,
-            title = { Text("Tambah profil", color = Wr.tx) },
-            text = {
-                Column {
-                    OutlinedTextField(teks, { teks = it }, minLines = 4, maxLines = 8, modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Tampal pautan (satu baris setiap profil)") }, colors = medan())
-                    TextButton(onClick = {
-                        val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        teks = cm.primaryClip?.getItemAt(0)?.text?.toString().orEmpty()
-                    }) { Text("Tampal dari papan klip", color = Wr.ac) }
-                }
-            },
-            confirmButton = {
-                TextButton(enabled = teks.isNotBlank(), onClick = {
-                    val t = teks; tambah = false
-                    bg { val (ok, m) = Modem.tambahNod(t); St.toast(m.ifEmpty { if (ok) "Ditambah" else "Gagal" }); St.nod = Modem.nodes() }
-                }) { Text("Tambah", color = Wr.ac) }
-            },
-            dismissButton = { TextButton(onClick = { tambah = false }) { Text("Batal", color = Wr.mu) } })
-    }
-    edit?.let { (nd, ln) ->
-        var t by remember { mutableStateOf(ln) }
-        AlertDialog(onDismissRequest = { edit = null }, containerColor = Wr.kad, title = { Text("Edit ${nd.nama}", color = Wr.tx) },
-            text = { OutlinedTextField(t, { t = it }, minLines = 4, maxLines = 8, modifier = Modifier.fillMaxWidth(), colors = medan()) },
-            confirmButton = { TextButton(onClick = { edit = null; bg { val (ok, m) = Modem.tindak("/api/node/edit", org.json.JSONObject().put("i", nd.i).put("link", t.trim()).toString()); St.toast(m.ifEmpty { if (ok) "Disimpan" else "Gagal" }); St.nod = Modem.nodes() } }) { Text("Simpan", color = Wr.ac) } },
-            dismissButton = { TextButton(onClick = { edit = null }) { Text("Batal", color = Wr.mu) } })
-    }
-    padam?.let { n ->
-        AlertDialog(onDismissRequest = { padam = null }, containerColor = Wr.kad,
-            title = { Text("Padam profil?", color = Wr.tx) }, text = { Text(n.nama, color = Wr.mu) },
-            confirmButton = {
-                TextButton(onClick = {
-                    padam = null
-                    bg { val (ok, m) = Modem.padamNod(n.i); St.toast(m.ifEmpty { if (ok) "Dipadam" else "Gagal" }); St.nod = Modem.nodes() }
-                }) { Text("Padam", color = Wr.bad) }
-            },
-            dismissButton = { TextButton(onClick = { padam = null }) { Text("Batal", color = Wr.mu) } })
     }
 }
 
