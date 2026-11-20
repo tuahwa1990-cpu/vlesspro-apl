@@ -12,6 +12,8 @@ android {
         targetSdk = 34
         versionCode = (project.findProperty("vCode") as String?)?.toInt() ?: 1
         versionName = (project.findProperty("vName") as String?) ?: "0.0.1"
+        (project.findProperty("idSuffix") as String?)?.let { applicationIdSuffix = it }
+        manifestPlaceholders["etiket"] = (project.findProperty("etiket") as String?) ?: "VLESS Pro"
     }
     signingConfigs {
         create("rel") {
@@ -25,7 +27,7 @@ android {
             signingConfig = if (System.getenv("KS_PATH") != null) signingConfigs.getByName("rel") else signingConfigs.getByName("debug")
         }
     }
-    packaging { resources { excludes += setOf("META-INF/DEPENDENCIES", "META-INF/LICENSE*", "META-INF/NOTICE*", "META-INF/versions/**", "META-INF/MANIFEST.MF") } }
+    packaging { jniLibs { useLegacyPackaging = true }; resources { excludes += setOf("META-INF/DEPENDENCIES", "META-INF/LICENSE*", "META-INF/NOTICE*", "META-INF/versions/**", "META-INF/MANIFEST.MF") } }
     lint { checkReleaseBuilds = false; abortOnError = false }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     kotlinOptions { jvmTarget = "17" }

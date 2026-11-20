@@ -1,0 +1,39 @@
+name: Bina APK ujian (Fungsi 2)
+# Cabang ujian: menghasilkan APK berasingan (VLESS Pro Ujian, boleh dipasang bersama apl asal).
+# TIDAK menerbitkan keluaran dan TIDAK menyentuh kemas kini pelanggan.
+on:
+  push:
+    branches: [fungsi2]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: 8.9 }
+      - name: Semak terjemahan
+        run: python3 tools/cek-bahasa.py
+      - name: Sedia komponen VPN
+        run: bash tools/sedia-vpn.sh
+      - name: Kunci tandatangan
+        env:
+          KS_PASS: ${{ secrets.KS_PASS }}
+        run: |
+          if [ -z "$KS_PASS" ]; then echo "Rahsia KS_PASS tiada"; exit 1; fi
+          openssl enc -d -aes-256-cbc -pbkdf2 -pass env:KS_PASS -in vp.jks.enc -out "$RUNNER_TEMP/vp.jks"
+          echo "KS_PATH=$RUNNER_TEMP/vp.jks" >> "$GITHUB_ENV"
+      - name: Bina
+        env:
+          KS_PASS: ${{ secrets.KS_PASS }}
+        run: gradle assembleRelease --no-daemon --stacktrace -PvCode=${{ github.run_number }} -PvName=1.1.0-ujian.${{ github.run_number }} -PidSuffix=.ujian "-Petiket=VLESS Pro Ujian"
+      - name: Simpan APK
+        run: cp app/build/outputs/apk/release/app-release.apk "VLESSPro-Ujian-${{ github.run_number }}.apk"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VLESSPro-Ujian
+          path: VLESSPro-Ujian-*.apk

@@ -726,6 +726,7 @@ fun Lagi(buka: (String) -> Unit) {
         Triple("kemas", "Kemas kini modem", "GitHub atau fail"),
         Triple("log", "Log", "Rekod sambungan"),
         Triple("sistem", "Sistem", "Maklumat modem"),
+        Triple("vpn", "VPN telefon", "Sambung terus dari telefon"),
         Triple("pasang", "Pasang / urus", "Pemasang SSH"),
         Triple("apl", "Kemas kini apl", "Versi apl ini"),
         Triple("tema", "Tema", "Rupa dan jenis tulisan"),
@@ -770,6 +771,7 @@ fun Sub(id: String, pref: android.content.SharedPreferences, keluar: () -> Unit,
                 "tema" -> SubTema()
                 "bhs" -> SubBahasa()
                 "sqm" -> SubSqm()
+                "vpn" -> SubVpn()
                 "adblock" -> SubAdblock()
                 "dev" -> SubPeranti()
                 "kuota" -> SubKuota()
