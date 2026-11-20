@@ -1196,7 +1196,11 @@
   "Tampal kandungan fail .conf WireGuard, atau pautan wireguard://.": "Paste the contents of a WireGuard .conf file, or a wireguard:// link.",
   "Tampal di sini": "Paste here",
   "Port tidak sah.": "Invalid port.",
-  "Format proksi mesti host:port.": "Proxy format must be host:port."
+  "Format proksi mesti host:port.": "Proxy format must be host:port.",
+  "Sahkan keaslian apl dan profil SSH/WireGuard lebih mudah": "Verify app authenticity and easier SSH/WireGuard profiles",
+  "Ciri baharu \"Sahkan apl ini\": semak cap jari sijil tandatangan dan SHA-256 fail APK, serta banding terus dengan keluaran rasmi terkini.": "New \"Verify this app\" feature: check the signing certificate fingerprint and APK SHA-256, and compare directly with the latest official release.",
+  "Tambah profil kini ada bahagian berasingan: VLESS/Lain, SSH (borang penuh dengan mod sambungan, SNI, payload dan proksi) dan WireGuard.": "Add profile now has separate sections: VLESS/Other, SSH (full form with connection mode, SNI, payload and proxy) and WireGuard.",
+  "Lebih mudah sediakan profil SSH tanpa perlu tahu format pautan.": "Easier to set up an SSH profile without needing to know the link format."
  },
  "zh": {
   "Mod VPN": "VPN 模式",
