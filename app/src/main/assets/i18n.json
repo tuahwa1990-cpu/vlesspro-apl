@@ -1165,7 +1165,18 @@
   "Tajuk halaman Utama dan VPN telefon di tengah, dengan status modem yang lebih jelas.": "Home and phone VPN titles are centred, with a clearer modem status.",
   "Penambahbaikan keselamatan dan prestasi": "Security and performance improvements",
   "Penambahbaikan keselamatan dalaman apl.": "Internal app security improvements.",
-  "Saiz apl lebih kecil dan pemasangan lebih pantas.": "Smaller app size and faster install."
+  "Saiz apl lebih kecil dan pemasangan lebih pantas.": "Smaller app size and faster install.",
+  "Sahkan apl ini": "Verify this app",
+  "Pastikan apl yang dipasang ialah keluaran rasmi, bukan tiruan.": "Make sure the installed app is the official release, not a fake.",
+  "Cap jari sijil tandatangan (SHA-256)": "Signing certificate fingerprint (SHA-256)",
+  "Mengira ...": "Calculating ...",
+  "Tidak dapat membaca sijil tandatangan.": "Could not read the signing certificate.",
+  "✔ Sepadan dengan sijil rasmi VLESS Pro.": "✔ Matches the official VLESS Pro certificate.",
+  "✖ TIDAK sepadan dengan sijil rasmi. Apl ini mungkin telah diubah suai. Pasang semula daripada group support rasmi.": "✖ Does NOT match the official certificate. This app may have been modified. Reinstall from the official support group.",
+  "SHA-256 fail APK yang dipasang": "SHA-256 of the installed APK file",
+  "Tidak dapat membaca fail APK.": "Could not read the APK file.",
+  "Semakan di dalam apl hanyalah petunjuk, kerana apl yang diubah suai boleh memalsukan paparan ini. Sahkan juga dengan admin dalam group support jika ragu-ragu.": "The check inside the app is only an indicator, since a modified app can fake this display. Also confirm with the admin in the support group if in doubt.",
+  "Tekan \\\"Semak sekarang\\\" di atas untuk banding dengan keluaran rasmi terkini.": "Tap \"Check now\" above to compare with the latest official release."
  },
  "zh": {
   "Mod VPN": "VPN 模式",

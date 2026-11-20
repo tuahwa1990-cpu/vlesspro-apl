@@ -926,5 +926,44 @@ fun SubApl() {
             if (Modem.ip.isNotEmpty()) Baris("Modem disambung", Modem.ip)
             Text("Sumber: GitHub (tuahwa1990-cpu/vlesspro-apl). Fail disemak SHA-256 sebelum dipasang.", color = Wr.mu, fontSize = 11.sp, modifier = Modifier.padding(top = 6.dp))
         }
+        SahkanApl(ctx, info)
+    }
+}
+
+@Composable
+private fun SahkanApl(ctx: Context, info: InfoApl?) {
+    var sijil by remember { mutableStateOf<String?>(null) }
+    var apk by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) { withContext(Dispatchers.IO) {
+        sijil = Sahkan.sijilSemasa(ctx) ?: ""
+        apk = try { Sahkan.apkSha256(ctx) } catch (_: Exception) { "" }
+    } }
+    val semasa = Kemas.versiSemasa(ctx)
+    KadWr {
+        Text("Sahkan apl ini", color = Wr.tx, fontWeight = FontWeight.Bold)
+        Text("Pastikan apl yang dipasang ialah keluaran rasmi, bukan tiruan.", color = Wr.mu, fontSize = 12.sp)
+
+        Text("Cap jari sijil tandatangan (SHA-256)", color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
+        val s = sijil
+        if (s == null) Text("Mengira ...", color = Wr.mu, fontSize = 12.sp)
+        else if (s.isEmpty()) Text("Tidak dapat membaca sijil tandatangan.", color = Wr.bad, fontSize = 13.sp)
+        else {
+            Text(Sahkan.cantik(s), color = Wr.tx, fontSize = 12.sp, fontFamily = FontFamily.Monospace, lineHeight = 17.sp)
+            if (s == Sahkan.SIJIL_RASMI) Text("✔ Sepadan dengan sijil rasmi VLESS Pro.", color = Wr.ok, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            else Text("✖ TIDAK sepadan dengan sijil rasmi. Apl ini mungkin telah diubah suai. Pasang semula daripada group support rasmi.", color = Wr.bad, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+        }
+
+        Text("SHA-256 fail APK yang dipasang", color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
+        val a = apk
+        if (a == null) Text("Mengira ...", color = Wr.mu, fontSize = 12.sp)
+        else if (a.isEmpty()) Text("Tidak dapat membaca fail APK.", color = Wr.bad, fontSize = 13.sp)
+        else {
+            Text(a.chunked(32).joinToString("\n"), color = Wr.tx, fontSize = 12.sp, fontFamily = FontFamily.Monospace, lineHeight = 17.sp)
+            if (info != null && info.code == semasa) {
+                if (a.equals(info.sha, ignoreCase = true)) Text("✔ Sama dengan keluaran rasmi v${info.name}.", color = Wr.ok, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                else Text("✖ TIDAK sama dengan keluaran rasmi v${info.name}. Fail ini mungkin telah diubah suai.", color = Wr.bad, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            } else Text("Tekan \"Semak sekarang\" di atas untuk banding dengan keluaran rasmi terkini.", color = Wr.mu, fontSize = 12.sp)
+        }
+        Text("Semakan di dalam apl hanyalah petunjuk, kerana apl yang diubah suai boleh memalsukan paparan ini. Sahkan juga dengan admin dalam group support jika ragu-ragu.", color = Wr.mu, fontSize = 11.sp, modifier = Modifier.padding(top = 6.dp))
     }
 }
