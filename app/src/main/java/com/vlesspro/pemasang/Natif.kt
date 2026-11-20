@@ -275,6 +275,7 @@ fun Utama2(pref: android.content.SharedPreferences, keluar: () -> Unit) {
 
     LaunchedEffect(Unit) {
         var n = 0
+        var ipMasa = 0L // semakan IP keluar: jarang, kerana modem menghantar beberapa permintaan melalui VLESS setiap kali
         while (true) {
             withContext(Dispatchers.IO) {
                 try {
@@ -282,7 +283,11 @@ fun Utama2(pref: android.content.SharedPreferences, keluar: () -> Unit) {
                     St.status = s
                     St.jamOfset = s.optLong("now") - System.currentTimeMillis() / 1000
                     St.luar = false
-                    if (n % 4 == 0 && s.optBoolean("vless")) St.ipInfo = Modem.ipInfo().takeIf { it.optBoolean("ok") }
+                    val kini = System.currentTimeMillis()
+                    if (s.optBoolean("vless") && kini - ipMasa > (if (St.ipInfo == null) 15000L else 120000L)) {
+                        ipMasa = kini
+                        St.ipInfo = Modem.ipInfo().takeIf { it.optBoolean("ok") }
+                    }
                     if (n % 4 == 0 || St.nod.isEmpty()) St.nod = Modem.nodes()
                     if (n % 4 == 0) St.vpnMod = Modem.obj("/api/opts").optString("vpnmode_eff")
                 } catch (_: SalahKata) { St.toast("Kata laluan telah berubah"); St.perluLog = true }

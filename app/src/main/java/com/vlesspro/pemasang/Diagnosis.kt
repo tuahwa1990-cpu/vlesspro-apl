@@ -45,8 +45,11 @@ object Diagnosis {
         sb.append("\nLog modem (amaran dan ralat sahaja; domain dan IP disorok):\n")
         try {
             val semua = Modem.log().lines().takeLast(300)
-            val masalah = semua.filter { l -> val k = l.lowercase(); "[warning]" in k || "[error]" in k || "failed" in k }
-            b("Ringkasan", semua.count { "accepted" in it }.toString() + " sambungan diterima, " + masalah.size + " amaran/ralat dalam " + semua.size + " baris terakhir")
+            val semuaMasalah = semua.filter { l -> val k = l.lowercase(); "[warning]" in k || "[error]" in k || "failed" in k }
+            // Amaran "closed pipe" daripada semakan IP ialah perkara biasa (permintaan lambat ditinggalkan); tidak dipaparkan.
+            val jinak = semuaMasalah.filter { "closed pipe" in it }
+            val masalah = semuaMasalah - jinak.toSet()
+            b("Ringkasan", semua.count { "accepted" in it }.toString() + " sambungan diterima, " + masalah.size + " amaran/ralat sebenar, " + jinak.size + " amaran jinak disembunyikan, dalam " + semua.size + " baris terakhir")
             if (masalah.isEmpty()) sb.append("(tiada amaran atau ralat)\n")
             else sb.append(bersih(masalah.takeLast(20).joinToString("\n"))).append('\n')
         } catch (e: Exception) { sb.append("(log tidak dapat dibaca)\n") }

@@ -916,7 +916,10 @@
   "Kestabilan lebih baik": "Better stability",
   "Jika apl ranap, jejak ralat terakhir disimpan dan disertakan dalam Hantar diagnosis.": "If the app crashes, the last error trace is saved and included in Send diagnostics.",
   "Panggilan ke modem cuba semula sekali jika sambungan terputus seketika.": "Calls to the modem retry once if the connection drops briefly.",
-  "Semakan terjemahan automatik ditambah semasa binaan supaya teks English tidak tertinggal.": "An automatic translation check was added to the build so no English text is left out."
+  "Semakan terjemahan automatik ditambah semasa binaan supaya teks English tidak tertinggal.": "An automatic translation check was added to the build so no English text is left out.",
+  "Kurang beban semakan IP": "Lighter IP checks",
+  "Semakan IP keluar kini lebih jarang (setiap 2 minit, bukan setiap 12 saat), mengurangkan trafik dan catatan amaran pada modem.": "The exit IP is now checked less often (every 2 minutes instead of every 12 seconds), reducing traffic and warning entries on the modem.",
+  "Hantar diagnosis menyembunyikan amaran jinak daripada semakan IP supaya masalah sebenar mudah dilihat.": "Send diagnostics hides harmless warnings from the IP check so real problems are easy to see."
  },
  "zh": {
   "Mod VPN": "VPN 模式",

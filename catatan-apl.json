@@ -1,11 +1,20 @@
 {
- "title": "Kestabilan lebih baik",
+ "title": "Kurang beban semakan IP",
  "items": [
-  "Jika apl ranap, jejak ralat terakhir disimpan dan disertakan dalam Hantar diagnosis.",
-  "Panggilan ke modem cuba semula sekali jika sambungan terputus seketika.",
-  "Semakan terjemahan automatik ditambah semasa binaan supaya teks English tidak tertinggal."
+  "Semakan IP keluar kini lebih jarang (setiap 2 minit, bukan setiap 12 saat), mengurangkan trafik dan catatan amaran pada modem.",
+  "Hantar diagnosis menyembunyikan amaran jinak daripada semakan IP supaya masalah sebenar mudah dilihat."
  ],
  "history": [
+  {
+   "version": "1.0.33",
+   "date": "2026-11-20",
+   "title": "Kestabilan lebih baik",
+   "items": [
+    "Jika apl ranap, jejak ralat terakhir disimpan dan disertakan dalam Hantar diagnosis.",
+    "Panggilan ke modem cuba semula sekali jika sambungan terputus seketika.",
+    "Semakan terjemahan automatik ditambah semasa binaan supaya teks English tidak tertinggal."
+   ]
+  },
   {
    "version": "1.0.32",
    "date": "2026-11-20",
