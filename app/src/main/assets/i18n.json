@@ -1228,7 +1228,14 @@
   "8 gaya tersedia — Bulat Klasik, Nafas, Cincin Berputar, Kapsul, Pelangi, Neon, Ombak Riak dan Bintang Berkilau — dengan pratonton boleh cuba sebelum pilih.": "8 styles available — Classic Circle, Breathe, Spinning Ring, Capsule, Rainbow, Neon, Ripple Waves and Sparkling Stars — with a preview you can try before choosing.",
   "Pilihan disimpan terus pada telefon anda.": "Your choice is saved directly on your phone.",
   "Pembetulan kecil antara muka": "Minor interface fix",
-  "Betulkan paparan pilihan \"Kemas Kini Automatik\" di skrin Kemas kini modem supaya tidak lagi terbalit.": "Fixed the \"Automatic Update\" option display on the Update modem screen so the text no longer wraps oddly."
+  "Betulkan paparan pilihan \"Kemas Kini Automatik\" di skrin Kemas kini modem supaya tidak lagi terbalit.": "Fixed the \"Automatic Update\" option display on the Update modem screen so the text no longer wraps oddly.",
+  "Xray Sedia Ada sedang digunakan": "Existing Xray is in use",
+  "Xray Sedia Ada": "Existing Xray",
+  "VLESS Pro diputuskan dan Xray Sedia Ada dipulihkan. Internet terhenti seketika.": "VLESS Pro disconnected and Existing Xray restored. The internet pauses briefly.",
+  "Xray Sedia Ada dihentikan sementara. Internet terhenti seketika.": "Existing Xray is stopped temporarily. The internet pauses briefly.",
+  "VLESS Pro tidak aktif. Trafik guna Xray Sedia Ada atau SIM asal.": "VLESS Pro is inactive. Traffic uses the Existing Xray or the original SIM.",
+  "Xray Sedia Ada tidak diubah. Mod semasa: {0}": "Existing Xray is unchanged. Current mode: {0}",
+  "Xray Sedia Ada: ada ({0})": "Existing Xray: present ({0})"
  },
  "zh": {
   "Mod VPN": "VPN 模式",

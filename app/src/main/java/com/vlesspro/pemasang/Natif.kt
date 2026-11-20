@@ -659,7 +659,7 @@ fun Utama() {
                 fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = if (on) Wr.ac else Wr.tx, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
             val ip = St.ipInfo
             Text(if (on && ip != null) "${ip.optString("ip")} · ${ip.optString("country")}"
-            else if (s != null && !on && s.optBoolean("xlite")) "VPN asal sedang digunakan" else if (on) "Memeriksa IP ..." else if (s == null && St.luar) "Sambung telefon ke WiFi modem" else "Sentuh butang untuk menyambung",
+            else if (s != null && !on && s.optBoolean("xlite")) "Xray Sedia Ada sedang digunakan" else if (on) "Memeriksa IP ..." else if (s == null && St.luar) "Sambung telefon ke WiFi modem" else "Sentuh butang untuk menyambung",
                 color = Wr.mu, fontSize = 14.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
         }
 
@@ -709,7 +709,7 @@ fun Utama() {
                 else -> Bhs.t("Lesen") + ": $st"
             }
             Cip(lt, if (st == "active") Wr.ok else Wr.bad)
-            Cip(if (s?.optString("mode") == "vless") "VLESS Pro" else "VPN asal", Wr.ac2)
+            Cip(if (s?.optString("mode") == "vless") "VLESS Pro" else "Xray Sedia Ada", Wr.ac2)
             val nama = s?.optString("node").orEmpty()
             if (nama.isNotEmpty()) Cip(nama, Wr.ac)
             if (on && St.vpnMod.isNotEmpty()) Cip(Bhs.f("Mod {0}", St.vpnMod), Wr.wn)
@@ -723,8 +723,8 @@ fun Utama() {
             title = { Text(if (on) "Putuskan sambungan?" else "Sambung VLESS Pro?", color = Wr.tx) },
             text = {
                 val hx = s?.optBoolean("hasx", true) ?: true
-                Text(if (on) (if (hx) "VLESS Pro diputuskan dan VPN asal dipulihkan. Internet terhenti seketika." else "VLESS Pro diputuskan. Sambungan kembali tanpa proksi.")
-                else (if (hx) "VPN asal dihentikan sementara. Internet terhenti seketika." else "Internet terhenti seketika."), color = Wr.mu)
+                Text(if (on) (if (hx) "VLESS Pro diputuskan dan Xray Sedia Ada dipulihkan. Internet terhenti seketika." else "VLESS Pro diputuskan. Sambungan kembali tanpa proksi.")
+                else (if (hx) "Xray Sedia Ada dihentikan sementara. Internet terhenti seketika." else "Internet terhenti seketika."), color = Wr.mu)
             },
             confirmButton = { TextButton(onClick = { sahkan = false; pindahMod() }) { Text(if (on) "Putuskan" else "Sambung", color = if (on) Wr.bad else Wr.ac) } },
             dismissButton = { TextButton(onClick = { sahkan = false }) { Text("Batal", color = Wr.mu) } })

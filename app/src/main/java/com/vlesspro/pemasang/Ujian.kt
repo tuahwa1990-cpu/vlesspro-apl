@@ -84,7 +84,7 @@ object Ujian {
         }
         val vless = st.optString("mode") == "vless" && st.optBoolean("vless")
         h += if (vless) Wr.ok to Bhs.t("VLESS Pro hidup.")
-        else Wr.wn to Bhs.t("VLESS Pro tidak aktif. Trafik guna VPN asal atau SIM asal.")
+        else Wr.wn to Bhs.t("VLESS Pro tidak aktif. Trafik guna Xray Sedia Ada atau SIM asal.")
 
         // IP melalui WiFi modem (dipaksa) dan IP lalai telefon (yang digunakan apl lain).
         fun ipLuar(n: Network?): Pair<String, Long> {
