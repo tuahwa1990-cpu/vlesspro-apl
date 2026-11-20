@@ -177,7 +177,8 @@ fun Profil(ke: (String) -> Unit) {
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 140.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Profil", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
+            Text("Profil", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
 
             // Failover
             KadWr {

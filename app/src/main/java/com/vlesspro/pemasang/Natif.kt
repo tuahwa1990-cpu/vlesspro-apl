@@ -655,8 +655,18 @@ fun Utama() {
             textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(sapa, color = Wr.mu, fontSize = 14.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-            Text(if (s == null && St.luar) "Modem tidak dicapai" else if (s == null) "Menyambung ..." else if (on) "Anda disambung" else if (s.optString("mode") == "xlite") "VLESS Pro tidak aktif" else "Tiada sambungan",
-                fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = if (on) Wr.ac else Wr.tx, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+            val khas = on || (s != null && s.optString("mode") == "xlite")
+            if (khas) {
+                val trS = rememberInfiniteTransition(label = "st")
+                val kilau by trS.animateFloat(0.75f, 1f, infiniteRepeatable(tween(1300, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "k")
+                val gradStatus = if (on) Brush.linearGradient(listOf(Color(0xFF4ADE80), Color(0xFF22D3EE)))
+                    else Brush.linearGradient(listOf(Color(0xFFFF8A65), Color(0xFFFF5370)))
+                Text(if (on) "Aktif" else "Tidak Aktif", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold,
+                    style = TextStyle(brush = gradStatus, alpha = kilau), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+            } else {
+                Text(if (s == null && St.luar) "Modem tidak dicapai" else if (s == null) "Menyambung ..." else "Tiada sambungan",
+                    fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+            }
             val ip = St.ipInfo
             Text(if (on && ip != null) "${ip.optString("ip")} · ${ip.optString("country")}"
             else if (s != null && !on && s.optBoolean("xlite")) "Xray Sedia Ada sedang digunakan" else if (on) "Memeriksa IP ..." else if (s == null && St.luar) "Sambung telefon ke WiFi modem" else "Sentuh butang untuk menyambung",
@@ -867,7 +877,8 @@ fun Lagi(buka: (String) -> Unit) {
     )
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 130.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Lagi", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx)
+        Text("Lagi", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Wr.tx,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
         item.chunked(2).forEach { baris ->
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 baris.forEach { (id, t, d) ->
