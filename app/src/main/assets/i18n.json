@@ -969,7 +969,8 @@
   "Uji ping": "Test ping",
   "+ Tampal pautan": "+ Paste link",
   "Belum ada pelayan.": "No servers yet.",
-  "Salin pautan vless:// atau vmess:// kemudian tekan Tampal pautan.": "Copy a vless:// or vmess:// link, then tap Paste link."
+  "Salin pautan vless:// atau vmess:// kemudian tekan Tampal pautan.": "Copy a vless:// or vmess:// link, then tap Paste link.",
+  "Penerowong gagal dimulakan.": "The tunnel failed to start."
  },
  "zh": {
   "Mod VPN": "VPN 模式",

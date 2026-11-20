@@ -45,8 +45,10 @@ object HevLib {
 /** JNI hev-socks5-tunnel (tun2socks). Nama kelas ini dipadankan semasa binaan CI (tools/sedia-vpn.sh). */
 class TProxyService {
     companion object {
-        @JvmStatic external fun TProxyStartService(configPath: String, fd: Int)
-        @JvmStatic external fun TProxyStopService()
+        // Tandatangan mesti sama dengan jadual native_methods dalam hev-jni.c: (String,int)Z, ()Z, ()Z, ()[J
+        @JvmStatic external fun TProxyStartService(configPath: String, fd: Int): Boolean
+        @JvmStatic external fun TProxyStopService(): Boolean
+        @JvmStatic external fun TProxyIsRunning(): Boolean
         @JvmStatic external fun TProxyGetStats(): LongArray
     }
 }
@@ -237,7 +239,7 @@ class VpnPerkhidmatan : VpnService() {
         val yml = File(filesDir, "vpn-hev.yml")
         yml.writeText("tunnel:\n  mtu: 1500\n  ipv4: 26.26.26.1\nsocks5:\n  port: $PORT\n  address: 127.0.0.1\n  udp: 'udp'\nmisc:\n  log-level: warn\n")
         HevLib.muat()
-        TProxyService.TProxyStartService(yml.path, fd.fd)
+        if (!TProxyService.TProxyStartService(yml.path, fd.fd)) throw RuntimeException(Bhs.t("Penerowong gagal dimulakan."))
         jalan = true; sibuk = false; masa0 = System.currentTimeMillis()
         notif(Bhs.f("Bersambung ke {0}", h.nama))
     }
