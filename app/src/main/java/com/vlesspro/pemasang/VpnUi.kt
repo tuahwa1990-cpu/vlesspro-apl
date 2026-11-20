@@ -42,10 +42,21 @@ private fun saizB(b: Long): String = when {
     else -> String.format("%.2f GB", b / 1073741824.0)
 }
 
-private suspend fun ambilIp(proksi: java.net.Proxy?): String = withContext(Dispatchers.IO) {
+/** Rangkaian sebenar telefon (WiFi/data), bukan terowong VPN. */
+@Suppress("DEPRECATION")
+private fun rangkaianAsal(ctx: Context): android.net.Network? {
+    val cm = ctx.getSystemService(Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
+    val senarai = cm.allNetworks.filter { n ->
+        val c = cm.getNetworkCapabilities(n)
+        c != null && !c.hasTransport(android.net.NetworkCapabilities.TRANSPORT_VPN) && c.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+    return senarai.firstOrNull { cm.getNetworkCapabilities(it)?.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED) == true } ?: senarai.firstOrNull()
+}
+
+private suspend fun ambilIp(proksi: java.net.Proxy?, rangkaian: android.net.Network? = null): String = withContext(Dispatchers.IO) {
     try {
         val url = java.net.URL("https://api.ipify.org")
-        val c = (if (proksi != null) url.openConnection(proksi) else url.openConnection()) as java.net.HttpURLConnection
+        val c = (if (proksi != null) url.openConnection(proksi) else if (rangkaian != null) rangkaian.openConnection(url) else url.openConnection()) as java.net.HttpURLConnection
         c.connectTimeout = 7000; c.readTimeout = 7000
         c.inputStream.bufferedReader().readText().trim()
     } catch (_: Exception) { "?" }
@@ -182,7 +193,7 @@ fun SubVpn() {
         menyemakIp = true; ipTel = ""; ipVpn = ""
         skop.launch {
             // Apl ini dikecualikan daripada VPN: sambungan terus = IP telefon sebenar; melalui SOCKS Xray = IP pelayan.
-            ipTel = ambilIp(null)
+            ipTel = ambilIp(null, rangkaianAsal(ctx))
             ipVpn = ambilIp(java.net.Proxy(java.net.Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", VpnPerkhidmatan.PORT)))
             menyemakIp = false
         }
