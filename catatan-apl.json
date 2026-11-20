@@ -1,13 +1,21 @@
 {
-  "title": "Statistik lebih lengkap",
+  "title": "Pembetulan ranap Statistik",
   "items": [
-    "Graf kelajuan kini ada pilihan julat masa: 3 minit atau 1 jam, dengan nombor muat turun/naik semasa dipaparkan besar.",
-    "Baharu: kad Penggunaan Data — jumlah 24 jam, 7 hari dan 30 hari.",
-    "Baharu: senarai pelayan DNS dalam bahagian Rangkaian.",
-    "Baharu: Sambungan gagal (24 jam) di samping (1 jam), dan memori bebas kini bar progres berwarna.",
-    "Butang segar semula dan masa dikemas kini ditambah supaya mudah pantau data terkini."
+    "Betulkan ranap apabila membuka skrin Statistik (disebabkan tetapan jarak dalaman yang tidak sah)."
   ],
   "history": [
+    {
+      "version": "1.0.54",
+      "date": "2026-11-21",
+      "title": "Statistik lebih lengkap",
+      "items": [
+        "Graf kelajuan kini ada pilihan julat masa: 3 minit atau 1 jam, dengan nombor muat turun/naik semasa dipaparkan besar.",
+        "Baharu: kad Penggunaan Data — jumlah 24 jam, 7 hari dan 30 hari.",
+        "Baharu: senarai pelayan DNS dalam bahagian Rangkaian.",
+        "Baharu: Sambungan gagal (24 jam) di samping (1 jam), dan memori bebas kini bar progres berwarna.",
+        "Butang segar semula dan masa dikemas kini ditambah supaya mudah pantau data terkini."
+      ]
+    },
     {
       "version": "1.0.53",
       "date": "2026-11-21",
