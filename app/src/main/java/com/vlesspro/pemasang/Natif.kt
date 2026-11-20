@@ -172,7 +172,12 @@ fun AppNatif() {
     Box(Modifier.fillMaxSize().background(Wr.bg)) {
         when (tahap) {
             "mula" -> Splash()
-            "setup" -> Setup(pref, ralatSetup, { tahap = "utama" }, { tahap = "pasang" })
+            "setup" -> Setup(pref, ralatSetup, { tahap = "utama" }, { tahap = "pasang" }, { tahap = "vpn" })
+            "vpn" -> Column(Modifier.fillMaxSize()) {
+                BackHandler { tahap = "setup" }
+                TextButton(onClick = { tahap = "setup" }, modifier = Modifier.padding(8.dp)) { Text("‹ Kembali", color = Wr.ac, fontSize = 16.sp) }
+                Box(Modifier.weight(1f)) { SubVpn() }
+            }
             "pasang" -> Column(Modifier.fillMaxSize()) {
                 var edisi by remember { mutableStateOf(Edisi.B618) }
                 var ip by remember { mutableStateOf(edisi.ipLalai) }
@@ -194,7 +199,7 @@ fun AppNatif() {
 }
 
 @Composable
-fun Setup(pref: android.content.SharedPreferences, ralat0: String, siap: () -> Unit, pasang: () -> Unit) {
+fun Setup(pref: android.content.SharedPreferences, ralat0: String, siap: () -> Unit, pasang: () -> Unit, vpn: () -> Unit) {
     var ip by remember { mutableStateOf(pref.getString("ip", "192.168.8.1") ?: "192.168.8.1") }
     var ps by remember { mutableStateOf("") }
     var baru by remember { mutableStateOf("") }
@@ -255,6 +260,9 @@ fun Setup(pref: android.content.SharedPreferences, ralat0: String, siap: () -> U
         }
         TextButton(onClick = pasang, modifier = Modifier.fillMaxWidth()) {
             Text("VLESS Pro belum dipasang pada modem? Pasang sekarang", color = Wr.ac2)
+        }
+        OutlinedButton(onClick = vpn, modifier = Modifier.fillMaxWidth().height(48.dp)) {
+            Text("VPN telefon (tanpa modem)", color = Wr.ac)
         }
     }
 }

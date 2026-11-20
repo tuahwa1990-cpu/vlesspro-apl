@@ -956,7 +956,8 @@
   "Tiada pautan vless:// dalam papan klip.": "No vless:// link in the clipboard.",
   "{0} pelayan ditambah.": "{0} server(s) added.",
   "Jika WiFi modem anda sudah menjalankan VLESS Pro, matikan salah satu supaya trafik tidak melalui dua lapisan (lebih perlahan).": "If your modem's WiFi already runs VLESS Pro, turn one of them off so traffic does not pass through two layers (slower).",
-  "Fungsi ini berjalan sepenuhnya dalam telefon dan tidak membebankan modem.": "This function runs entirely on the phone and does not load the modem."
+  "Fungsi ini berjalan sepenuhnya dalam telefon dan tidak membebankan modem.": "This function runs entirely on the phone and does not load the modem.",
+  "VPN telefon (tanpa modem)": "Phone VPN (no modem needed)"
  },
  "zh": {
   "Mod VPN": "VPN 模式",
