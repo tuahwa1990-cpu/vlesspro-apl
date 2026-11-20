@@ -109,6 +109,20 @@ fun IkonDenyut(warna: Color) {
 }
 
 @Composable
+fun IkonPerisai(warna: Color) {
+    Canvas(Modifier.size(24.dp)) {
+        val w = this.size.width
+        val p = Path().apply {
+            moveTo(w * 0.5f, w * 0.06f); lineTo(w * 0.86f, w * 0.2f); lineTo(w * 0.86f, w * 0.5f)
+            cubicTo(w * 0.86f, w * 0.74f, w * 0.7f, w * 0.9f, w * 0.5f, w * 0.96f)
+            cubicTo(w * 0.3f, w * 0.9f, w * 0.14f, w * 0.74f, w * 0.14f, w * 0.5f)
+            lineTo(w * 0.14f, w * 0.2f); close()
+        }
+        drawPath(p, warna, style = Stroke(width = w * 0.09f, cap = StrokeCap.Round))
+    }
+}
+
+@Composable
 fun IkonSenarai(warna: Color) {
     Canvas(Modifier.size(24.dp)) {
         val w = this.size.width
@@ -351,7 +365,7 @@ fun Utama2(pref: android.content.SharedPreferences, keluar: () -> Unit) {
                 else when (tab) {
                     0 -> Utama()
                     1 -> Profil()
-                    2 -> Statistik()
+                    2 -> SubVpn()
                     else -> Lagi { sub = it }
                 }
             }
@@ -379,7 +393,7 @@ fun BarBawah(tab: Int, pilih: (Int) -> Unit, modifier: Modifier) {
             item(0, "Utama") { IkonRumah(it) }
             item(1, "Profil") { IkonSenarai(it) }
             Spacer(Modifier.width(72.dp))
-            item(2, "Statistik") { IkonDenyut(it) }
+            item(2, "VPN") { IkonPerisai(it) }
             item(3, "Lagi") { IkonGrid(it) }
         }
         Box(Modifier.align(Alignment.TopCenter).offset(y = (-16).dp).size(66.dp).clip(CircleShape)
@@ -752,7 +766,7 @@ fun Lagi(buka: (String) -> Unit) {
         Triple("kemas", "Kemas kini modem", "GitHub atau fail"),
         Triple("log", "Log", "Rekod sambungan"),
         Triple("sistem", "Sistem", "Maklumat modem"),
-        Triple("vpn", "VPN telefon", "Sambung terus dari telefon"),
+        Triple("statistik", "Statistik", "Trafik dan penggunaan"),
         Triple("pasang", "Pasang / urus", "Pemasang SSH"),
         Triple("apl", "Kemas kini apl", "Versi apl ini"),
         Triple("tema", "Tema", "Rupa dan jenis tulisan"),
@@ -798,6 +812,7 @@ fun Sub(id: String, pref: android.content.SharedPreferences, keluar: () -> Unit,
                 "bhs" -> SubBahasa()
                 "sqm" -> SubSqm()
                 "vpn" -> SubVpn()
+                "statistik" -> Statistik()
                 "adblock" -> SubAdblock()
                 "dev" -> SubPeranti()
                 "kuota" -> SubKuota()

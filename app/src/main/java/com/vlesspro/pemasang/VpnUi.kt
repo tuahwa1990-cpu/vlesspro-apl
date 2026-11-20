@@ -364,6 +364,7 @@ private fun SkrinUtama(ke: (String) -> Unit) {
         Text(Bhs.t("Ping TCP hanyalah anggaran (nod D1G1 menunjukkan ping palsu). Ping sebenar boleh diuji selepas bersambung."), color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
         Text(Bhs.t("Jika WiFi modem anda sudah menjalankan VLESS Pro, matikan salah satu supaya trafik tidak melalui dua lapisan (lebih perlahan)."), color = Wr.mu, fontSize = 12.sp)
         Text(Bhs.f("Apl {0} · Xray {1}", Kemas.namaSemasa(ctx), VpnPerkhidmatan.VERSI_XRAY), color = Wr.mu, fontSize = 11.sp)
+        Spacer(Modifier.height(80.dp))
     }
 }
 
