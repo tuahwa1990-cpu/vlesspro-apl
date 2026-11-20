@@ -1262,7 +1262,13 @@
     "7 hari": "7 days",
     "30 hari": "30 days",
     "Kesihatan sistem": "System health",
-    "Sambungan gagal (24 jam)": "Failed connections (24h)"
+    "Sambungan gagal (24 jam)": "Failed connections (24h)",
+    "Statistik lebih lengkap": "More complete statistics",
+    "Graf kelajuan kini ada pilihan julat masa: 3 minit atau 1 jam, dengan nombor muat turun/naik semasa dipaparkan besar.": "The speed graph now has a time-range choice: 3 minutes or 1 hour, with the current download/upload numbers shown large.",
+    "Baharu: kad Penggunaan Data — jumlah 24 jam, 7 hari dan 30 hari.": "New: a Data Usage card — 24-hour, 7-day and 30-day totals.",
+    "Baharu: senarai pelayan DNS dalam bahagian Rangkaian.": "New: the DNS server list in the Network section.",
+    "Baharu: Sambungan gagal (24 jam) di samping (1 jam), dan memori bebas kini bar progres berwarna.": "New: Failed connections (24h) alongside (1h), and free memory is now a colored progress bar.",
+    "Butang segar semula dan masa dikemas kini ditambah supaya mudah pantau data terkini.": "A refresh button and an updated-at time were added so the latest data is easy to track."
   },
   "zh": {
     "Mod VPN": "VPN 模式",

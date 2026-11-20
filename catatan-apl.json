@@ -1,12 +1,24 @@
 {
-  "title": "Skrin VPN Telefon lebih menarik",
+  "title": "Statistik lebih lengkap",
   "items": [
-    "Butang sambung/putus di VPN Telefon kini guna gaya animasi yang sama seperti anda pilih di skrin Utama.",
-    "Senarai pelayan kini ada aksen warna ikut jenis sambungan (VLESS, VMess, Trojan, Shadowsocks, SSH) supaya mudah dibezakan.",
-    "Kad pelayan yang dipilih kini bercahaya lembut berdenyut, dan status Bersambung/Menyambung kini berwarna-warni.",
-    "Butang Tetapan, Per-apl, Panduan dan Tentang kini berwarna berbeza-beza."
+    "Graf kelajuan kini ada pilihan julat masa: 3 minit atau 1 jam, dengan nombor muat turun/naik semasa dipaparkan besar.",
+    "Baharu: kad Penggunaan Data — jumlah 24 jam, 7 hari dan 30 hari.",
+    "Baharu: senarai pelayan DNS dalam bahagian Rangkaian.",
+    "Baharu: Sambungan gagal (24 jam) di samping (1 jam), dan memori bebas kini bar progres berwarna.",
+    "Butang segar semula dan masa dikemas kini ditambah supaya mudah pantau data terkini."
   ],
   "history": [
+    {
+      "version": "1.0.53",
+      "date": "2026-11-21",
+      "title": "Skrin VPN Telefon lebih menarik",
+      "items": [
+        "Butang sambung/putus di VPN Telefon kini guna gaya animasi yang sama seperti anda pilih di skrin Utama.",
+        "Senarai pelayan kini ada aksen warna ikut jenis sambungan (VLESS, VMess, Trojan, Shadowsocks, SSH) supaya mudah dibezakan.",
+        "Kad pelayan yang dipilih kini bercahaya lembut berdenyut, dan status Bersambung/Menyambung kini berwarna-warni.",
+        "Butang Tetapan, Per-apl, Panduan dan Tentang kini berwarna berbeza-beza."
+      ]
+    },
     {
       "version": "1.0.52",
       "date": "2026-11-21",
