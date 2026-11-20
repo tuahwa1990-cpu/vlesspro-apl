@@ -148,7 +148,7 @@ class VpnPerkhidmatan : VpnService() {
         val h = VlessPautan.hurai(pautan)
         VpnKawal.semak(this)?.let { throw SekatanVpn(it) }
         val lesen = VpnLesen.berlesen(this)
-        if (!lesen && VpnLesen.berbayar(h)) throw SekatanVpn(VpnLesen.mesej())
+        if (!lesen && VpnLesen.berbayar(h)) throw SekatanVpn(VpnLesen.mesej(VpnLesen.nama(h)))
         hasil = h
         nama = h.nama
         notif(Bhs.f("Menyambung ke {0}", h.nama))

@@ -36,7 +36,7 @@ object VpnKongsi {
     /** Untuk widget: putus jika hidup, sambung jika kebenaran sudah ada, jika tidak buka apl. */
     fun togol(ctx: Context) {
         if (VpnPerkhidmatan.jalan || VpnPerkhidmatan.sibuk) { VpnPerkhidmatan.henti(ctx); return }
-        if (!VpnLesen.berlesen(ctx)) { St.toast(VpnLesen.mesej()); bukaApl(ctx); return }
+        if (!VpnLesen.berlesen(ctx)) { St.toast(VpnLesen.mesej("Jubin dan widget")); bukaApl(ctx); return }
         if (SimpanVpn.semua(ctx).isEmpty() || VpnService.prepare(ctx) != null) { bukaApl(ctx); return }
         try { mula(ctx) } catch (_: Throwable) { bukaApl(ctx) }
     }
@@ -59,7 +59,7 @@ class VpnTile : TileService() {
     @Suppress("DEPRECATION")
     override fun onClick() {
         if (VpnPerkhidmatan.jalan || VpnPerkhidmatan.sibuk) { VpnPerkhidmatan.henti(this); return }
-        if (!VpnLesen.berlesen(this)) St.toast(VpnLesen.mesej())
+        if (!VpnLesen.berlesen(this)) St.toast(VpnLesen.mesej("Jubin dan widget"))
         if (!VpnLesen.berlesen(this) || SimpanVpn.semua(this).isEmpty() || VpnService.prepare(this) != null) {
             val i = Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             if (Build.VERSION.SDK_INT >= 34) startActivityAndCollapse(PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_IMMUTABLE))

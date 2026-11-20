@@ -73,7 +73,10 @@ object VpnLesen {
     fun berlesen(ctx: Context) = p(ctx).getBoolean("vpn_berlesen", false)
     fun tetap(ctx: Context, v: Boolean) { if (berlesen(ctx) != v) p(ctx).edit().putBoolean("vpn_berlesen", v).apply() }
     fun berbayar(h: VlessPautan.Hasil) = h.jenis == "SSH" || h.jenis == "TROJAN" || h.jenis == "SS"
-    fun mesej() = Bhs.t("Ciri ini untuk pelanggan VLESS Pro berlesen. Log masuk modem anda dalam apl ini sekali untuk membukanya.")
+    fun nama(h: VlessPautan.Hasil) = when (h.jenis) { "SSH" -> "SSH"; "TROJAN" -> "Trojan"; else -> "Shadowsocks" }
+    /** Mesej sekatan: nyatakan ciri yang dikunci dan bahawa ia boleh dibuka oleh pelanggan berlesen. */
+    fun mesej(ciri: String) = Bhs.f("{0} dikunci. Boleh dibuka jika anda pelanggan VLESS Pro berlesen: log masuk modem berlesen anda dalam apl ini sekali.", Bhs.t(ciri))
+    fun nota() = Bhs.t("🔒 = ciri dibuka untuk pelanggan VLESS Pro berlesen. Log masuk modem berlesen anda dalam apl ini sekali untuk membukanya.")
 }
 
 /** Suis jauh: fail kawal.json di GitHub. Jika gagal dimuat turun, VPN dibenarkan (fail-open). */
@@ -187,7 +190,7 @@ object VpnImport {
     }
 
     fun segarkan(ctx: Context): String {
-        if (!VpnLesen.berlesen(ctx)) return VpnLesen.mesej()
+        if (!VpnLesen.berlesen(ctx)) return VpnLesen.mesej("Langganan")
         val lama = SimpanVpn.langganan(ctx)
         if (lama.isEmpty()) return Bhs.t("Tiada langganan.")
         var ok = 0; var gagal = 0
@@ -208,7 +211,7 @@ object VpnImport {
             try {
                 val h = VlessPautan.hurai(l)
                 if (l in m) continue
-                if (!lesen && VpnLesen.berbayar(h)) { ralat = VpnLesen.mesej(); continue }
+                if (!lesen && VpnLesen.berbayar(h)) { ralat = VpnLesen.mesej(VpnLesen.nama(h)); continue }
                 if (!lesen && m.size >= VpnLesen.HAD_PERCUMA) { ralat = Bhs.f("Had {0} pelayan untuk pengguna percuma. Padam satu dahulu.", VpnLesen.HAD_PERCUMA.toString()); continue }
                 m.add(l); tambah++
             } catch (e: Exception) { ralat = e.message ?: "" }
@@ -217,7 +220,7 @@ object VpnImport {
         var sub = 0
         val ls = SimpanVpn.langganan(ctx).toMutableList()
         for (u in url) {
-            if (!lesen) { ralat = VpnLesen.mesej(); break }
+            if (!lesen) { ralat = VpnLesen.mesej("Langganan"); break }
             try {
                 val l = ambilLangganan(u)
                 val i = ls.indexOfFirst { it.first == u }

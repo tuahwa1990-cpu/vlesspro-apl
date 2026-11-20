@@ -303,14 +303,15 @@ private fun SkrinUtama(ke: (String) -> Unit) {
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             BtnKecil(Bhs.t("Tampal"), Modifier.weight(1f)) { tampal() }
-            BtnKecil(Bhs.t("Imbas QR"), Modifier.weight(1f)) {
-                if (!VpnLesen.berlesen(ctx)) { St.toast(VpnLesen.mesej()); return@BtnKecil }
+            BtnKecil((if (VpnLesen.berlesen(ctx)) "" else "🔒 ") + Bhs.t("Imbas QR"), Modifier.weight(1f)) {
+                if (!VpnLesen.berlesen(ctx)) { St.toast(VpnLesen.mesej("Imbas QR")); return@BtnKecil }
                 imbas.launch(ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE).setPrompt(Bhs.t("Halakan kamera ke kod QR"))
                     .setBeepEnabled(false).setOrientationLocked(false).setCaptureActivity(ImbasQr::class.java))
             }
-            BtnKecil(Bhs.t("Imej QR"), Modifier.weight(1f)) { if (VpnLesen.berlesen(ctx)) galeri.launch("image/*") else St.toast(VpnLesen.mesej()) }
-            BtnKecil("+ SSH", Modifier.weight(1f)) { if (VpnLesen.berlesen(ctx)) ke("ssh") else St.toast(VpnLesen.mesej()) }
+            BtnKecil((if (VpnLesen.berlesen(ctx)) "" else "🔒 ") + Bhs.t("Imej QR"), Modifier.weight(1f)) { if (VpnLesen.berlesen(ctx)) galeri.launch("image/*") else St.toast(VpnLesen.mesej("Imej QR")) }
+            BtnKecil((if (VpnLesen.berlesen(ctx)) "" else "🔒 ") + "+ SSH", Modifier.weight(1f)) { if (VpnLesen.berlesen(ctx)) ke("ssh") else St.toast(VpnLesen.mesej("SSH")) }
         }
+        if (!VpnLesen.berlesen(ctx)) Text(VpnLesen.nota(), color = Wr.mu, fontSize = 12.sp)
         if (sedangImport) Text(Bhs.t("Mengimport..."), color = Wr.mu, fontSize = 12.sp)
         if (senarai.isEmpty()) {
             KadWr {
@@ -417,8 +418,8 @@ private fun SkrinApl(kembali: () -> Unit) {
     Halaman {
         Judul(Bhs.t("VPN per-apl"))
         pilihan.forEachIndexed { i, t ->
-            KadWr(klik = { if (i != 0 && !VpnLesen.berlesen(ctx)) St.toast(VpnLesen.mesej()) else { mod = i; VpnTetapan.setModApl(ctx, i) } }) {
-                Text((if (mod == i) "◉  " else "○  ") + t, color = if (mod == i) Wr.ac else Wr.tx, fontWeight = FontWeight.Bold)
+            KadWr(klik = { if (i != 0 && !VpnLesen.berlesen(ctx)) St.toast(VpnLesen.mesej("VPN per-apl")) else { mod = i; VpnTetapan.setModApl(ctx, i) } }) {
+                Text((if (mod == i) "◉  " else "○  ") + (if (i != 0 && !VpnLesen.berlesen(ctx)) "🔒 " else "") + t, color = if (mod == i) Wr.ac else Wr.tx, fontWeight = FontWeight.Bold)
             }
         }
         Text(Bhs.t("Perubahan terpakai pada sambungan seterusnya. Sambung semula VPN selepas mengubah."), color = Wr.mu, fontSize = 12.sp)
