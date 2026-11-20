@@ -124,6 +124,7 @@ fun SubVpn() {
         "apl" -> SkrinApl { skrin = "utama" }
         "tetapan" -> SkrinTetapan { skrin = "utama" }
         "tentang" -> SkrinTentang { skrin = "utama" }
+        "panduan" -> SkrinPanduan { skrin = "utama" }
         "ssh" -> SkrinSsh { skrin = "utama" }
         else -> SkrinUtama { skrin = it }
     }
@@ -245,6 +246,7 @@ private fun SkrinUtama(ke: (String) -> Unit) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             BtnKecil(Bhs.t("Tetapan"), Modifier.weight(1f)) { ke("tetapan") }
             BtnKecil(Bhs.t("Per-apl"), Modifier.weight(1f)) { ke("apl") }
+            BtnKecil(Bhs.t("Panduan"), Modifier.weight(1f)) { ke("panduan") }
             BtnKecil(Bhs.t("Tentang"), Modifier.weight(1f)) { ke("tentang") }
         }
         Column(Modifier.fillMaxWidth().padding(top = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -316,7 +318,10 @@ private fun SkrinUtama(ke: (String) -> Unit) {
         if (senarai.isEmpty()) {
             KadWr {
                 Text(Bhs.t("Belum ada pelayan."), color = Wr.tx, fontWeight = FontWeight.Bold)
-                Text(Bhs.t("Salin pautan (vless, vmess, trojan, ss, ssh) atau pautan langganan, kemudian tekan Tampal. Atau imbas kod QR."), color = Wr.mu, fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp))
+                Text(Bhs.t("1. Salin pautan pelayan anda (vless, vmess, trojan atau ss)."), color = Wr.mu, fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp))
+                Text(Bhs.t("2. Tekan Tampal."), color = Wr.mu, fontSize = 13.sp)
+                Text(Bhs.t("3. Tekan butang kuasa untuk bersambung."), color = Wr.mu, fontSize = 13.sp)
+                TextButton({ ke("panduan") }) { Text(Bhs.t("Lihat panduan penuh"), color = Wr.ac, fontWeight = FontWeight.Bold) }
             }
         }
         senarai.forEachIndexed { i, p ->
@@ -439,6 +444,25 @@ private fun SkrinApl(kembali: () -> Unit) {
             }
         }
         Btn(Bhs.t("Kembali"), utama = false) { kembali() }
+    }
+}
+
+@Composable
+private fun SkrinPanduan(kembali: () -> Unit) {
+    Halaman {
+        Judul(Bhs.t("Cara guna VPN telefon"))
+        Text(Bhs.t("VPN telefon menghantar trafik telefon ini melalui pelayan anda sendiri. Sesuai digunakan di luar rumah, ketika VPN modem tidak boleh dicapai."), color = Wr.mu, fontSize = 13.sp)
+        @Composable fun langkah(n: String, t: String, d: String) = KadWr {
+            Text("$n. " + Bhs.t(t), color = Wr.tx, fontWeight = FontWeight.Bold)
+            Text(Bhs.t(d), color = Wr.mu, fontSize = 13.sp)
+        }
+        langkah("1", "Tambah pelayan", "Salin pautan pelayan (vless, vmess, trojan atau ss) daripada penyedia anda, kemudian tekan Tampal. Pautan langganan juga boleh digunakan.")
+        langkah("2", "Sambung", "Tekan butang kuasa. Kali pertama, Android meminta kebenaran VPN: tekan OK. Ikon kunci muncul di bar status.")
+        langkah("3", "Semak", "Tekan Semak IP. IP melalui pelayan mesti berbeza daripada IP telefon. Ping sebenar menunjukkan kelajuan sambungan semasa.")
+        langkah("4", "Pilih pelayan terbaik", "Tekan Uji ping untuk melihat pelayan yang hidup. Terpantas memilih pelayan dengan ping terendah.")
+        langkah("5", "Di rumah dan di luar", "Apabila anda bersambung ke WiFi modem, VPN telefon dan VLESS modem tidak dihidupkan serentak: salah satu dimatikan secara automatik. Boleh ditukar di Tetapan.")
+        langkah("6", "Tetapan berguna", "Sambung semula automatik memulihkan VPN jika rangkaian terputus. Kill switch menyekat internet jika VPN terputus. Per-apl memilih apl yang menggunakan VPN.")
+        Btn(Bhs.t("Kembali")) { kembali() }
     }
 }
 
