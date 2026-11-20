@@ -1,12 +1,20 @@
 {
- "title": "SQM lebih jelas",
+ "title": "Tip SQM lebih jelas",
  "items": [
-  "Skrin SQM kini hanya menunjukkan had muat naik, kerana had muat turun tidak boleh dikawal pada modem ini. Ini dijelaskan dalam skrin.",
-  "Butang pantas 5, 10, 20, 50 dan 100 Mbit/s, serta tip untuk memilih nilai.",
-  "Status jelas: SQM aktif atau tidak, dengan had muat naik yang digunakan.",
-  "Amaran jika SQM dihidupkan tanpa had muat naik."
+  "Tip SQM kini menjelaskan bahawa had yang lebih tinggi daripada kelajuan muat naik sebenar tidak memberi kesan, dan mencadangkan 80 hingga 90% kelajuan sebenar."
  ],
  "history": [
+  {
+   "version": "1.0.35",
+   "date": "2026-11-20",
+   "title": "SQM lebih jelas",
+   "items": [
+    "Skrin SQM kini hanya menunjukkan had muat naik, kerana had muat turun tidak boleh dikawal pada modem ini. Ini dijelaskan dalam skrin.",
+    "Butang pantas 5, 10, 20, 50 dan 100 Mbit/s, serta tip untuk memilih nilai.",
+    "Status jelas: SQM aktif atau tidak, dengan had muat naik yang digunakan.",
+    "Amaran jika SQM dihidupkan tanpa had muat naik."
+   ]
+  },
   {
    "version": "1.0.34",
    "date": "2026-11-20",

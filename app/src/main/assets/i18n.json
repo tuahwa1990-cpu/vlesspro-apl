@@ -931,7 +931,10 @@
   "Skrin SQM kini hanya menunjukkan had muat naik, kerana had muat turun tidak boleh dikawal pada modem ini. Ini dijelaskan dalam skrin.": "The SQM screen now shows only the upload limit, because a download limit cannot be controlled on this modem. This is explained on the screen.",
   "Butang pantas 5, 10, 20, 50 dan 100 Mbit/s, serta tip untuk memilih nilai.": "Quick buttons for 5, 10, 20, 50 and 100 Mbit/s, plus a tip for choosing a value.",
   "Status jelas: SQM aktif atau tidak, dengan had muat naik yang digunakan.": "A clear status: SQM on or off, with the upload limit in use.",
-  "Amaran jika SQM dihidupkan tanpa had muat naik.": "A warning if SQM is turned on without an upload limit."
+  "Amaran jika SQM dihidupkan tanpa had muat naik.": "A warning if SQM is turned on without an upload limit.",
+  "Tip: tetapkan kira-kira 80 hingga 90% kelajuan muat naik sebenar anda (uji dengan Speedtest). Had yang lebih tinggi daripada kelajuan sebenar tidak memberi kesan.": "Tip: set about 80 to 90% of your real upload speed (measure it with Speedtest). A limit higher than your real speed has no effect.",
+  "Tip SQM lebih jelas": "Clearer SQM tip",
+  "Tip SQM kini menjelaskan bahawa had yang lebih tinggi daripada kelajuan muat naik sebenar tidak memberi kesan, dan mencadangkan 80 hingga 90% kelajuan sebenar.": "The SQM tip now explains that a limit higher than your real upload speed has no effect, and suggests 80 to 90% of the real speed."
  },
  "zh": {
   "Mod VPN": "VPN 模式",

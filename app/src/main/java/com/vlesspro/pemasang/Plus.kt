@@ -102,7 +102,7 @@ fun SubSqm() {
                     FilterChip(up.toDoubleOrNull() == n.toDouble(), { up = n.toString() }, label = { Text("$n Mbit/s", fontSize = 12.sp) })
                 }
             }
-            Text("Tip: tetapkan sekitar 90% kelajuan muat naik sebenar anda (uji dengan Speedtest).", color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+            Text("Tip: tetapkan kira-kira 80 hingga 90% kelajuan muat naik sebenar anda (uji dengan Speedtest). Had yang lebih tinggi daripada kelajuan sebenar tidak memberi kesan.", color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
             Text("Had muat turun tidak disokong pada modem ini kerana pecutan perkakasan.", color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp))
             Spacer(Modifier.height(10.dp))
             Btn("Simpan") {
