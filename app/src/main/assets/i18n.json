@@ -970,7 +970,12 @@
   "+ Tampal pautan": "+ Paste link",
   "Belum ada pelayan.": "No servers yet.",
   "Salin pautan vless:// atau vmess:// kemudian tekan Tampal pautan.": "Copy a vless:// or vmess:// link, then tap Paste link.",
-  "Penerowong gagal dimulakan.": "The tunnel failed to start."
+  "Penerowong gagal dimulakan.": "The tunnel failed to start.",
+  "VPN telefon baharu": "New phone VPN",
+  "Fungsi baharu: VPN terus dari telefon (seperti v2rayNG) tanpa memerlukan modem. Buka dari skrin log masuk (VPN telefon (tanpa modem)) atau Lagi > VPN telefon.": "New function: VPN straight from the phone (like v2rayNG) without needing the modem. Open it from the login screen (VPN telefon (tanpa modem)) or More > Phone VPN.",
+  "Tampal pautan vless:// atau vmess:// dari papan klip, pilih pelayan, kemudian sentuh butang kuasa untuk sambung.": "Paste a vless:// or vmess:// link from the clipboard, pick a server, then tap the power button to connect.",
+  "Paparan masa sambungan, kelajuan dan jumlah data, serta ujian ping untuk setiap pelayan.": "Shows connection time, speed and total data, plus a ping test for each server.",
+  "Saiz apl lebih besar kerana enjin Xray disertakan, jadi kemas kini kali ini lebih lama dimuat turun.": "The app is larger because the Xray engine is included, so this update takes longer to download."
  },
  "zh": {
   "Mod VPN": "VPN 模式",
