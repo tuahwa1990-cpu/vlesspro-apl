@@ -1001,7 +1001,7 @@ fun Lagi(buka: (String) -> Unit) {
                                 Text(t.take(1).uppercase(), color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
                             }
                             Spacer(Modifier.height(8.dp))
-                            Text(t, color = w, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 2, softWrap = true,
+                            Text(t, color = w, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 2,
                                 modifier = Modifier.fillMaxWidth())
                             Text(d, color = Wr.mu, fontSize = 11.sp, maxLines = 2, modifier = Modifier.fillMaxWidth())
                         }
