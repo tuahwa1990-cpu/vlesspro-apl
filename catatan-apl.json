@@ -1,9 +1,20 @@
 {
-  "title": "Pembetulan bahasa skrin Lagi",
+  "title": "Failover lebih lengkap dan senang disemak",
   "items": [
-    "Betulkan tajuk kad menu di skrin Lagi (Lesen, Penghalaan, Kumpulan dan lain-lain) yang tidak bertukar ke bahasa yang dipilih."
+    "Skrin Failover kini papar status jelas (aktif atau sebab tidak aktif) dan kiraan ujian gagal berturut secara langsung.",
+    "Baharu: kad Status setiap nod — kelayakan dan ping setiap pelayan dipaparkan terus.",
+    "Rekod tukar nod kini sertakan sebab setiap pertukaran.",
+    "Baharu: butang Hantar diagnosis failover untuk salin terus maklumat lengkap bila perlu bantuan."
   ],
   "history": [
+    {
+      "version": "1.0.56",
+      "date": "2026-11-21",
+      "title": "Pembetulan bahasa skrin Lagi",
+      "items": [
+        "Betulkan tajuk kad menu di skrin Lagi (Lesen, Penghalaan, Kumpulan dan lain-lain) yang tidak bertukar ke bahasa yang dipilih."
+      ]
+    },
     {
       "version": "1.0.55",
       "date": "2026-11-21",
