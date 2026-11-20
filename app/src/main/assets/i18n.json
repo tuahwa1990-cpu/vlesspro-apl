@@ -1200,7 +1200,9 @@
   "Sahkan keaslian apl dan profil SSH/WireGuard lebih mudah": "Verify app authenticity and easier SSH/WireGuard profiles",
   "Ciri baharu \"Sahkan apl ini\": semak cap jari sijil tandatangan dan SHA-256 fail APK, serta banding terus dengan keluaran rasmi terkini.": "New \"Verify this app\" feature: check the signing certificate fingerprint and APK SHA-256, and compare directly with the latest official release.",
   "Tambah profil kini ada bahagian berasingan: VLESS/Lain, SSH (borang penuh dengan mod sambungan, SNI, payload dan proksi) dan WireGuard.": "Add profile now has separate sections: VLESS/Other, SSH (full form with connection mode, SNI, payload and proxy) and WireGuard.",
-  "Lebih mudah sediakan profil SSH tanpa perlu tahu format pautan.": "Easier to set up an SSH profile without needing to know the link format."
+  "Lebih mudah sediakan profil SSH tanpa perlu tahu format pautan.": "Easier to set up an SSH profile without needing to know the link format.",
+  "Urus profil lebih pantas": "Manage profiles faster",
+  "Setiap profil kini ada butang Aktifkan, Edit dan Hapus terus kelihatan, tak perlu buka menu lagi.": "Each profile now has Activate, Edit and Delete buttons visible directly, no need to open a menu."
  },
  "zh": {
   "Mod VPN": "VPN 模式",

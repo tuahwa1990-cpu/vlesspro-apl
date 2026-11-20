@@ -1,11 +1,19 @@
 {
- "title": "Sahkan keaslian apl dan profil SSH/WireGuard lebih mudah",
+ "title": "Urus profil lebih pantas",
  "items": [
-  "Ciri baharu \"Sahkan apl ini\": semak cap jari sijil tandatangan dan SHA-256 fail APK, serta banding terus dengan keluaran rasmi terkini.",
-  "Tambah profil kini ada bahagian berasingan: VLESS/Lain, SSH (borang penuh dengan mod sambungan, SNI, payload dan proksi) dan WireGuard.",
-  "Lebih mudah sediakan profil SSH tanpa perlu tahu format pautan."
+  "Setiap profil kini ada butang Aktifkan, Edit dan Hapus terus kelihatan, tak perlu buka menu lagi."
  ],
  "history": [
+  {
+   "version": "1.0.45",
+   "date": "2026-11-20",
+   "title": "Sahkan keaslian apl dan profil SSH/WireGuard lebih mudah",
+   "items": [
+    "Ciri baharu \"Sahkan apl ini\": semak cap jari sijil tandatangan dan SHA-256 fail APK, serta banding terus dengan keluaran rasmi terkini.",
+    "Tambah profil kini ada bahagian berasingan: VLESS/Lain, SSH (borang penuh dengan mod sambungan, SNI, payload dan proksi) dan WireGuard.",
+    "Lebih mudah sediakan profil SSH tanpa perlu tahu format pautan."
+   ]
+  },
   {
    "version": "1.0.43",
    "date": "2026-11-20",
