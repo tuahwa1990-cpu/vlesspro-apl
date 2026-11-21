@@ -1298,7 +1298,12 @@
     "Modem dan apl": "Modem and app",
     "Kemas kini web/Chrome": "Web/Chrome Update",
     "Skrin Kemas kini digabungkan": "Update screen merged",
-    "Skrin Lagi kini ada satu kad Kemas kini sahaja (gantikan dua kad berasingan), dengan pemilih tab: Kemas kini web/Chrome (modem) dan Kemas kini apl.": "The More screen now has a single Update card (replacing two separate cards), with a tab selector: Web/Chrome Update (modem) and App update."
+    "Skrin Lagi kini ada satu kad Kemas kini sahaja (gantikan dua kad berasingan), dengan pemilih tab: Kemas kini web/Chrome (modem) dan Kemas kini apl.": "The More screen now has a single Update card (replacing two separate cards), with a tab selector: Web/Chrome Update (modem) and App update.",
+    "Atau taip URL sendiri": "Or type your own URL",
+    "Digunakan untuk uji sama ada internet melalui nod semasa benar-benar berfungsi (bukan hanya sambungan TCP).": "Used to test whether internet through the current node is actually working (not just a TCP connection).",
+    "But semula modem berjadual harian": "Scheduled daily modem reboot",
+    "Berbeza daripada butang But semula modem di Sistem (yang but semula serta-merta bila ditekan). Pilihan ini but semula modem secara AUTOMATIK setiap hari pada masa yang ditetapkan (contohnya lewat malam, trafik rendah), untuk bersihkan memori dan kekalkan prestasi dalam jangka panjang.": "Different from the Reboot modem button in System (which reboots instantly when pressed). This option reboots the modem AUTOMATICALLY every day at a set time (e.g. late at night, low traffic), to clear memory and keep performance up over the long run.",
+    "Masa (HH:MM)": "Time (HH:MM)"
   },
   "zh": {
     "Mod VPN": "VPN 模式",

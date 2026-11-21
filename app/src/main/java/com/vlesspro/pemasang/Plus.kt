@@ -526,23 +526,45 @@ fun SubTetapan() {
     var dns by remember { mutableStateOf("") }
     var ping by remember { mutableStateOf("") }
     var reboot by remember { mutableStateOf("") }
+    var rebootOn by remember { mutableStateOf(false) }
     var mod by remember { mutableStateOf("redirect") }
     var kata by remember { mutableStateOf("") }
     var hook by remember { mutableStateOf(false) }
     var web by remember { mutableStateOf(true) }
     val ctx = LocalContext.current
-    LaunchedEffect(o.value) { o.value?.let { auto = it.optBoolean("autorecon"); dns = it.optString("dns"); ping = it.optString("pingurl"); reboot = it.optString("reboot"); mod = it.optString("vpnmode").ifEmpty { "redirect" } } }
+    LaunchedEffect(o.value) { o.value?.let { auto = it.optBoolean("autorecon"); dns = it.optString("dns"); ping = it.optString("pingurl"); reboot = it.optString("reboot"); rebootOn = reboot.isNotEmpty(); mod = it.optString("vpnmode").ifEmpty { "redirect" } } }
     LaunchedEffect(st.value) { hook = st.value?.optBoolean("hook") ?: false; web = st.value?.optBoolean("web", true) ?: true }
     Halaman {
         Judul("Tetapan")
         KadWr {
             Suis("Sambung semula automatik", auto) { auto = it }
             OutlinedTextField(dns, { dns = it.trim() }, singleLine = true, label = { Text("DNS (kosong = lalai, cth 1.1.1.1)") }, modifier = Modifier.fillMaxWidth(), colors = medan())
-            Spacer(Modifier.height(8.dp))
-            OutlinedTextField(ping, { ping = it.trim() }, singleLine = true, label = { Text("URL ujian sambungan") }, modifier = Modifier.fillMaxWidth(), colors = medan())
-            Spacer(Modifier.height(8.dp))
-            OutlinedTextField(reboot, { reboot = it.trim() }, singleLine = true, label = { Text("But semula harian (HH:MM, kosong = mati)") }, modifier = Modifier.fillMaxWidth(), colors = medan())
-            Text("Mod VPN", color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+            Spacer(Modifier.height(10.dp))
+            Text("URL ujian sambungan", color = Wr.mu, fontSize = 12.sp)
+            Row(Modifier.horizontalScroll(rememberScrollState()).padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                listOf(
+                    "YouTube" to "http://www.youtube.com/generate_204",
+                    "Cloudflare" to "http://cp.cloudflare.com/generate_204",
+                    "Google" to "http://www.google.com/generate_204",
+                    "Gstatic" to "http://connectivitycheck.gstatic.com/generate_204"
+                ).forEach { (label, url) -> FilterChip(ping == url, { ping = url }, label = { Text(label, fontSize = 12.sp) }) }
+            }
+            Spacer(Modifier.height(6.dp))
+            OutlinedTextField(ping, { ping = it.trim() }, singleLine = true, label = { Text("Atau taip URL sendiri") }, modifier = Modifier.fillMaxWidth(), colors = medan())
+            Text("Digunakan untuk uji sama ada internet melalui nod semasa benar-benar berfungsi (bukan hanya sambungan TCP).", color = Wr.mu, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
+            Spacer(Modifier.height(10.dp))
+            Suis("But semula modem berjadual harian", rebootOn) { rebootOn = it; if (!it) reboot = "" else if (reboot.isEmpty()) reboot = "04:00" }
+            Text("Berbeza daripada butang But semula modem di Sistem (yang but semula serta-merta bila ditekan). Pilihan ini but semula modem secara AUTOMATIK setiap hari pada masa yang ditetapkan (contohnya lewat malam, trafik rendah), untuk bersihkan memori dan kekalkan prestasi dalam jangka panjang.",
+                color = Wr.mu, fontSize = 11.sp, modifier = Modifier.padding(top = 2.dp))
+            if (rebootOn) {
+                Spacer(Modifier.height(6.dp))
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    listOf("00:00", "02:00", "03:00", "04:00", "05:00").forEach { t -> FilterChip(reboot == t, { reboot = t }, label = { Text(t, fontSize = 12.sp) }) }
+                }
+                Spacer(Modifier.height(6.dp))
+                OutlinedTextField(reboot, { reboot = it.trim() }, singleLine = true, label = { Text("Masa (HH:MM)") }, modifier = Modifier.fillMaxWidth(), colors = medan())
+            }
+            Text("Mod VPN", color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 listOf("redirect", "tproxy", "tun").forEach { m ->
                     val ok = when (m) { "tproxy" -> o.value?.optBoolean("cap_tproxy") ?: false; "tun" -> o.value?.optBoolean("cap_tun") ?: false; else -> true }
