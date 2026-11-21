@@ -517,6 +517,23 @@ fun SubLangganan() {
     }
 }
 
+// ───────────── Menu pilihan (seperti dropdown web) ─────────────
+@Composable
+fun Pilihan(label: String, pilihan: List<Pair<String, String>>, nilai: String, ubah: (String) -> Unit) {
+    var buka by remember { mutableStateOf(false) }
+    val teks = pilihan.firstOrNull { it.first == nilai }?.second ?: nilai
+    Text(label, color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp, bottom = 4.dp))
+    Box {
+        OutlinedButton(onClick = { buka = true }, modifier = Modifier.fillMaxWidth()) {
+            Text(teks, modifier = Modifier.weight(1f), maxLines = 1)
+            Text("▾", color = Wr.mu)
+        }
+        DropdownMenu(buka, { buka = false }) {
+            pilihan.forEach { (v, t) -> DropdownMenuItem({ Text(t) }, { ubah(v); buka = false }) }
+        }
+    }
+}
+
 // ───────────── Tetapan ─────────────
 @Composable
 fun SubTetapan() {
@@ -524,7 +541,11 @@ fun SubTetapan() {
     val st = muat { Modem.obj("/api/settings") }
     var auto by remember { mutableStateOf(true) }
     var dns by remember { mutableStateOf("") }
+    var dnsSendiri by remember { mutableStateOf(false) }
+    var qs by remember { mutableStateOf("UseIP") }
     var ping by remember { mutableStateOf("") }
+    var pingSendiri by remember { mutableStateOf(false) }
+    var logLevel by remember { mutableStateOf("warning") }
     var reboot by remember { mutableStateOf("") }
     var rebootOn by remember { mutableStateOf(false) }
     var mod by remember { mutableStateOf("redirect") }
@@ -532,26 +553,40 @@ fun SubTetapan() {
     var hook by remember { mutableStateOf(false) }
     var web by remember { mutableStateOf(true) }
     val ctx = LocalContext.current
-    LaunchedEffect(o.value) { o.value?.let { auto = it.optBoolean("autorecon"); dns = it.optString("dns"); ping = it.optString("pingurl"); reboot = it.optString("reboot"); rebootOn = reboot.isNotEmpty(); mod = it.optString("vpnmode").ifEmpty { "redirect" } } }
+    val dnsPilihan = listOf("" to "Lalai (8.8.8.8)", "1.1.1.1" to "Cloudflare (1.1.1.1)", "8.8.8.8" to "Google (8.8.8.8)",
+        "9.9.9.9" to "Quad9 (9.9.9.9)", "208.67.222.222" to "OpenDNS (208.67.222.222)", "94.140.14.14" to "AdGuard (94.140.14.14)",
+        "185.228.168.9" to "CleanBrowsing (185.228.168.9)")
+    val qsPilihan = listOf("UseIP" to "IPv4 + IPv6", "UseIPv4" to "IPv4 Sahaja", "UseIPv6" to "IPv6 Sahaja")
+    val pingPilihan = listOf(
+        "http://www.gstatic.com/generate_204" to "Google (gstatic)",
+        "http://connectivitycheck.gstatic.com/generate_204" to "Google (connectivitycheck)",
+        "http://cp.cloudflare.com/generate_204" to "Cloudflare",
+        "http://detectportal.firefox.com/success.txt" to "Firefox",
+        "http://www.msftconnecttest.com/connecttest.txt" to "Microsoft")
+    val logPilihan = listOf("debug" to "debug", "info" to "info", "warning" to "warning", "error" to "error", "none" to "none")
+    val lain = "__c" to "Lain-lain (taip sendiri)"
+    LaunchedEffect(o.value) { o.value?.let {
+        auto = it.optBoolean("autorecon")
+        dns = it.optString("dns"); dnsSendiri = dns.isNotEmpty() && dnsPilihan.none { p -> p.first == dns }
+        qs = it.optString("qs").ifEmpty { "UseIP" }
+        ping = it.optString("pingurl"); pingSendiri = ping.isNotEmpty() && pingPilihan.none { p -> p.first == ping }
+        logLevel = it.optString("loglevel").ifEmpty { "warning" }
+        reboot = it.optString("reboot"); rebootOn = reboot.isNotEmpty()
+        mod = it.optString("vpnmode").ifEmpty { "redirect" }
+    } }
     LaunchedEffect(st.value) { hook = st.value?.optBoolean("hook") ?: false; web = st.value?.optBoolean("web", true) ?: true }
     Halaman {
         Judul("Tetapan")
         KadWr {
             Suis("Sambung semula automatik", auto) { auto = it }
-            OutlinedTextField(dns, { dns = it.trim() }, singleLine = true, label = { Text("DNS (kosong = lalai, cth 1.1.1.1)") }, modifier = Modifier.fillMaxWidth(), colors = medan())
-            Spacer(Modifier.height(10.dp))
-            Text("URL ujian sambungan", color = Wr.mu, fontSize = 12.sp)
-            Row(Modifier.horizontalScroll(rememberScrollState()).padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                listOf(
-                    "YouTube" to "http://www.youtube.com/generate_204",
-                    "Cloudflare" to "http://cp.cloudflare.com/generate_204",
-                    "Google" to "http://www.google.com/generate_204",
-                    "Gstatic" to "http://connectivitycheck.gstatic.com/generate_204"
-                ).forEach { (label, url) -> FilterChip(ping == url, { ping = url }, label = { Text(label, fontSize = 12.sp) }) }
-            }
-            Spacer(Modifier.height(6.dp))
-            OutlinedTextField(ping, { ping = it.trim() }, singleLine = true, label = { Text("Atau taip URL sendiri") }, modifier = Modifier.fillMaxWidth(), colors = medan())
+            Text("Mulakan semula xray jika terputus atau ujian gagal 3 kali.", color = Wr.mu, fontSize = 11.sp)
+            Pilihan("Pelayan DNS", dnsPilihan + lain, if (dnsSendiri) "__c" else dns) { v -> if (v == "__c") dnsSendiri = true else { dnsSendiri = false; dns = v } }
+            if (dnsSendiri) OutlinedTextField(dns, { dns = it.trim() }, singleLine = true, label = { Text("Alamat IP (cth 1.1.1.1)") }, modifier = Modifier.fillMaxWidth().padding(top = 6.dp), colors = medan())
+            Pilihan("Query strategy", qsPilihan, qs) { qs = it }
+            Pilihan("URL ujian sambungan", pingPilihan + lain, if (pingSendiri) "__c" else ping) { v -> if (v == "__c") pingSendiri = true else { pingSendiri = false; ping = v } }
+            if (pingSendiri) OutlinedTextField(ping, { ping = it.trim() }, singleLine = true, label = { Text("URL (http:// atau https://)") }, modifier = Modifier.fillMaxWidth().padding(top = 6.dp), colors = medan())
             Text("Digunakan untuk uji sama ada internet melalui nod semasa benar-benar berfungsi (bukan hanya sambungan TCP).", color = Wr.mu, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
+            Pilihan("Tahap log xray", logPilihan, logLevel) { logLevel = it }
             Spacer(Modifier.height(10.dp))
             Suis("But semula modem berjadual harian", rebootOn) { rebootOn = it; if (!it) reboot = "" else if (reboot.isEmpty()) reboot = "04:00" }
             Text("Berbeza daripada butang But semula modem di Sistem (yang but semula serta-merta bila ditekan). Pilihan ini but semula modem secara AUTOMATIK setiap hari pada masa yang ditetapkan (contohnya lewat malam, trafik rendah), untuk bersihkan memori dan kekalkan prestasi dalam jangka panjang.",
@@ -571,8 +606,12 @@ fun SubTetapan() {
                     FilterChip(mod == m, { mod = m }, enabled = ok, label = { Text(m) })
                 }
             }
+            Text(when (mod) {
+                "redirect" -> "Redirect: hanya TCP melalui nod, paling serasi."
+                else -> "TProxy dan TUN: TCP dan UDP (termasuk permainan dan panggilan) melalui nod, nod mesti menyokong UDP."
+            }, color = Wr.mu, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
             Spacer(Modifier.height(8.dp))
-            Btn("Simpan tetapan") { bg { lapor(Modem.tindak("/api/opts", JSONObject().put("autorecon", auto).put("dns", dns).put("qs", o.value?.optString("qs").orEmpty().ifEmpty { "UseIP" }).put("pingurl", ping).put("loglevel", o.value?.optString("loglevel").orEmpty().ifEmpty { "warning" }).put("reboot", reboot).put("vpnmode", mod).toString())) } }
+            Btn("Simpan tetapan") { bg { lapor(Modem.tindak("/api/opts", JSONObject().put("autorecon", auto).put("dns", dns).put("qs", qs).put("pingurl", ping).put("loglevel", logLevel).put("reboot", reboot).put("vpnmode", mod).toString())) } }
         }
         KadWr {
             Suis("Suis boot (mula automatik selepas modem hidup)", hook) { hook = it; bg { lapor(Modem.tindak("/api/hook", if (it) "on" else "off")) } }
