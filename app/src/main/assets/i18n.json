@@ -1356,7 +1356,10 @@
     "VPN Telefon: Penghalaan baharu — boleh pintas rangkaian tempatan (LAN) dan sekat iklan/penjejak asas.": "Phone VPN: New routing options — can bypass the local network (LAN) and block basic ads/trackers.",
     "VPN Telefon: DNS tersuai (Cloudflare, Google, Quad9, OpenDNS, AdGuard atau taip sendiri).": "Phone VPN: Custom DNS (Cloudflare, Google, Quad9, OpenDNS, AdGuard, or type your own).",
     "VPN Telefon: notifikasi kini papar kelajuan muat turun/naik masa nyata semasa bersambung.": "Phone VPN: the notification now shows real-time download/upload speed while connected.",
-    "Guna senarai category-ads-all (200,000+ domain iklan/penjejak), sama seperti v2rayNG.": "Uses the category-ads-all list (200,000+ ad/tracker domains), same as v2rayNG."
+    "Guna senarai category-ads-all (200,000+ domain iklan/penjejak), sama seperti v2rayNG.": "Uses the category-ads-all list (200,000+ ad/tracker domains), same as v2rayNG.",
+    "VPN Telefon: Sekat iklan kini benar-benar berfungsi": "Phone VPN: Ad blocking now actually works",
+    "VPN Telefon: Sekat iklan asas kini guna senarai penuh 200,000+ domain iklan/penjejak (category-ads-all, sama seperti v2rayNG) — bukan senarai kecil terhad seperti sebelum ini.": "Phone VPN: Basic ad blocking now uses the full category-ads-all list (200,000+ ad/tracker domains, same as v2rayNG) instead of the small limited list used before.",
+    "VPN Telefon: dibetulkan isu sekatan iklan tidak berkesan walaupun suis 'Sekat iklan asas' dihidupkan.": "Phone VPN: fixed ad blocking not taking effect even when the 'Basic ad blocking' switch was on."
   },
   "zh": {
     "Mod VPN": "VPN 模式",

@@ -1,12 +1,21 @@
 {
-  "title": "VPN Telefon: Failover, Penghalaan & DNS tersuai",
+  "title": "VPN Telefon: Sekat iklan kini benar-benar berfungsi",
   "items": [
-    "VPN Telefon: Failover automatik — jika sambung semula ke pelayan sama gagal berulang, apl cuba tukar ke pelayan lain yang disimpan (ikut ping terendah).",
-    "VPN Telefon: Penghalaan baharu — boleh pintas rangkaian tempatan (LAN) dan sekat iklan/penjejak asas.",
-    "VPN Telefon: DNS tersuai (Cloudflare, Google, Quad9, OpenDNS, AdGuard atau taip sendiri).",
-    "VPN Telefon: notifikasi kini papar kelajuan muat turun/naik masa nyata semasa bersambung."
+    "VPN Telefon: Sekat iklan asas kini guna senarai penuh 200,000+ domain iklan/penjejak (category-ads-all, sama seperti v2rayNG) — bukan senarai kecil terhad seperti sebelum ini.",
+    "VPN Telefon: dibetulkan isu sekatan iklan tidak berkesan walaupun suis 'Sekat iklan asas' dihidupkan."
   ],
   "history": [
+    {
+      "version": "1.0.61",
+      "date": "2026-11-21",
+      "title": "VPN Telefon: Failover, Penghalaan & DNS tersuai",
+      "items": [
+        "VPN Telefon: Failover automatik — jika sambung semula ke pelayan sama gagal berulang, apl cuba tukar ke pelayan lain yang disimpan (ikut ping terendah).",
+        "VPN Telefon: Penghalaan baharu — boleh pintas rangkaian tempatan (LAN) dan sekat iklan/penjejak asas.",
+        "VPN Telefon: DNS tersuai (Cloudflare, Google, Quad9, OpenDNS, AdGuard atau taip sendiri).",
+        "VPN Telefon: notifikasi kini papar kelajuan muat turun/naik masa nyata semasa bersambung."
+      ]
+    },
     {
       "version": "1.0.60",
       "date": "2026-11-21",
