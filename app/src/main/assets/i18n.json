@@ -1350,7 +1350,12 @@
     "Peranti dalam WiFi/rangkaian tempatan anda (printer, NAS, dll) disambung terus, tidak melalui pelayan VPN.": "Devices on your WiFi/local network (printer, NAS, etc) connect directly, not through the VPN server.",
     "Sekat iklan asas": "Basic ad blocking",
     "Sekat domain iklan/penjejak yang biasa dijumpai. Bukan penapis lengkap.": "Blocks common ad/tracker domains. Not a complete filter.",
-    "Perubahan penghalaan dan DNS terpakai pada sambungan seterusnya.": "Routing and DNS changes apply on the next connection."
+    "Perubahan penghalaan dan DNS terpakai pada sambungan seterusnya.": "Routing and DNS changes apply on the next connection.",
+    "VPN Telefon: Failover, Penghalaan & DNS tersuai": "Phone VPN: Failover, Routing & custom DNS",
+    "VPN Telefon: Failover automatik — jika sambung semula ke pelayan sama gagal berulang, apl cuba tukar ke pelayan lain yang disimpan (ikut ping terendah).": "Phone VPN: Automatic failover — if reconnecting to the same server keeps failing, the app tries switching to another saved server (by lowest ping).",
+    "VPN Telefon: Penghalaan baharu — boleh pintas rangkaian tempatan (LAN) dan sekat iklan/penjejak asas.": "Phone VPN: New routing options — can bypass the local network (LAN) and block basic ads/trackers.",
+    "VPN Telefon: DNS tersuai (Cloudflare, Google, Quad9, OpenDNS, AdGuard atau taip sendiri).": "Phone VPN: Custom DNS (Cloudflare, Google, Quad9, OpenDNS, AdGuard, or type your own).",
+    "VPN Telefon: notifikasi kini papar kelajuan muat turun/naik masa nyata semasa bersambung.": "Phone VPN: the notification now shows real-time download/upload speed while connected."
   },
   "zh": {
     "Mod VPN": "VPN 模式",

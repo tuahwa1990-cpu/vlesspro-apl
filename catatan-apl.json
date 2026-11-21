@@ -1,13 +1,24 @@
 {
-  "title": "Susun kedudukan tab & Langganan lebih lengkap",
+  "title": "VPN Telefon: Failover, Penghalaan & DNS tersuai",
   "items": [
-    "Skrin Lagi: boleh susun semula kedudukan setiap kad mengikut citarasa sendiri (tekan ikon ⇅, guna anak panah ▲▼).",
-    "Langganan: setiap langganan boleh dibuka untuk lihat senarai nod di dalamnya dan status (digunakan sekarang / ms ping / tidak boleh dicapai).",
-    "Langganan: papar bila kali terakhir setiap langganan dikemas kini.",
-    "Langganan: dialog pengesahan sebelum padam (supaya tidak tersilap buang semua nod sekali gus).",
-    "Langganan: butang Tampal pada medan URL, dan mesej ralat jelas jika import gagal."
+    "VPN Telefon: Failover automatik — jika sambung semula ke pelayan sama gagal berulang, apl cuba tukar ke pelayan lain yang disimpan (ikut ping terendah).",
+    "VPN Telefon: Penghalaan baharu — boleh pintas rangkaian tempatan (LAN) dan sekat iklan/penjejak asas.",
+    "VPN Telefon: DNS tersuai (Cloudflare, Google, Quad9, OpenDNS, AdGuard atau taip sendiri).",
+    "VPN Telefon: notifikasi kini papar kelajuan muat turun/naik masa nyata semasa bersambung."
   ],
   "history": [
+    {
+      "version": "1.0.60",
+      "date": "2026-11-21",
+      "title": "Susun kedudukan tab & Langganan lebih lengkap",
+      "items": [
+        "Skrin Lagi: boleh susun semula kedudukan setiap kad mengikut citarasa sendiri (tekan ikon ⇅, guna anak panah ▲▼).",
+        "Langganan: setiap langganan boleh dibuka untuk lihat senarai nod di dalamnya dan status (digunakan sekarang / ms ping / tidak boleh dicapai).",
+        "Langganan: papar bila kali terakhir setiap langganan dikemas kini.",
+        "Langganan: dialog pengesahan sebelum padam (supaya tidak tersilap buang semua nod sekali gus).",
+        "Langganan: butang Tampal pada medan URL, dan mesej ralat jelas jika import gagal."
+      ]
+    },
     {
       "version": "1.0.59",
       "date": "2026-11-21",
