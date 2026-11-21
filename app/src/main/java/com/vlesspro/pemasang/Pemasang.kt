@@ -256,12 +256,32 @@ object Pemasang {
         val sums = String(muat("$ed/aw1000-sha256.txt"))
         semak(sums, "install.tgz", tgz)
         log(Bhs.t("Fail disemak (SHA-256 sepadan)."))
+        log(Bhs.t("Membersihkan ruang storan lama pada modem ..."))
+        // run/vp.log tumbuh tanpa had (setiap panggilan "vp" ditambah terus); pada storan modem yang
+        // kecil ini boleh membesar sehingga tiada ruang tersisa untuk extract pakej baharu, menyebabkan
+        // tar gagal menulis separuh jalan. Potong fail log lama dan buang sisa fail sementara dahulu.
+        ssh.run(
+            "[ -f $h/run/vp.log ] && [ \$(wc -c < $h/run/vp.log 2>/dev/null || echo 0) -gt 262144 ] && " +
+                "{ tail -c 65536 $h/run/vp.log > $h/run/vp.log.tmp 2>/dev/null && mv $h/run/vp.log.tmp $h/run/vp.log; }; " +
+                "rm -f $h/new/*.tmp $h/*.tmp /data/*.tmp 2>/dev/null; true",
+            null, 30
+        )
+        val ruang = ssh.run("df -k /data 2>/dev/null | tail -n 1 | awk '{print \$4}'", null, 15).second.trim().toLongOrNull()
+        if (ruang != null && ruang < 2048) {
+            throw RuntimeException(Bhs.f(
+                "Ruang storan pada modem tidak mencukupi untuk pasang/naik taraf ({0} KB sahaja tersisa pada /data). " +
+                    "Sambung ke modem melalui SSH dan padam fail/log lama yang tidak diperlukan (cth. /data/vlesspro/run/vp.log, cache lama), kemudian cuba lagi.",
+                ruang.toString()
+            ))
+        }
         log(Bhs.t("[2/4] Menghantar fail ke modem ..."))
         val r = ssh.run(
             "[ -f $h/run/ui.pid ] && kill \$(cat $h/run/ui.pid) 2>/dev/null; rm -f $h/bin/vpro; mkdir -p /data && cd /data && tar xzf -",
             Kira(tgz, "install.tgz"), 600
         )
-        if (r.first != 0) throw RuntimeException(Bhs.f("Gagal membuka pakej pada modem: {0}", r.second))
+        if (r.first != 0) throw RuntimeException(Bhs.f(
+            "Gagal membuka pakej pada modem (mungkin ruang storan tidak mencukupi): {0}", r.second
+        ))
         val x = ssh.run("[ -x $h/bin/xray ] || echo tiadaxray").second
         if (x.contains("tiadaxray")) {
             log(Bhs.t("Memasang Xray sendiri untuk VLESS Pro (sekitar 20 MB) ..."))
