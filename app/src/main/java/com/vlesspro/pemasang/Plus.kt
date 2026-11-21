@@ -673,6 +673,19 @@ fun SubBahasa() {
     }
 }
 
+// ───────────── Kemas kini (gabungan: modem + apl) ─────────────
+@Composable
+fun SubKemasGabung() {
+    var tab by remember { mutableStateOf(0) }
+    Column(Modifier.fillMaxSize()) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterChip(tab == 0, { tab = 0 }, label = { Text("Kemas kini web/Chrome", fontSize = 12.sp, maxLines = 1) }, modifier = Modifier.weight(1f))
+            FilterChip(tab == 1, { tab = 1 }, label = { Text("Kemas kini apl", fontSize = 12.sp, maxLines = 1) }, modifier = Modifier.weight(1f))
+        }
+        Box(Modifier.weight(1f)) { if (tab == 0) SubKemas() else SubApl() }
+    }
+}
+
 // ───────────── Kemas kini modem (seperti panel Chrome) ─────────────
 @Composable
 fun SubKemas() {

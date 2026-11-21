@@ -968,13 +968,12 @@ fun Lagi(buka: (String) -> Unit) {
         Triple("kumpulan", "Kumpulan", "Gabung beberapa profil"),
         Triple("langganan", "Langganan", "Import pautan langganan"),
         Triple("tetapan", "Tetapan", "DNS, mod, kata laluan"),
-        Triple("kemas", "Kemas kini modem", "GitHub atau fail"),
+        Triple("kemas_gab", "Kemas kini", "Modem dan apl"),
         Triple("log", "Log", "Rekod sambungan"),
         Triple("sistem", "Sistem", "Maklumat modem"),
         Triple("statistik", "Statistik", "Trafik dan penggunaan"),
         Triple("janji", "Perjanjian", "Syarat dan resit persetujuan"),
         Triple("pasang", "Pasang / urus", "Pemasang SSH"),
-        Triple("apl", "Kemas kini apl", "Versi apl ini"),
         Triple("tema", "Tema", "Rupa dan jenis tulisan"),
         Triple("gaya", "Gaya Butang", "Bentuk butang sambung"),
         Triple("bhs", "Bahasa", "Bahasa paparan apl"),
@@ -1027,10 +1026,9 @@ fun Sub(id: String, pref: android.content.SharedPreferences, keluar: () -> Unit,
         Box(Modifier.weight(1f)) {
             when (id) {
                 "lesen" -> SubLesen()
-                "kemas" -> SubKemas()
+                "kemas_gab" -> SubKemasGabung()
                 "log" -> SubLog()
                 "sistem" -> SubSistem()
-                "apl" -> SubApl()
                 "plus" -> SubPlus(ke)
                 "tema" -> SubTema()
                 "gaya" -> SubGaya()

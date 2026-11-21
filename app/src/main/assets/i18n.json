@@ -1294,7 +1294,9 @@
     "Skrin Failover kini papar status jelas (aktif atau sebab tidak aktif) dan kiraan ujian gagal berturut secara langsung.": "The Failover screen now shows clear status (active, or why it isn't) and a live count of consecutive failed checks.",
     "Baharu: kad Status setiap nod — kelayakan dan ping setiap pelayan dipaparkan terus.": "New: a Status of each node card — each server's reachability and ping are shown directly.",
     "Rekod tukar nod kini sertakan sebab setiap pertukaran.": "The node-switch log now includes the reason for each switch.",
-    "Baharu: butang Hantar diagnosis failover untuk salin terus maklumat lengkap bila perlu bantuan.": "New: a Send failover diagnosis button to instantly copy full details whenever help is needed."
+    "Baharu: butang Hantar diagnosis failover untuk salin terus maklumat lengkap bila perlu bantuan.": "New: a Send failover diagnosis button to instantly copy full details whenever help is needed.",
+    "Modem dan apl": "Modem and app",
+    "Kemas kini web/Chrome": "Web/Chrome Update"
   },
   "zh": {
     "Mod VPN": "VPN 模式",
