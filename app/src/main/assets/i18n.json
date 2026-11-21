@@ -1296,7 +1296,9 @@
     "Rekod tukar nod kini sertakan sebab setiap pertukaran.": "The node-switch log now includes the reason for each switch.",
     "Baharu: butang Hantar diagnosis failover untuk salin terus maklumat lengkap bila perlu bantuan.": "New: a Send failover diagnosis button to instantly copy full details whenever help is needed.",
     "Modem dan apl": "Modem and app",
-    "Kemas kini web/Chrome": "Web/Chrome Update"
+    "Kemas kini web/Chrome": "Web/Chrome Update",
+    "Skrin Kemas kini digabungkan": "Update screen merged",
+    "Skrin Lagi kini ada satu kad Kemas kini sahaja (gantikan dua kad berasingan), dengan pemilih tab: Kemas kini web/Chrome (modem) dan Kemas kini apl.": "The More screen now has a single Update card (replacing two separate cards), with a tab selector: Web/Chrome Update (modem) and App update."
   },
   "zh": {
     "Mod VPN": "VPN 模式",

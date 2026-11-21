@@ -1,12 +1,20 @@
 {
-  "title": "Failover lebih lengkap dan senang disemak",
+  "title": "Skrin Kemas kini digabungkan",
   "items": [
-    "Skrin Failover kini papar status jelas (aktif atau sebab tidak aktif) dan kiraan ujian gagal berturut secara langsung.",
-    "Baharu: kad Status setiap nod — kelayakan dan ping setiap pelayan dipaparkan terus.",
-    "Rekod tukar nod kini sertakan sebab setiap pertukaran.",
-    "Baharu: butang Hantar diagnosis failover untuk salin terus maklumat lengkap bila perlu bantuan."
+    "Skrin Lagi kini ada satu kad Kemas kini sahaja (gantikan dua kad berasingan), dengan pemilih tab: Kemas kini web/Chrome (modem) dan Kemas kini apl."
   ],
   "history": [
+    {
+      "version": "1.0.57",
+      "date": "2026-11-21",
+      "title": "Failover lebih lengkap dan senang disemak",
+      "items": [
+        "Skrin Failover kini papar status jelas (aktif atau sebab tidak aktif) dan kiraan ujian gagal berturut secara langsung.",
+        "Baharu: kad Status setiap nod — kelayakan dan ping setiap pelayan dipaparkan terus.",
+        "Rekod tukar nod kini sertakan sebab setiap pertukaran.",
+        "Baharu: butang Hantar diagnosis failover untuk salin terus maklumat lengkap bila perlu bantuan."
+      ]
+    },
     {
       "version": "1.0.56",
       "date": "2026-11-21",
