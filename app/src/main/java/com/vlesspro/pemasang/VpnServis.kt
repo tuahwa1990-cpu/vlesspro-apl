@@ -91,7 +91,9 @@ class VpnPerkhidmatan : VpnService() {
         return START_NOT_STICKY
     }
 
+    @Volatile private var teksNotifSemasa = ""
     private fun notif(teks: String) {
+        teksNotifSemasa = teks
         val nm = getSystemService(NotificationManager::class.java)
         if (Build.VERSION.SDK_INT >= 26) nm.createNotificationChannel(NotificationChannel(SALURAN, "VPN", NotificationManager.IMPORTANCE_LOW))
         val buka = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
@@ -102,6 +104,11 @@ class VpnPerkhidmatan : VpnService() {
         try {
             if (Build.VERSION.SDK_INT >= 29) startForeground(7, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED) else startForeground(7, n)
         } catch (_: Exception) { try { startForeground(7, n) } catch (_: Exception) {} }
+    }
+    /** Kemaskini notifikasi dengan kelajuan semasa tanpa ubah teks status utama. */
+    private fun notifKelajuan(turun: Long, naik: Long) {
+        val asas = teksNotifSemasa.substringBefore(" · ↓")
+        notif(asas + " · ↓" + saizB(turun) + "/s ↑" + saizB(naik) + "/s")
     }
 
     /** Mulakan SSH (jika perlu) dan Xray. Tun tidak disentuh, jadi boleh dipanggil semula untuk pulih. */
@@ -114,7 +121,7 @@ class VpnPerkhidmatan : VpnService() {
         }
         val bin = File(applicationInfo.nativeLibraryDir, "libxray.so")
         if (!bin.exists()) throw RuntimeException(Bhs.t("Teras Xray tiada dalam binaan apl ini."))
-        val cfg = File(filesDir, "vpn-xray.json").apply { writeText(VlessPautan.konfig(h, PORT)) }
+        val cfg = File(filesDir, "vpn-xray.json").apply { writeText(VlessPautan.konfig(h, PORT, this@VpnPerkhidmatan)) }
         val pb = ProcessBuilder(bin.path, "run", "-c", cfg.path).redirectErrorStream(true)
         pb.environment()["XRAY_LOCATION_ASSET"] = filesDir.path
         val pr = pb.start()
@@ -180,12 +187,42 @@ class VpnPerkhidmatan : VpnService() {
         VpnKongsi.kemaskini(this)
         daftarRangkaian()
         mulaPengawas()
+        mulaStatistik()
     }
 
-    /** Pulihkan teras (Xray/SSH) sahaja; tun kekal supaya trafik tidak bocor (kill switch) semasa cuba semula. */
+    /** Kemaskini kelajuan muat turun/naik dalam notifikasi setiap 2 saat semasa bersambung. */
+    private fun mulaStatistik() {
+        Thread {
+            var lt = 0L; var ln = 0L; var lm = 0L
+            while (!tamat) {
+                try { Thread.sleep(2000) } catch (_: Exception) {}
+                if (tamat) return@Thread
+                if (!jalan || memulih) { lm = 0L; continue }
+                val st = try { HevLib.muat(); TProxyService.TProxyGetStats() } catch (_: Throwable) { null }
+                if (st == null || st.size < 4) continue
+                val t = st[3]; val n = st[1]; val now = System.currentTimeMillis()
+                if (lm != 0L && now > lm) notifKelajuan(((t - lt) * 1000 / (now - lm)).coerceAtLeast(0), ((n - ln) * 1000 / (now - lm)).coerceAtLeast(0))
+                lt = t; ln = n; lm = now
+            }
+        }.start()
+    }
+
+    /** Pelayan lain (selain h semasa) yang disimpan, disusun ikut ping terendah. Null jika tiada calon. */
+    private fun pelayanLain(semasa: VlessPautan.Hasil): VlessPautan.Hasil? = try {
+        val calon = SimpanVpn.semua(this).mapNotNull { p -> try { VlessPautan.hurai(p) } catch (_: Exception) { null } }
+            .filter { it.host != semasa.host || it.port != semasa.port }
+        if (calon.isEmpty()) null else {
+            val ping = VpnAlat.pingSemua(calon)
+            val terbaik = ping.filter { it.value >= 0 }.minByOrNull { it.value }?.key
+            if (terbaik != null) calon[terbaik] else calon.first()
+        }
+    } catch (_: Throwable) { null }
+
+    /** Pulihkan teras (Xray/SSH) sahaja; tun kekal supaya trafik tidak bocor (kill switch) semasa cuba semula.
+     * Jika Failover dihidupkan dan pelayan semasa terus gagal, cuba tukar ke pelayan lain yang disimpan. */
     @Synchronized private fun pulih(sebab: String) {
         if (memulih || tamat || !jalan) return
-        val h = hasil ?: return
+        val h0 = hasil ?: return
         memulih = true
         catat("Putus: $sebab")
         notif(Bhs.t("Menyambung semula..."))
@@ -193,21 +230,31 @@ class VpnPerkhidmatan : VpnService() {
         Thread {
             if (!VpnTetapan.auto(this)) { ralat = Bhs.t("Sambungan terputus."); berhenti(); return@Thread }
             val kill = VpnTetapan.kill(this)
+            val failover = VpnTetapan.failover(this)
+            var h = h0
             var cuba = 0
+            var cubaPelayanIni = 0
+            val jumlahPelayan = if (failover) maxOf(1, SimpanVpn.semua(this).size) else 1
+            val maksCuba = if (kill) Int.MAX_VALUE else 6 * jumlahPelayan
             while (!tamat) {
-                cuba++
+                cuba++; cubaPelayanIni++
                 try {
                     bersihTeras()
                     mulaTeras(h)
-                    catat("Disambung semula")
+                    catat("Disambung semula" + if (h !== h0) Bhs.f(" (tukar ke {0})", h.nama) else "")
+                    hasil = h; nama = h.nama
                     memulih = false
                     notif(Bhs.f("Bersambung ke {0}", h.nama))
                     VpnKongsi.kemaskini(this)
                     return@Thread
                 } catch (e: Throwable) { catat("Cuba semula " + cuba + " gagal: " + (e.message ?: e.javaClass.simpleName)) }
-                if (!kill && cuba >= 6) { ralat = Bhs.t("Gagal menyambung semula."); berhenti(); return@Thread }
+                if (failover && cubaPelayanIni >= 3) {
+                    val lain = pelayanLain(h)
+                    if (lain != null) { catat("Failover: cuba pelayan lain — " + lain.nama); h = lain; cubaPelayanIni = 0 }
+                }
+                if (!kill && cuba >= maksCuba) { ralat = Bhs.t("Gagal menyambung semula."); berhenti(); return@Thread }
                 var t = 0
-                while (!tamat && t < minOf(3000 * cuba, 20000)) { try { Thread.sleep(500) } catch (_: Exception) {}; t += 500 }
+                while (!tamat && t < minOf(3000 * cubaPelayanIni, 20000)) { try { Thread.sleep(500) } catch (_: Exception) {}; t += 500 }
             }
         }.start()
     }

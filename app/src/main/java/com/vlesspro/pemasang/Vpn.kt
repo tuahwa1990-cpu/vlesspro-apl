@@ -209,10 +209,12 @@ object VlessPautan {
         }
     }
 
-    fun konfig(h: Hasil, portSocks: Int): String {
+    fun konfig(h: Hasil, portSocks: Int, ctx: Context? = null): String {
         val ssh = h.ssh != null
+        val dnsTersuai = ctx?.let { VpnTetapan.dns(it) }.orEmpty().split(",").map { it.trim() }.filter { it.isNotEmpty() }
         val dns = JSONObject().put("servers", JSONArray().apply {
-            if (ssh) { put("tcp://1.1.1.1"); put("tcp://8.8.8.8") } else { put("1.1.1.1"); put("8.8.8.8") }
+            if (dnsTersuai.isNotEmpty()) dnsTersuai.forEach { put(if (ssh) "tcp://$it" else it) }
+            else if (ssh) { put("tcp://1.1.1.1"); put("tcp://8.8.8.8") } else { put("1.1.1.1"); put("8.8.8.8") }
         })
         val keluar = JSONArray().put(h.outbound).put(JSONObject().put("tag", "direct").put("protocol", "freedom"))
         val j = JSONObject()
@@ -220,12 +222,20 @@ object VlessPautan {
             .put("dns", dns)
             .put("inbounds", JSONArray().put(JSONObject().put("tag", "socks").put("listen", "127.0.0.1").put("port", portSocks).put("protocol", "socks")
                 .put("settings", JSONObject().put("auth", "noauth").put("udp", true))))
+        val peraturan = JSONArray()
         if (ssh) {
             // SSH hanya bawa TCP: pertanyaan DNS (UDP 53) ditukar kepada DNS-over-TCP melalui terowong.
             keluar.put(JSONObject().put("tag", "dns-out").put("protocol", "dns"))
-            j.put("routing", JSONObject().put("domainStrategy", "AsIs").put("rules", JSONArray().put(
-                JSONObject().put("type", "field").put("inboundTag", JSONArray().put("socks")).put("network", "udp").put("port", "53").put("outboundTag", "dns-out"))))
+            peraturan.put(JSONObject().put("type", "field").put("inboundTag", JSONArray().put("socks")).put("network", "udp").put("port", "53").put("outboundTag", "dns-out"))
         }
+        if (ctx != null && VpnTetapan.routingIklan(ctx)) {
+            keluar.put(JSONObject().put("tag", "block").put("protocol", "blackhole"))
+            peraturan.put(JSONObject().put("type", "field").put("domain", JSONArray(SENARAI_IKLAN_VPN)).put("outboundTag", "block"))
+        }
+        if (ctx != null && VpnTetapan.routingLan(ctx)) {
+            peraturan.put(JSONObject().put("type", "field").put("ip", JSONArray(SENARAI_LAN_VPN)).put("outboundTag", "direct"))
+        }
+        if (peraturan.length() > 0) j.put("routing", JSONObject().put("domainStrategy", "AsIs").put("rules", peraturan))
         return j.put("outbounds", keluar).toString()
     }
 }

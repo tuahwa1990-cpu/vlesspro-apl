@@ -62,7 +62,32 @@ object VpnTetapan {
     fun setModApl(ctx: Context, m: Int) { p(ctx).edit().putInt("vpn_mod", m).apply() }
     fun apl(ctx: Context): Set<String> = p(ctx).getStringSet("vpn_apl", emptySet()) ?: emptySet()
     fun setApl(ctx: Context, s: Set<String>) { p(ctx).edit().putStringSet("vpn_apl", HashSet(s)).apply() }
+    /** Failover: bila sambung semula ke pelayan sama gagal berulang, cuba pelayan lain yang disimpan. */
+    fun failover(ctx: Context) = p(ctx).getBoolean("vpn_failover", true)
+    /** Penghalaan: pintas rangkaian tempatan (LAN) terus, tidak melalui pelayan. */
+    fun routingLan(ctx: Context) = p(ctx).getBoolean("vpn_routing_lan", false)
+    /** Penghalaan: sekat domain iklan/penjejak biasa. */
+    fun routingIklan(ctx: Context) = p(ctx).getBoolean("vpn_routing_iklan", false)
+    /** DNS tersuai (senarai IP dipisah koma); kosong = lalai (1.1.1.1, 8.8.8.8). */
+    fun dns(ctx: Context) = p(ctx).getString("vpn_dns", "") ?: ""
+    fun setDns(ctx: Context, v: String) { p(ctx).edit().putString("vpn_dns", v).apply() }
 }
+
+/** Senarai domain iklan/penjejak biasa untuk peraturan "Sekat iklan". Bukan senarai lengkap. */
+val SENARAI_IKLAN_VPN = listOf(
+    "domain:doubleclick.net", "domain:googlesyndication.com", "domain:googleadservices.com",
+    "domain:google-analytics.com", "domain:adservice.google.com", "domain:adservice.google.com.my",
+    "domain:ads.youtube.com", "domain:adsafeprotected.com", "domain:moatads.com",
+    "domain:scorecardresearch.com", "domain:taboola.com", "domain:outbrain.com",
+    "domain:mopub.com", "domain:unityads.unity3d.com", "domain:applovin.com", "domain:adcolony.com",
+    "domain:adjust.com", "domain:ironsrc.com", "domain:vungle.com",
+)
+
+/** Julat IP rangkaian tempatan (RFC1918 + setempat) untuk peraturan "Pintas LAN". */
+val SENARAI_LAN_VPN = listOf(
+    "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/8", "169.254.0.0/16",
+    "224.0.0.0/4", "fc00::/7", "fe80::/10", "::1/128",
+)
 
 class SekatanVpn(m: String) : RuntimeException(m)
 

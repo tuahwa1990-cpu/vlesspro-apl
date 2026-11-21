@@ -1339,7 +1339,18 @@
     "Langganan: setiap langganan boleh dibuka untuk lihat senarai nod di dalamnya dan status (digunakan sekarang / ms ping / tidak boleh dicapai).": "Subscriptions: each subscription can be expanded to see its nodes and their status (in use now / ping ms / unreachable).",
     "Langganan: papar bila kali terakhir setiap langganan dikemas kini.": "Subscriptions: shows when each subscription was last updated.",
     "Langganan: dialog pengesahan sebelum padam (supaya tidak tersilap buang semua nod sekali gus).": "Subscriptions: confirmation dialog before deleting (so you don't accidentally remove all its nodes at once).",
-    "Langganan: butang Tampal pada medan URL, dan mesej ralat jelas jika import gagal.": "Subscriptions: a Paste button on the URL field, and a clear error message if the import fails."
+    "Langganan: butang Tampal pada medan URL, dan mesej ralat jelas jika import gagal.": "Subscriptions: a Paste button on the URL field, and a clear error message if the import fails.",
+    "Disambung semula": "Reconnected",
+    " (tukar ke {0})": " (switched to {0})",
+    "Lalai (1.1.1.1, 8.8.8.8)": "Default (1.1.1.1, 8.8.8.8)",
+    "Failover: tukar pelayan lain jika gagal berulang": "Failover: switch servers on repeated failure",
+    "Jika sambung semula ke pelayan yang sama gagal 3 kali berturut-turut, cuba tukar ke pelayan lain yang disimpan (dipilih ikut ping terendah).": "If reconnecting to the same server fails 3 times in a row, try switching to another saved server (picked by lowest ping).",
+    "Penghalaan (Routing)": "Routing",
+    "Pintas rangkaian tempatan (LAN)": "Bypass local network (LAN)",
+    "Peranti dalam WiFi/rangkaian tempatan anda (printer, NAS, dll) disambung terus, tidak melalui pelayan VPN.": "Devices on your WiFi/local network (printer, NAS, etc) connect directly, not through the VPN server.",
+    "Sekat iklan asas": "Basic ad blocking",
+    "Sekat domain iklan/penjejak yang biasa dijumpai. Bukan penapis lengkap.": "Blocks common ad/tracker domains. Not a complete filter.",
+    "Perubahan penghalaan dan DNS terpakai pada sambungan seterusnya.": "Routing and DNS changes apply on the next connection."
   },
   "zh": {
     "Mod VPN": "VPN 模式",

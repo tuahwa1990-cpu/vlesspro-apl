@@ -41,7 +41,7 @@ import com.journeyapps.barcodescanner.ScanOptions
 import java.net.InetSocketAddress
 import java.net.Socket
 
-private fun saizB(b: Long): String = when {
+fun saizB(b: Long): String = when {
     b < 1024 -> "$b B"
     b < 1024 * 1024 -> String.format("%.1f KB", b / 1024.0)
     b < 1024L * 1024 * 1024 -> String.format("%.1f MB", b / 1048576.0)
@@ -400,18 +400,44 @@ private fun SkrinTetapan(kembali: () -> Unit) {
     var boot by remember { mutableStateOf(VpnTetapan.boot(ctx)) }
     var cepat by remember { mutableStateOf(VpnTetapan.terpantas(ctx)) }
     var tukar by remember { mutableStateOf(VpnTetapan.tukar(ctx)) }
+    var failover by remember { mutableStateOf(VpnTetapan.failover(ctx)) }
+    var rLan by remember { mutableStateOf(VpnTetapan.routingLan(ctx)) }
+    var rIklan by remember { mutableStateOf(VpnTetapan.routingIklan(ctx)) }
+    var dns by remember { mutableStateOf(VpnTetapan.dns(ctx)) }
+    var dnsSendiri by remember { mutableStateOf(false) }
+    val dnsPilihan = listOf("" to Bhs.t("Lalai (1.1.1.1, 8.8.8.8)"), "1.1.1.1" to "Cloudflare (1.1.1.1)", "8.8.8.8" to "Google (8.8.8.8)",
+        "9.9.9.9" to "Quad9 (9.9.9.9)", "208.67.222.222" to "OpenDNS (208.67.222.222)", "94.140.14.14" to "AdGuard (94.140.14.14)")
+    LaunchedEffect(Unit) { dnsSendiri = dns.isNotEmpty() && dnsPilihan.none { it.first == dns } }
     Halaman {
         Judul(Bhs.t("Tetapan VPN"))
         Suis(Bhs.t("Auto-tukar dengan VLESS modem"), tukar) { tukar = it; VpnTetapan.set(ctx, "vpn_tukar", it) }
         Text(Bhs.t("Bila VPN telefon dihidupkan, VLESS modem dimatikan automatik, dan sebaliknya, supaya trafik tidak melalui dua lapisan."), color = Wr.mu, fontSize = 12.sp)
         Suis(Bhs.t("Sambung semula automatik"), auto) { auto = it; VpnTetapan.set(ctx, "vpn_auto", it) }
         Text(Bhs.t("Jika sambungan terputus atau rangkaian bertukar (WiFi/data), VPN cuba menyambung semula sendiri."), color = Wr.mu, fontSize = 12.sp)
+        if (auto) {
+            Suis(Bhs.t("Failover: tukar pelayan lain jika gagal berulang"), failover) { failover = it; VpnTetapan.set(ctx, "vpn_failover", it) }
+            Text(Bhs.t("Jika sambung semula ke pelayan yang sama gagal 3 kali berturut-turut, cuba tukar ke pelayan lain yang disimpan (dipilih ikut ping terendah)."), color = Wr.mu, fontSize = 11.sp)
+        }
         Suis(Bhs.t("Kill switch"), kill) { kill = it; VpnTetapan.set(ctx, "vpn_kill", it) }
         Text(Bhs.t("Semasa VPN terputus dan sedang cuba semula, internet disekat (tidak bocor ikut IP asal) dan percubaan tidak berhenti."), color = Wr.mu, fontSize = 12.sp)
         Suis(Bhs.t("Sambung semasa telefon dihidupkan"), boot) { boot = it; VpnTetapan.set(ctx, "vpn_boot", it) }
         Text(Bhs.t("Memerlukan kebenaran VPN diberi sekali dan apl tidak dihentikan paksa."), color = Wr.mu, fontSize = 12.sp)
         Suis(Bhs.t("Pilih pelayan terpantas semasa sambung"), cepat) { cepat = it; VpnTetapan.set(ctx, "vpn_terpantas", it) }
         Text(Bhs.t("Menguji ping semua pelayan dan memilih yang terendah setiap kali menyambung."), color = Wr.mu, fontSize = 12.sp)
+        Spacer(Modifier.height(10.dp))
+        Text(Bhs.t("Penghalaan (Routing)"), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        Suis(Bhs.t("Pintas rangkaian tempatan (LAN)"), rLan) { rLan = it; VpnTetapan.set(ctx, "vpn_routing_lan", it) }
+        Text(Bhs.t("Peranti dalam WiFi/rangkaian tempatan anda (printer, NAS, dll) disambung terus, tidak melalui pelayan VPN."), color = Wr.mu, fontSize = 11.sp)
+        Suis(Bhs.t("Sekat iklan asas"), rIklan) { rIklan = it; VpnTetapan.set(ctx, "vpn_routing_iklan", it) }
+        Text(Bhs.t("Sekat domain iklan/penjejak yang biasa dijumpai. Bukan penapis lengkap."), color = Wr.mu, fontSize = 11.sp)
+        Spacer(Modifier.height(10.dp))
+        Text(Bhs.t("DNS"), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        Pilihan(Bhs.t("Pelayan DNS"), dnsPilihan + ("__c" to Bhs.t("Lain-lain (taip sendiri)")), if (dnsSendiri) "__c" else dns) { v ->
+            if (v == "__c") dnsSendiri = true else { dnsSendiri = false; dns = v; VpnTetapan.setDns(ctx, v) }
+        }
+        if (dnsSendiri) OutlinedTextField(dns, { dns = it.trim(); VpnTetapan.setDns(ctx, dns) }, singleLine = true,
+            label = { Text(Bhs.t("Alamat IP (cth 1.1.1.1)")) }, modifier = Modifier.fillMaxWidth().padding(top = 6.dp), colors = medan())
+        Text(Bhs.t("Perubahan penghalaan dan DNS terpakai pada sambungan seterusnya."), color = Wr.mu, fontSize = 11.sp)
         Spacer(Modifier.height(6.dp))
         Btn(Bhs.t("Buka tetapan VPN Android"), utama = false) {
             try { ctx.startActivity(android.content.Intent(android.provider.Settings.ACTION_VPN_SETTINGS).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) } catch (_: Exception) {}
@@ -474,7 +500,7 @@ private fun SkrinPanduan(kembali: () -> Unit) {
         langkah("3", "Semak", "Tekan Semak IP. IP melalui pelayan mesti berbeza daripada IP telefon. Ping sebenar menunjukkan kelajuan sambungan semasa.")
         langkah("4", "Pilih pelayan terbaik", "Tekan Uji ping untuk melihat pelayan yang hidup. Terpantas memilih pelayan dengan ping terendah.")
         langkah("5", "Di rumah dan di luar", "Apabila anda bersambung ke WiFi modem, VPN telefon dan VLESS modem tidak dihidupkan serentak: salah satu dimatikan secara automatik. Boleh ditukar di Tetapan.")
-        langkah("6", "Tetapan berguna", "Sambung semula automatik memulihkan VPN jika rangkaian terputus. Kill switch menyekat internet jika VPN terputus. Per-apl memilih apl yang menggunakan VPN.")
+        langkah("6", "Tetapan berguna", "Sambung semula automatik memulihkan VPN jika rangkaian terputus. Failover tukar ke pelayan lain jika pelayan semasa terus gagal. Kill switch menyekat internet jika VPN terputus. Per-apl memilih apl yang menggunakan VPN. Penghalaan boleh pintas LAN atau sekat iklan, dan DNS boleh ditukar ikut citarasa.")
         Btn(Bhs.t("Kembali")) { kembali() }
     }
 }
