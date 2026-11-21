@@ -121,6 +121,7 @@ class VpnPerkhidmatan : VpnService() {
         }
         val bin = File(applicationInfo.nativeLibraryDir, "libxray.so")
         if (!bin.exists()) throw RuntimeException(Bhs.t("Teras Xray tiada dalam binaan apl ini."))
+        if (VpnTetapan.routingIklan(this)) pastikanGeosite()
         val cfg = File(filesDir, "vpn-xray.json").apply { writeText(VlessPautan.konfig(h, PORT, this@VpnPerkhidmatan)) }
         val pb = ProcessBuilder(bin.path, "run", "-c", cfg.path).redirectErrorStream(true)
         pb.environment()["XRAY_LOCATION_ASSET"] = filesDir.path
@@ -133,6 +134,15 @@ class VpnPerkhidmatan : VpnService() {
         }.start()
         Thread.sleep(1200)
         if (!pr.isAlive) throw RuntimeException(Bhs.f("Xray berhenti: {0}", synchronized(log) { log.toString().trim().takeLast(300) }))
+    }
+
+    /** Salin geosite.dat (senarai domain iklan, category-ads-all) daripada aset ke filesDir sekali sahaja,
+     * supaya Xray (XRAY_LOCATION_ASSET = filesDir) boleh guna peraturan "geosite:category-ads-all". */
+    private fun pastikanGeosite() {
+        val f = File(filesDir, "geosite.dat")
+        if (f.exists() && f.length() > 1_000_000L) return
+        try { assets.open("geosite_ads.dat").use { inp -> f.outputStream().use { out -> inp.copyTo(out) } } }
+        catch (e: Exception) { catat("Gagal salin geosite.dat: " + (e.message ?: e.javaClass.simpleName)) }
     }
 
     private fun bersihTeras() {

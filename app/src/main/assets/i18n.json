@@ -1355,7 +1355,8 @@
     "VPN Telefon: Failover automatik — jika sambung semula ke pelayan sama gagal berulang, apl cuba tukar ke pelayan lain yang disimpan (ikut ping terendah).": "Phone VPN: Automatic failover — if reconnecting to the same server keeps failing, the app tries switching to another saved server (by lowest ping).",
     "VPN Telefon: Penghalaan baharu — boleh pintas rangkaian tempatan (LAN) dan sekat iklan/penjejak asas.": "Phone VPN: New routing options — can bypass the local network (LAN) and block basic ads/trackers.",
     "VPN Telefon: DNS tersuai (Cloudflare, Google, Quad9, OpenDNS, AdGuard atau taip sendiri).": "Phone VPN: Custom DNS (Cloudflare, Google, Quad9, OpenDNS, AdGuard, or type your own).",
-    "VPN Telefon: notifikasi kini papar kelajuan muat turun/naik masa nyata semasa bersambung.": "Phone VPN: the notification now shows real-time download/upload speed while connected."
+    "VPN Telefon: notifikasi kini papar kelajuan muat turun/naik masa nyata semasa bersambung.": "Phone VPN: the notification now shows real-time download/upload speed while connected.",
+    "Guna senarai category-ads-all (200,000+ domain iklan/penjejak), sama seperti v2rayNG.": "Uses the category-ads-all list (200,000+ ad/tracker domains), same as v2rayNG."
   },
   "zh": {
     "Mod VPN": "VPN 模式",

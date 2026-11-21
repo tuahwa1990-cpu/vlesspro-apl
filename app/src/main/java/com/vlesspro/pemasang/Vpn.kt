@@ -230,7 +230,9 @@ object VlessPautan {
         }
         if (ctx != null && VpnTetapan.routingIklan(ctx)) {
             keluar.put(JSONObject().put("tag", "block").put("protocol", "blackhole"))
-            peraturan.put(JSONObject().put("type", "field").put("domain", JSONArray(SENARAI_IKLAN_VPN)).put("outboundTag", "block"))
+            // geosite:category-ads-all — senarai penuh (200,000+ domain) dibina ke dalam geosite.dat
+            // yang disalin daripada aset (lihat VpnServis.pastikanGeosite), sama seperti v2rayNG.
+            peraturan.put(JSONObject().put("type", "field").put("domain", JSONArray(listOf("geosite:category-ads-all"))).put("outboundTag", "block"))
         }
         if (ctx != null && VpnTetapan.routingLan(ctx)) {
             peraturan.put(JSONObject().put("type", "field").put("ip", JSONArray(SENARAI_LAN_VPN)).put("outboundTag", "direct"))

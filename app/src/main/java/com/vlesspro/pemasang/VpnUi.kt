@@ -429,7 +429,7 @@ private fun SkrinTetapan(kembali: () -> Unit) {
         Suis(Bhs.t("Pintas rangkaian tempatan (LAN)"), rLan) { rLan = it; VpnTetapan.set(ctx, "vpn_routing_lan", it) }
         Text(Bhs.t("Peranti dalam WiFi/rangkaian tempatan anda (printer, NAS, dll) disambung terus, tidak melalui pelayan VPN."), color = Wr.mu, fontSize = 11.sp)
         Suis(Bhs.t("Sekat iklan asas"), rIklan) { rIklan = it; VpnTetapan.set(ctx, "vpn_routing_iklan", it) }
-        Text(Bhs.t("Sekat domain iklan/penjejak yang biasa dijumpai. Bukan penapis lengkap."), color = Wr.mu, fontSize = 11.sp)
+        Text(Bhs.t("Guna senarai category-ads-all (200,000+ domain iklan/penjejak), sama seperti v2rayNG."), color = Wr.mu, fontSize = 11.sp)
         Spacer(Modifier.height(10.dp))
         Text(Bhs.t("DNS"), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 14.sp)
         Pilihan(Bhs.t("Pelayan DNS"), dnsPilihan + ("__c" to Bhs.t("Lain-lain (taip sendiri)")), if (dnsSendiri) "__c" else dns) { v ->

@@ -73,16 +73,6 @@ object VpnTetapan {
     fun setDns(ctx: Context, v: String) { p(ctx).edit().putString("vpn_dns", v).apply() }
 }
 
-/** Senarai domain iklan/penjejak biasa untuk peraturan "Sekat iklan". Bukan senarai lengkap. */
-val SENARAI_IKLAN_VPN = listOf(
-    "domain:doubleclick.net", "domain:googlesyndication.com", "domain:googleadservices.com",
-    "domain:google-analytics.com", "domain:adservice.google.com", "domain:adservice.google.com.my",
-    "domain:ads.youtube.com", "domain:adsafeprotected.com", "domain:moatads.com",
-    "domain:scorecardresearch.com", "domain:taboola.com", "domain:outbrain.com",
-    "domain:mopub.com", "domain:unityads.unity3d.com", "domain:applovin.com", "domain:adcolony.com",
-    "domain:adjust.com", "domain:ironsrc.com", "domain:vungle.com",
-)
-
 /** Julat IP rangkaian tempatan (RFC1918 + setempat) untuk peraturan "Pintas LAN". */
 val SENARAI_LAN_VPN = listOf(
     "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/8", "169.254.0.0/16",
