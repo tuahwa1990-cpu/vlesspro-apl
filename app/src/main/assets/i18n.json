@@ -1320,7 +1320,13 @@
     "Microsoft": "Microsoft",
     "URL (http:// atau https://)": "URL (http:// or https://)",
     "TProxy dan TUN: TCP dan UDP (termasuk permainan dan panggilan) melalui nod, nod mesti menyokong UDP.": "TProxy and TUN: TCP and UDP (including games and calls) go through the node; the node must support UDP.",
-    "Redirect: hanya TCP melalui nod, paling serasi.": "Redirect: only TCP goes through the node, most compatible."
+    "Redirect: hanya TCP melalui nod, paling serasi.": "Redirect: only TCP goes through the node, most compatible.",
+    "Tetapan selaras panel web/Chrome": "Settings aligned with the web/Chrome panel",
+    "Pelayan DNS kini dropdown dengan pilihan sedia ada (Cloudflare, Google, Quad9, OpenDNS, AdGuard, CleanBrowsing) atau taip sendiri.": "DNS server is now a dropdown with ready-made options (Cloudflare, Google, Quad9, OpenDNS, AdGuard, CleanBrowsing) or type your own.",
+    "Baharu: Query strategy (IPv4 + IPv6 / IPv4 sahaja / IPv6 sahaja).": "New: Query strategy (IPv4 + IPv6 / IPv4 only / IPv6 only).",
+    "URL ujian sambungan kini guna senarai pilihan rasmi yang sama dengan panel web, atau taip sendiri.": "Connection test URL now uses the same official preset list as the web panel, or type your own.",
+    "Baharu: Tahap log xray (debug/info/warning/error/none).": "New: Xray log level (debug/info/warning/error/none).",
+    "But semula modem berjadual harian kini lebih jelas (suis hidup/mati + pilihan cepat masa) dan penerangan ia berbeza daripada butang But semula modem segera di Sistem.": "Scheduled daily modem reboot is now clearer (on/off switch + quick time presets), with an explanation that it differs from the instant Reboot modem button in System."
   },
   "zh": {
     "Mod VPN": "VPN 模式",

@@ -1,9 +1,21 @@
 {
-  "title": "Skrin Kemas kini digabungkan",
+  "title": "Tetapan selaras panel web/Chrome",
   "items": [
-    "Skrin Lagi kini ada satu kad Kemas kini sahaja (gantikan dua kad berasingan), dengan pemilih tab: Kemas kini web/Chrome (modem) dan Kemas kini apl."
+    "Pelayan DNS kini dropdown dengan pilihan sedia ada (Cloudflare, Google, Quad9, OpenDNS, AdGuard, CleanBrowsing) atau taip sendiri.",
+    "Baharu: Query strategy (IPv4 + IPv6 / IPv4 sahaja / IPv6 sahaja).",
+    "URL ujian sambungan kini guna senarai pilihan rasmi yang sama dengan panel web, atau taip sendiri.",
+    "Baharu: Tahap log xray (debug/info/warning/error/none).",
+    "But semula modem berjadual harian kini lebih jelas (suis hidup/mati + pilihan cepat masa) dan penerangan ia berbeza daripada butang But semula modem segera di Sistem."
   ],
   "history": [
+    {
+      "version": "1.0.58",
+      "date": "2026-11-21",
+      "title": "Skrin Kemas kini digabungkan",
+      "items": [
+        "Skrin Lagi kini ada satu kad Kemas kini sahaja (gantikan dua kad berasingan), dengan pemilih tab: Kemas kini web/Chrome (modem) dan Kemas kini apl."
+      ]
+    },
     {
       "version": "1.0.57",
       "date": "2026-11-21",
