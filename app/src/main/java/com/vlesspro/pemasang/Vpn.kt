@@ -221,7 +221,12 @@ object VlessPautan {
             .put("log", JSONObject().put("loglevel", "warning"))
             .put("dns", dns)
             .put("inbounds", JSONArray().put(JSONObject().put("tag", "socks").put("listen", "127.0.0.1").put("port", portSocks).put("protocol", "socks")
-                .put("settings", JSONObject().put("auth", "noauth").put("udp", true))))
+                .put("settings", JSONObject().put("auth", "noauth").put("udp", true))
+                // hev-socks5-tunnel hantar sambungan ikut IP sahaja (DNS diselesaikan oleh Android sebelum
+                // sampai ke tun2socks), jadi Xray TIDAK nampak nama domain secara semula jadi. "sniffing"
+                // membaca SNI (TLS) / Host (HTTP) daripada trafik itu sendiri supaya peraturan "domain"
+                // (termasuk geosite:category-ads-all) benar-benar dapat dipadankan.
+                .put("sniffing", JSONObject().put("enabled", true).put("destOverride", JSONArray(listOf("http", "tls"))).put("routeOnly", false))))
         val peraturan = JSONArray()
         if (ssh) {
             // SSH hanya bawa TCP: pertanyaan DNS (UDP 53) ditukar kepada DNS-over-TCP melalui terowong.
