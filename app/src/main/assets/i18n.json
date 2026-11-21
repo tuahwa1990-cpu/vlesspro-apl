@@ -1326,7 +1326,8 @@
     "Baharu: Query strategy (IPv4 + IPv6 / IPv4 sahaja / IPv6 sahaja).": "New: Query strategy (IPv4 + IPv6 / IPv4 only / IPv6 only).",
     "URL ujian sambungan kini guna senarai pilihan rasmi yang sama dengan panel web, atau taip sendiri.": "Connection test URL now uses the same official preset list as the web panel, or type your own.",
     "Baharu: Tahap log xray (debug/info/warning/error/none).": "New: Xray log level (debug/info/warning/error/none).",
-    "But semula modem berjadual harian kini lebih jelas (suis hidup/mati + pilihan cepat masa) dan penerangan ia berbeza daripada butang But semula modem segera di Sistem.": "Scheduled daily modem reboot is now clearer (on/off switch + quick time presets), with an explanation that it differs from the instant Reboot modem button in System."
+    "But semula modem berjadual harian kini lebih jelas (suis hidup/mati + pilihan cepat masa) dan penerangan ia berbeza daripada butang But semula modem segera di Sistem.": "Scheduled daily modem reboot is now clearer (on/off switch + quick time presets), with an explanation that it differs from the instant Reboot modem button in System.",
+    "Guna anak panah untuk susun semula kedudukan tab.": "Use the arrows to rearrange the tabs."
   },
   "zh": {
     "Mod VPN": "VPN 模式",

@@ -562,7 +562,7 @@ fun Utama2(pref: android.content.SharedPreferences, keluar: () -> Unit) {
                     0 -> Utama()
                     1 -> Profil { sub = it }
                     2 -> SubVpn()
-                    else -> Lagi { sub = it }
+                    else -> Lagi(pref) { sub = it }
                 }
             }
         }
@@ -959,45 +959,90 @@ fun Baris(k: String, v: String) {
 
 // ───────────────────────── Lagi ─────────────────────────
 
+private val lagiLalai = listOf(
+    Triple("lesen", "Lesen", "Aktifkan dan semak"),
+    Triple("plus", "Feature Plus", "SQM, iklan, kuota, peranti"),
+    Triple("laluan", "Penghalaan", "Peraturan laluan"),
+    Triple("kumpulan", "Kumpulan", "Gabung beberapa profil"),
+    Triple("langganan", "Langganan", "Import pautan langganan"),
+    Triple("tetapan", "Tetapan", "DNS, mod, kata laluan"),
+    Triple("kemas_gab", "Kemas kini", "Modem dan apl"),
+    Triple("log", "Log", "Rekod sambungan"),
+    Triple("sistem", "Sistem", "Maklumat modem"),
+    Triple("statistik", "Statistik", "Trafik dan penggunaan"),
+    Triple("janji", "Perjanjian", "Syarat dan resit persetujuan"),
+    Triple("pasang", "Pasang / urus", "Pemasang SSH"),
+    Triple("tema", "Tema", "Rupa dan jenis tulisan"),
+    Triple("gaya", "Gaya Butang", "Bentuk butang sambung"),
+    Triple("bhs", "Bahasa", "Bahasa paparan apl"),
+)
+
+private fun susunanLagi(pref: android.content.SharedPreferences): List<Triple<String, String, String>> {
+    val simpan = pref.getString("lagi_susunan", null)
+    if (simpan.isNullOrEmpty()) return lagiLalai
+    val byId = lagiLalai.associateBy { it.first }
+    val susun = simpan.split(",").mapNotNull { byId[it] }.toMutableList()
+    // tambah item baharu (cth selepas kemas kini apl) yang belum ada dalam susunan tersimpan
+    lagiLalai.forEach { if (it.first !in susun.map { s -> s.first }) susun.add(it) }
+    return susun
+}
+
 @Composable
-fun Lagi(buka: (String) -> Unit) {
-    val item = listOf(
-        Triple("lesen", "Lesen", "Aktifkan dan semak"),
-        Triple("plus", "Feature Plus", "SQM, iklan, kuota, peranti"),
-        Triple("laluan", "Penghalaan", "Peraturan laluan"),
-        Triple("kumpulan", "Kumpulan", "Gabung beberapa profil"),
-        Triple("langganan", "Langganan", "Import pautan langganan"),
-        Triple("tetapan", "Tetapan", "DNS, mod, kata laluan"),
-        Triple("kemas_gab", "Kemas kini", "Modem dan apl"),
-        Triple("log", "Log", "Rekod sambungan"),
-        Triple("sistem", "Sistem", "Maklumat modem"),
-        Triple("statistik", "Statistik", "Trafik dan penggunaan"),
-        Triple("janji", "Perjanjian", "Syarat dan resit persetujuan"),
-        Triple("pasang", "Pasang / urus", "Pemasang SSH"),
-        Triple("tema", "Tema", "Rupa dan jenis tulisan"),
-        Triple("gaya", "Gaya Butang", "Bentuk butang sambung"),
-        Triple("bhs", "Bahasa", "Bahasa paparan apl"),
-    )
+fun Lagi(pref: android.content.SharedPreferences, buka: (String) -> Unit) {
+    var item by remember { mutableStateOf(susunanLagi(pref)) }
+    var susunMod by remember { mutableStateOf(false) }
+    fun simpanSusunan(baharu: List<Triple<String, String, String>>) {
+        item = baharu
+        pref.edit().putString("lagi_susunan", baharu.joinToString(",") { it.first }).apply()
+    }
+    fun tukarKedudukan(dari: Int, ke: Int) {
+        if (ke < 0 || ke >= item.size) return
+        val baharu = item.toMutableList()
+        val t = baharu.removeAt(dari)
+        baharu.add(ke, t)
+        simpanSusunan(baharu)
+    }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 130.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Lagi", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold,
-            style = TextStyle(brush = Brush.linearGradient(listOf(Color(0xFFFACC15), Color(0xFFFB923C), Color(0xFFF87171)))),
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Spacer(Modifier.weight(1f))
+            Text("Lagi", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold,
+                style = TextStyle(brush = Brush.linearGradient(listOf(Color(0xFFFACC15), Color(0xFFFB923C), Color(0xFFF87171)))),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+            Spacer(Modifier.weight(1f))
+            IconButton(onClick = { susunMod = !susunMod }) {
+                Text(if (susunMod) "✓" else "⇅", fontSize = 20.sp, color = if (susunMod) Wr.ok else Wr.ac)
+            }
+        }
+        if (susunMod) Text("Guna anak panah untuk susun semula kedudukan tab.", color = Wr.mu, fontSize = 12.sp,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth())
         val warnaLagi = listOf(Color(0xFF38BDF8), Color(0xFFA78BFA), Color(0xFFFB7185), Color(0xFF4ADE80),
             Color(0xFFFACC15), Color(0xFFFF8A65), Color(0xFF22D3EE), Color(0xFFE879F9), Color(0xFF818CF8),
             Color(0xFFF87171), Color(0xFF34D399), Color(0xFFFBBF24), Color(0xFF60A5FA), Color(0xFFF472B6),
             Color(0xFF2DD4BF), Color(0xFFC084FC))
-        var idxLagi = 0
-        item.chunked(2).forEach { baris ->
+        item.chunked(2).forEachIndexed { baris, dua ->
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                baris.forEach { (id, t, d) ->
-                    val w = warnaLagi[idxLagi % warnaLagi.size]; idxLagi++
+                dua.forEachIndexed { k, (id, t, d) ->
+                    val i = baris * 2 + k
+                    val w = warnaLagi[i % warnaLagi.size]
                     Box(Modifier.weight(1f)) {
-                        KadWr(klik = { buka(id) }, warna = w) {
-                            Box(Modifier.size(32.dp).clip(CircleShape)
-                                .background(Brush.linearGradient(listOf(w, w.copy(alpha = 0.55f)))),
-                                contentAlignment = Alignment.Center) {
-                                Text(t.take(1).uppercase(), color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+                        val klikKad: (() -> Unit)? = if (susunMod) null else ({ buka(id) })
+                        KadWr(klik = klikKad, warna = w) {
+                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                Box(Modifier.size(32.dp).clip(CircleShape)
+                                    .background(Brush.linearGradient(listOf(w, w.copy(alpha = 0.55f)))),
+                                    contentAlignment = Alignment.Center) {
+                                    Text(t.take(1).uppercase(), color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+                                }
+                                if (susunMod) {
+                                    Spacer(Modifier.weight(1f))
+                                    Column {
+                                        Text("▲", color = if (i > 0) Wr.ac else Wr.mu, fontSize = 14.sp,
+                                            modifier = Modifier.clickable(enabled = i > 0) { tukarKedudukan(i, i - 1) }.padding(4.dp))
+                                        Text("▼", color = if (i < item.size - 1) Wr.ac else Wr.mu, fontSize = 14.sp,
+                                            modifier = Modifier.clickable(enabled = i < item.size - 1) { tukarKedudukan(i, i + 1) }.padding(4.dp))
+                                    }
+                                }
                             }
                             Spacer(Modifier.height(8.dp))
                             Text(t, color = w, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 2,
@@ -1006,10 +1051,10 @@ fun Lagi(buka: (String) -> Unit) {
                         }
                     }
                 }
-                if (baris.size == 1) Spacer(Modifier.weight(1f))
+                if (dua.size == 1) Spacer(Modifier.weight(1f))
             }
         }
-        KadWr(klik = { buka("keluar") }) { Text("Tukar modem / kata laluan", color = Wr.bad, fontWeight = FontWeight.Bold) }
+        if (!susunMod) KadWr(klik = { buka("keluar") }) { Text("Tukar modem / kata laluan", color = Wr.bad, fontWeight = FontWeight.Bold) }
     }
 }
 
