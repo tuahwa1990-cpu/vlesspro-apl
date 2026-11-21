@@ -1327,7 +1327,19 @@
     "URL ujian sambungan kini guna senarai pilihan rasmi yang sama dengan panel web, atau taip sendiri.": "Connection test URL now uses the same official preset list as the web panel, or type your own.",
     "Baharu: Tahap log xray (debug/info/warning/error/none).": "New: Xray log level (debug/info/warning/error/none).",
     "But semula modem berjadual harian kini lebih jelas (suis hidup/mati + pilihan cepat masa) dan penerangan ia berbeza daripada butang But semula modem segera di Sistem.": "Scheduled daily modem reboot is now clearer (on/off switch + quick time presets), with an explanation that it differs from the instant Reboot modem button in System.",
-    "Guna anak panah untuk susun semula kedudukan tab.": "Use the arrows to rearrange the tabs."
+    "Guna anak panah untuk susun semula kedudukan tab.": "Use the arrows to rearrange the tabs.",
+    "Tiada langganan lagi. Tekan butang Tambah langganan di bawah untuk import pautan.": "No subscriptions yet. Tap the Add subscription button below to import a link.",
+    "Dikemas kini: {0}": "Updated: {0}",
+    "Belum pernah dikemas kini": "Never updated",
+    "Gagal import": "Import failed",
+    "Padam langganan ini?": "Delete this subscription?",
+    "{0}: semua {1} nod yang diimportnya akan dibuang. Tindakan ini tidak boleh dibatalkan.": "{0}: all {1} nodes it imported will be removed. This cannot be undone.",
+    "Susun kedudukan tab & Langganan lebih lengkap": "Tab reordering & richer Subscriptions",
+    "Skrin Lagi: boleh susun semula kedudukan setiap kad mengikut citarasa sendiri (tekan ikon ⇅, guna anak panah ▲▼).": "More screen: you can now rearrange each card's position to your liking (tap the ⇅ icon, use the ▲▼ arrows).",
+    "Langganan: setiap langganan boleh dibuka untuk lihat senarai nod di dalamnya dan status (digunakan sekarang / ms ping / tidak boleh dicapai).": "Subscriptions: each subscription can be expanded to see its nodes and their status (in use now / ping ms / unreachable).",
+    "Langganan: papar bila kali terakhir setiap langganan dikemas kini.": "Subscriptions: shows when each subscription was last updated.",
+    "Langganan: dialog pengesahan sebelum padam (supaya tidak tersilap buang semua nod sekali gus).": "Subscriptions: confirmation dialog before deleting (so you don't accidentally remove all its nodes at once).",
+    "Langganan: butang Tampal pada medan URL, dan mesej ralat jelas jika import gagal.": "Subscriptions: a Paste button on the URL field, and a clear error message if the import fails."
   },
   "zh": {
     "Mod VPN": "VPN 模式",

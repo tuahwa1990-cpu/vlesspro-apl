@@ -491,17 +491,66 @@ fun idPautan(l: String): String = java.security.MessageDigest.getInstance("SHA-1
 fun SubLangganan() {
     var ss by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
     var baru by remember { mutableStateOf(false) }
+    var padam by remember { mutableStateOf<JSONObject?>(null) }
+    var bukaId by remember { mutableStateOf<String?>(null) }
+    var nodSub by remember { mutableStateOf<List<Nod>>(emptyList()) }
+    var pingSub by remember { mutableStateOf<List<Int>>(emptyList()) }
+    val ctx = LocalContext.current
     fun m() = bg { val a = Modem.arr("/api/subs"); ss = (0 until a.length()).map { a.getJSONObject(it) }; St.nod = Modem.nodes() }
     LaunchedEffect(Unit) { m() }
+    LaunchedEffect(bukaId) {
+        val id = bukaId ?: return@LaunchedEffect
+        nodSub = emptyList()
+        withContext(Dispatchers.IO) {
+            try {
+                val semua = Modem.nodes()
+                nodSub = semua.filter { it.src == id }
+                pingSub = Modem.ping()
+            } catch (_: Exception) {}
+        }
+    }
     Halaman {
         Judul("Langganan")
+        if (ss.isEmpty()) Text("Tiada langganan lagi. Tekan butang Tambah langganan di bawah untuk import pautan.", color = Wr.mu, fontSize = 13.sp)
         ss.forEach { s ->
+            val id = s.optString("id")
+            val terbuka = bukaId == id && id.isNotEmpty()
             KadWr {
-                Text(s.optString("name"), color = Wr.tx, fontWeight = FontWeight.Bold)
-                Text(Bhs.f("{0} profil", s.optInt("count")), color = Wr.mu, fontSize = 12.sp)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(Modifier.fillMaxWidth().clickable(enabled = id.isNotEmpty()) { bukaId = if (terbuka) null else id },
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(s.optString("name"), color = Wr.tx, fontWeight = FontWeight.Bold)
+                        Text(Bhs.f("{0} profil", s.optInt("count")), color = Wr.mu, fontSize = 12.sp)
+                        val up = s.optLong("updated")
+                        Text(if (up > 0) Bhs.f("Dikemas kini: {0}", ProfilAlat.waktu(up)) else "Belum pernah dikemas kini",
+                            color = Wr.mu, fontSize = 11.sp, modifier = Modifier.padding(top = 2.dp))
+                    }
+                    if (id.isNotEmpty()) Text(if (terbuka) "▲" else "▼", color = Wr.mu, fontSize = 13.sp)
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
                     TextButton(onClick = { St.toast("Mengemas kini ..."); bg { lapor(Modem.tindak("/api/sub/refresh", s.optInt("i").toString())); m() } }) { Text("Kemas kini", color = Wr.ac) }
-                    TextButton(onClick = { bg { lapor(Modem.tindak("/api/sub/del", s.optInt("i").toString())); m() } }) { Text("Padam", color = Wr.bad) }
+                    TextButton(onClick = { padam = s }) { Text("Padam", color = Wr.bad) }
+                }
+                if (terbuka) {
+                    Spacer(Modifier.height(8.dp))
+                    Box(Modifier.fillMaxWidth().height(1.dp).background(Wr.garis))
+                    Spacer(Modifier.height(8.dp))
+                    if (nodSub.isEmpty()) Text("Memuatkan ...", color = Wr.mu, fontSize = 12.sp)
+                    else nodSub.forEach { nd ->
+                        val p = pingSub.getOrElse(nd.i) { -1 }
+                        val (warna, teks) = when {
+                            nd.pilih -> Wr.ac to "Digunakan sekarang"
+                            p == -2 -> Wr.mu to "Tidak diuji"
+                            p < 0 -> Wr.bad to "Tidak boleh dicapai"
+                            else -> Wr.ok to "$p ms"
+                        }
+                        Row(Modifier.fillMaxWidth().padding(vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Box(Modifier.size(7.dp).clip(androidx.compose.foundation.shape.CircleShape).background(warna))
+                            Spacer(Modifier.width(8.dp))
+                            Text(nd.nama, color = Wr.tx, fontSize = 12.sp, modifier = Modifier.weight(1f), maxLines = 1)
+                            Text(teks, color = warna, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
                 }
             }
         }
@@ -510,10 +559,46 @@ fun SubLangganan() {
     if (baru) {
         var nama by remember { mutableStateOf("") }
         var url by remember { mutableStateOf("") }
-        AlertDialog(onDismissRequest = { baru = false }, containerColor = Wr.kad, title = { Text("Langganan baharu", color = Wr.tx) },
-            text = { Column { OutlinedTextField(nama, { nama = it }, singleLine = true, label = { Text("Nama") }, colors = medan()); Spacer(Modifier.height(8.dp)); OutlinedTextField(url, { url = it.trim() }, label = { Text("URL langganan (http...)") }, colors = medan()) } },
-            confirmButton = { TextButton(enabled = url.startsWith("http"), onClick = { baru = false; St.toast("Mengimport ..."); bg { lapor(Modem.tindak("/api/sub/add", JSONObject().put("name", nama).put("url", url).toString())); m() } }) { Text("Tambah", color = Wr.ac) } },
-            dismissButton = { TextButton(onClick = { baru = false }) { Text("Batal", color = Wr.mu) } })
+        var ralat by remember { mutableStateOf("") }
+        var sibuk by remember { mutableStateOf(false) }
+        AlertDialog(onDismissRequest = { if (!sibuk) baru = false }, containerColor = Wr.kad, title = { Text("Langganan baharu", color = Wr.tx) },
+            text = {
+                Column {
+                    OutlinedTextField(nama, { nama = it }, singleLine = true, label = { Text("Nama") }, colors = medan())
+                    Spacer(Modifier.height(8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        OutlinedTextField(url, { url = it.trim(); ralat = "" }, label = { Text("URL langganan (http...)") },
+                            colors = medan(), modifier = Modifier.weight(1f))
+                        TextButton(onClick = {
+                            val c = (ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).primaryClip
+                            val teks = c?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.text?.toString()?.trim()
+                            if (!teks.isNullOrEmpty()) { url = teks; ralat = "" }
+                        }) { Text("Tampal", color = Wr.ac) }
+                    }
+                    if (ralat.isNotEmpty()) Text(ralat, color = Wr.bad, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
+                    if (sibuk) Text("Mengimport ...", color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
+                }
+            },
+            confirmButton = { TextButton(enabled = url.startsWith("http") && !sibuk, onClick = {
+                sibuk = true
+                bg {
+                    val r = Modem.tindak("/api/sub/add", JSONObject().put("name", nama).put("url", url).toString())
+                    sibuk = false
+                    if (r.first) { baru = false; St.toast(r.second.ifEmpty { "Siap" }); m() } else { ralat = r.second.ifEmpty { "Gagal import" } }
+                }
+            }) { Text("Tambah", color = Wr.ac) } },
+            dismissButton = { TextButton(enabled = !sibuk, onClick = { baru = false }) { Text("Batal", color = Wr.mu) } })
+    }
+    padam?.let { s ->
+        AlertDialog(onDismissRequest = { padam = null }, containerColor = Wr.kad,
+            title = { Text("Padam langganan ini?", color = Wr.tx) },
+            text = { Text(Bhs.f("{0}: semua {1} nod yang diimportnya akan dibuang. Tindakan ini tidak boleh dibatalkan.", s.optString("name"), s.optInt("count")),
+                color = Wr.mu, fontSize = 13.sp) },
+            confirmButton = { TextButton(onClick = {
+                val i = s.optInt("i"); padam = null; bukaId = null
+                bg { lapor(Modem.tindak("/api/sub/del", i.toString())); m() }
+            }) { Text("Padam", color = Wr.bad) } },
+            dismissButton = { TextButton(onClick = { padam = null }) { Text("Batal", color = Wr.mu) } })
     }
 }
 

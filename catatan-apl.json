@@ -1,13 +1,25 @@
 {
-  "title": "Tetapan selaras panel web/Chrome",
+  "title": "Susun kedudukan tab & Langganan lebih lengkap",
   "items": [
-    "Pelayan DNS kini dropdown dengan pilihan sedia ada (Cloudflare, Google, Quad9, OpenDNS, AdGuard, CleanBrowsing) atau taip sendiri.",
-    "Baharu: Query strategy (IPv4 + IPv6 / IPv4 sahaja / IPv6 sahaja).",
-    "URL ujian sambungan kini guna senarai pilihan rasmi yang sama dengan panel web, atau taip sendiri.",
-    "Baharu: Tahap log xray (debug/info/warning/error/none).",
-    "But semula modem berjadual harian kini lebih jelas (suis hidup/mati + pilihan cepat masa) dan penerangan ia berbeza daripada butang But semula modem segera di Sistem."
+    "Skrin Lagi: boleh susun semula kedudukan setiap kad mengikut citarasa sendiri (tekan ikon ⇅, guna anak panah ▲▼).",
+    "Langganan: setiap langganan boleh dibuka untuk lihat senarai nod di dalamnya dan status (digunakan sekarang / ms ping / tidak boleh dicapai).",
+    "Langganan: papar bila kali terakhir setiap langganan dikemas kini.",
+    "Langganan: dialog pengesahan sebelum padam (supaya tidak tersilap buang semua nod sekali gus).",
+    "Langganan: butang Tampal pada medan URL, dan mesej ralat jelas jika import gagal."
   ],
   "history": [
+    {
+      "version": "1.0.59",
+      "date": "2026-11-21",
+      "title": "Tetapan selaras panel web/Chrome",
+      "items": [
+        "Pelayan DNS kini dropdown dengan pilihan sedia ada (Cloudflare, Google, Quad9, OpenDNS, AdGuard, CleanBrowsing) atau taip sendiri.",
+        "Baharu: Query strategy (IPv4 + IPv6 / IPv4 sahaja / IPv6 sahaja).",
+        "URL ujian sambungan kini guna senarai pilihan rasmi yang sama dengan panel web, atau taip sendiri.",
+        "Baharu: Tahap log xray (debug/info/warning/error/none).",
+        "But semula modem berjadual harian kini lebih jelas (suis hidup/mati + pilihan cepat masa) dan penerangan ia berbeza daripada butang But semula modem segera di Sistem."
+      ]
+    },
     {
       "version": "1.0.58",
       "date": "2026-11-21",

@@ -12,7 +12,7 @@ import java.net.URL
 class SalahKata : Exception("Kata laluan salah")
 class TiadaSambungan(m: String, sebab: Throwable? = null) : Exception(m, sebab)
 
-data class Nod(val i: Int, val nama: String, val host: String, val port: Int, val net: String, val sec: String, val pilih: Boolean, val id: String = "")
+data class Nod(val i: Int, val nama: String, val host: String, val port: Int, val net: String, val sec: String, val pilih: Boolean, val id: String = "", val src: String = "")
 
 /** Klien API modem (VLESS Pro, port 8990). Pengesahan: Basic dengan kata laluan panel. */
 object Modem {
@@ -97,7 +97,7 @@ object Modem {
         val a = arr("/api/nodes")
         return (0 until a.length()).map {
             val o = a.getJSONObject(it)
-            Nod(o.optInt("i"), o.optString("name"), o.optString("host"), o.optInt("port"), o.optString("net"), o.optString("sec"), o.optBoolean("sel"), o.optString("id"))
+            Nod(o.optInt("i"), o.optString("name"), o.optString("host"), o.optInt("port"), o.optString("net"), o.optString("sec"), o.optBoolean("sel"), o.optString("id"), o.optString("src"))
         }
     }
 
