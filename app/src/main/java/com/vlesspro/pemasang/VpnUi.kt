@@ -200,6 +200,19 @@ private fun SkrinUtama(ke: (String) -> Unit) {
         val i = VpnService.prepare(ctx)
         if (i != null) minta.launch(i) else sambung()
     }
+    /** Pilih pelayan ke-i dan terus sambung dengannya, tukar terus walaupun sedang bersambung ke pelayan lain. */
+    fun aktifkan(i: Int) {
+        pilih = i; SimpanVpn.setPilih(ctx, i)
+        skop.launch {
+            if (VpnPerkhidmatan.jalan || VpnPerkhidmatan.sibuk) {
+                VpnPerkhidmatan.henti(ctx)
+                var cubaan = 0
+                while ((VpnPerkhidmatan.jalan || VpnPerkhidmatan.sibuk) && cubaan < 50) { delay(100); cubaan++ }
+            }
+            val iz = VpnService.prepare(ctx)
+            if (iz != null) minta.launch(iz) else sambung()
+        }
+    }
     fun tampal() {
         val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val t = cm.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(ctx)?.toString().orEmpty()
@@ -344,35 +357,46 @@ private fun SkrinUtama(ke: (String) -> Unit) {
             val wj = warnaJenis(h?.jenis ?: "")
             val trKad = rememberInfiniteTransition(label = "kad$i")
             val kilauKad by trKad.animateFloat(0.55f, 1f, infiniteRepeatable(tween(1400, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "kk$i")
-            Row(
+            Column(
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(if (dipilih) Wr.kad2 else Wr.kad)
                     .border(if (dipilih) 2.dp else 1.5.dp, if (dipilih) Wr.ac.copy(alpha = kilauKad) else Wr.garis, RoundedCornerShape(18.dp))
-                    .clickable { pilih = i; SimpanVpn.setPilih(ctx, i) }.padding(horizontal = 14.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .clickable { pilih = i; SimpanVpn.setPilih(ctx, i) }.padding(horizontal = 14.dp, vertical = 12.dp)
             ) {
-                Box(Modifier.width(4.dp).height(34.dp).clip(RoundedCornerShape(50)).background(wj))
-                Spacer(Modifier.width(10.dp))
-                Column(Modifier.weight(1f)) {
-                    Text(h?.nama ?: p.take(30), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 15.sp, maxLines = 2)
-                    Spacer(Modifier.height(4.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                        if (h != null) CipVpn(h.ringkas, wj)
-                        ping[i]?.let { ms -> if (ms >= 0) CipVpn("$ms ms", if (ms < 150) Wr.ac else Wr.wn) else CipVpn(Bhs.t("Gagal"), Wr.bad) }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.width(4.dp).height(34.dp).clip(RoundedCornerShape(50)).background(wj))
+                    Spacer(Modifier.width(10.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(h?.nama ?: p.take(30), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 15.sp, maxLines = 2)
+                        Spacer(Modifier.height(4.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                            if (h != null) CipVpn(h.ringkas, wj)
+                            ping[i]?.let { ms -> if (ms >= 0) CipVpn("$ms ms", if (ms < 150) Wr.ac else Wr.wn) else CipVpn(Bhs.t("Gagal"), Wr.bad) }
+                            if (p !in manual) CipVpn(Bhs.t("Langganan"), Wr.mu)
+                        }
+                    }
+                    if (dipilih && jalan) CipVpn(Bhs.t("Aktif"), Color(0xFF4ADE80))
+                }
+                Spacer(Modifier.height(8.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+                    TextButton({ aktifkan(i) }, contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)) {
+                        Text("▶ " + Bhs.t("Aktifkan"), color = Color(0xFF4ADE80), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    }
+                    if (p in manual) {
+                        if (!p.startsWith("ssh://")) TextButton({
+                            bg { lapor(Modem.tambahNod(p)) }
+                        }, contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)) {
+                            Text("📡 " + Bhs.t("Modem"), color = Color(0xFF38BDF8), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                        TextButton({
+                            if (p.startsWith("vless://")) { vlessSunting = p; ke("sunting_vless") }
+                            else { suntingAsal = p; suntingTeks = p }
+                        }, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp)) { Text("✎", color = Wr.ac, fontSize = 16.sp) }
+                        TextButton({
+                            SimpanVpn.simpanManual(ctx, manual.filter { it != p })
+                            muatSemula()
+                        }, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp)) { Text("✕", color = Wr.mu, fontSize = 16.sp) }
                     }
                 }
-                if (p in manual) {
-                    if (!p.startsWith("ssh://")) TextButton({
-                        bg { lapor(Modem.tambahNod(p)) }
-                    }) { Text("↗", color = Wr.ac, fontSize = 16.sp) }
-                    TextButton({
-                        if (p.startsWith("vless://")) { vlessSunting = p; ke("sunting_vless") }
-                        else { suntingAsal = p; suntingTeks = p }
-                    }) { Text("✎", color = Wr.ac, fontSize = 16.sp) }
-                    TextButton({
-                        SimpanVpn.simpanManual(ctx, manual.filter { it != p })
-                        muatSemula()
-                    }) { Text("✕", color = Wr.mu, fontSize = 16.sp) }
-                } else CipVpn(Bhs.t("Langganan"), Wr.mu)
             }
         }
         if (langganan.isNotEmpty()) {
@@ -394,7 +418,7 @@ private fun SkrinUtama(ke: (String) -> Unit) {
                 }
             }
         }
-        if (manual.any { !it.startsWith("ssh://") }) Text(Bhs.t("Tekan ↗ untuk menghantar pelayan ke modem (perlu disambung ke WiFi modem)."), color = Wr.mu, fontSize = 12.sp)
+        if (manual.any { !it.startsWith("ssh://") }) Text(Bhs.t("Tekan '📡 Modem' untuk menghantar pelayan itu ke modem (perlu disambung ke WiFi modem). Tekan '▶ Aktifkan' untuk terus sambung VPN telefon menggunakan pelayan itu."), color = Wr.mu, fontSize = 12.sp)
         Text(Bhs.t("Ping TCP hanyalah anggaran (nod D1G1 menunjukkan ping palsu). Ping sebenar boleh diuji selepas bersambung."), color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
         Text(Bhs.t("Jika WiFi modem anda sudah menjalankan VLESS Pro, matikan salah satu supaya trafik tidak melalui dua lapisan (lebih perlahan)."), color = Wr.mu, fontSize = 12.sp)
         Text(Bhs.f("Apl {0} · Xray {1}", Kemas.namaSemasa(ctx), VpnPerkhidmatan.VERSI_XRAY), color = Wr.mu, fontSize = 11.sp)
