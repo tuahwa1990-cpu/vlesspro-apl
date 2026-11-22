@@ -1,10 +1,19 @@
 {
-  "title": "VPN Telefon: Sekat iklan kini benar-benar berfungsi",
+  "title": "VPN Telefon: Tambah baik senarai pelayan",
   "items": [
-    "VPN Telefon: Sekat iklan asas kini guna senarai penuh 200,000+ domain iklan/penjejak (category-ads-all, sama seperti v2rayNG) — bukan senarai kecil terhad seperti sebelum ini.",
-    "VPN Telefon: dibetulkan isu sekatan iklan tidak berkesan walaupun suis 'Sekat iklan asas' dihidupkan."
+    "VPN Telefon: setiap pelayan kini ada butang '▶ Aktifkan' — tekan sekali untuk terus pilih dan sambung VPN telefon dengan pelayan itu, tanpa perlu guna butang kuasa berasingan.",
+    "VPN Telefon: butang hantar pelayan ke modem kini berlabel jelas '📡 Modem' supaya mudah difahami fungsinya."
   ],
   "history": [
+    {
+      "version": "1.0.67",
+      "date": "2026-11-22",
+      "title": "VPN Telefon: Sekat iklan kini benar-benar berfungsi",
+      "items": [
+        "VPN Telefon: Sekat iklan asas kini guna senarai penuh 200,000+ domain iklan/penjejak (category-ads-all, sama seperti v2rayNG) — bukan senarai kecil terhad seperti sebelum ini.",
+        "VPN Telefon: dibetulkan isu sekatan iklan tidak berkesan walaupun suis 'Sekat iklan asas' dihidupkan."
+      ]
+    },
     {
       "version": "1.0.61",
       "date": "2026-11-21",
