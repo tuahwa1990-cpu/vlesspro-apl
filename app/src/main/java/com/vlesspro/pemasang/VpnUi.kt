@@ -106,6 +106,9 @@ private fun BtnKecil(t: String, modifier: Modifier = Modifier, warna: Color = Wr
         colors = ButtonDefaults.outlinedButtonColors(contentColor = warna)) { Text(t, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1) }
 }
 
+/** Pautan vless:// yang sedang disunting; ditetapkan sebelum navigasi ke skrin "sunting_vless". */
+private var vlessSunting: String = ""
+
 @Composable
 fun SubVpn() {
     var skrin by remember { mutableStateOf("utama") }
@@ -116,6 +119,7 @@ fun SubVpn() {
         "tentang" -> SkrinTentang { skrin = "utama" }
         "panduan" -> SkrinPanduan { skrin = "utama" }
         "ssh" -> SkrinSsh { skrin = "utama" }
+        "sunting_vless" -> SkrinSuntingVless(vlessSunting) { skrin = "utama" }
         else -> SkrinUtama { skrin = it }
     }
 }
@@ -360,7 +364,10 @@ private fun SkrinUtama(ke: (String) -> Unit) {
                     if (!p.startsWith("ssh://")) TextButton({
                         bg { lapor(Modem.tambahNod(p)) }
                     }) { Text("↗", color = Wr.ac, fontSize = 16.sp) }
-                    TextButton({ suntingAsal = p; suntingTeks = p }) { Text("✎", color = Wr.ac, fontSize = 16.sp) }
+                    TextButton({
+                        if (p.startsWith("vless://")) { vlessSunting = p; ke("sunting_vless") }
+                        else { suntingAsal = p; suntingTeks = p }
+                    }) { Text("✎", color = Wr.ac, fontSize = 16.sp) }
                     TextButton({
                         SimpanVpn.simpanManual(ctx, manual.filter { it != p })
                         muatSemula()
@@ -597,6 +604,81 @@ private fun SkrinSsh(kembali: () -> Unit) {
             val p = SshProfil(nama.ifBlank { host }, host, port.toIntOrNull() ?: 22, pengguna, kata, sni, payload)
             val m = SimpanVpn.manual(ctx).toMutableList(); m.add(SshPautan.bina(p)); SimpanVpn.simpanManual(ctx, m)
             St.toast(Bhs.t("Pelayan SSH disimpan.")); kembali()
+        }
+        Btn(Bhs.t("Kembali"), utama = false) { kembali() }
+    }
+}
+
+@Composable
+private fun SkrinSuntingVless(asal: String, kembali: () -> Unit) {
+    val ctx = LocalContext.current
+    val awal = remember(asal) { try { VlessPautan.huraiMedanVless(asal) } catch (_: Exception) { VlessPautan.MedanVless() } }
+    var nama by remember { mutableStateOf(awal.nama) }
+    var host by remember { mutableStateOf(awal.host) }
+    var port by remember { mutableStateOf(awal.port) }
+    var uuid by remember { mutableStateOf(awal.uuid) }
+    var jaringan by remember { mutableStateOf(awal.jaringan) }
+    var laluan by remember { mutableStateOf(awal.laluan) }
+    var hos by remember { mutableStateOf(awal.hos) }
+    var serviceName by remember { mutableStateOf(awal.serviceName) }
+    var mod by remember { mutableStateOf(awal.mod) }
+    var keselamatan by remember { mutableStateOf(awal.keselamatan) }
+    var sni by remember { mutableStateOf(awal.sni) }
+    var fp by remember { mutableStateOf(awal.fp) }
+    var alpn by remember { mutableStateOf(awal.alpn) }
+    var pbk by remember { mutableStateOf(awal.pbk) }
+    var sid by remember { mutableStateOf(awal.sid) }
+    var spx by remember { mutableStateOf(awal.spx) }
+    var flow by remember { mutableStateOf(awal.flow) }
+    var tunjukUuid by remember { mutableStateOf(false) }
+
+    @Composable fun medanTeks(label: String, nilai: String, ubah: (String) -> Unit, rahsia: Boolean = false, trailing: (@Composable () -> Unit)? = null) {
+        OutlinedTextField(value = nilai, onValueChange = ubah, singleLine = true, colors = medan(), label = { Text(label) },
+            visualTransformation = if (rahsia) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
+            trailingIcon = trailing, modifier = Modifier.fillMaxWidth())
+    }
+
+    Halaman {
+        Judul(Bhs.t("Sunting pelayan VLESS"))
+        Text(Bhs.t("ASAS"), color = Wr.ac, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp, modifier = Modifier.padding(top = 4.dp))
+        medanTeks(Bhs.t("Nama"), nama, { nama = it })
+        medanTeks(Bhs.t("Alamat"), host, { host = it.trim() })
+        medanTeks(Bhs.t("Port"), port, { port = it.filter { c -> c.isDigit() } })
+        medanTeks(Bhs.t("UUID"), uuid, { uuid = it.trim() }, rahsia = !tunjukUuid, trailing = {
+            TextButton({ tunjukUuid = !tunjukUuid }) { Text(if (tunjukUuid) "🙈" else "👁") }
+        })
+        Text(Bhs.t("PENGANGKUTAN"), color = Wr.ac, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp, modifier = Modifier.padding(top = 10.dp))
+        Pilihan(Bhs.t("Rangkaian"), listOf("tcp" to "TCP", "ws" to "WebSocket", "grpc" to "gRPC", "httpupgrade" to "HTTPUpgrade", "xhttp" to "XHTTP"), jaringan) { jaringan = it }
+        when (jaringan) {
+            "ws", "httpupgrade", "xhttp" -> {
+                medanTeks(Bhs.t("Laluan (Path)"), laluan, { laluan = it })
+                medanTeks(Bhs.t("Pengepala Hos (Host Header)"), hos, { hos = it.trim() })
+            }
+            "grpc" -> medanTeks(Bhs.t("Nama perkhidmatan (serviceName)"), serviceName, { serviceName = it.trim() })
+        }
+        Text(Bhs.t("SEKURITI"), color = Wr.ac, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp, modifier = Modifier.padding(top = 10.dp))
+        Pilihan(Bhs.t("Sekuriti"), listOf("none" to "None", "tls" to "TLS", "reality" to "REALITY"), keselamatan) { keselamatan = it }
+        if (keselamatan == "tls" || keselamatan == "reality") {
+            medanTeks(Bhs.t("SNI"), sni, { sni = it.trim() })
+            medanTeks(Bhs.t("Fingerprint"), fp, { fp = it.trim() })
+        }
+        if (keselamatan == "tls") medanTeks(Bhs.t("ALPN (cth: h2,http/1.1)"), alpn, { alpn = it.trim() })
+        if (keselamatan == "reality") {
+            medanTeks(Bhs.t("Public Key"), pbk, { pbk = it.trim() })
+            medanTeks(Bhs.t("Short ID"), sid, { sid = it.trim() })
+            medanTeks(Bhs.t("SpiderX"), spx, { spx = it.trim() })
+        }
+        medanTeks(Bhs.t("Flow (cth: xtls-rprx-vision)"), flow, { flow = it.trim() })
+        Btn(Bhs.t("Simpan")) {
+            if (host.isBlank() || port.isBlank() || uuid.isBlank()) { St.toast(Bhs.t("Alamat, port dan UUID wajib")); return@Btn }
+            val m = VlessPautan.MedanVless(nama, uuid, host, port, jaringan, keselamatan, laluan, hos, flow, sni, fp, alpn, pbk, sid, spx, serviceName, mod)
+            val baharu = try { VlessPautan.binaVless(m) } catch (e: Exception) { St.toast(e.message ?: Bhs.t("Pautan tidak sah.")); return@Btn }
+            try { VlessPautan.hurai(baharu) } catch (e: Exception) { St.toast(e.message ?: Bhs.t("Pautan tidak sah.")); return@Btn }
+            val senarai = SimpanVpn.manual(ctx).toMutableList()
+            val idx = senarai.indexOf(asal)
+            if (idx >= 0) senarai[idx] = baharu else senarai.add(baharu)
+            SimpanVpn.simpanManual(ctx, senarai)
+            St.toast(Bhs.t("Pelayan dikemas kini.")); kembali()
         }
         Btn(Bhs.t("Kembali"), utama = false) { kembali() }
     }

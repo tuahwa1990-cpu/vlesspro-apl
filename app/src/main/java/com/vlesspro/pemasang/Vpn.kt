@@ -189,6 +189,80 @@ object VlessPautan {
         return Hasil(s.nama, out, "SSH", if (s.payload.isNotBlank()) "payload" else "tcp", if (s.sni.isNotBlank()) "tls" else "none", s.host, s.port, s)
     }
 
+    /** Medan boleh sunting bagi satu pautan vless:// (untuk skrin sunting penuh, seperti panel web). */
+    class MedanVless(
+        var nama: String = "", var uuid: String = "", var host: String = "", var port: String = "443",
+        var jaringan: String = "tcp", var keselamatan: String = "none", var laluan: String = "/",
+        var hos: String = "", var flow: String = "", var sni: String = "", var fp: String = "chrome",
+        var alpn: String = "", var pbk: String = "", var sid: String = "", var spx: String = "",
+        var serviceName: String = "", var mod: String = "auto"
+    )
+
+    private fun enc(s: String) = try { java.net.URLEncoder.encode(s, "UTF-8").replace("+", "%20") } catch (_: Exception) { s }
+
+    /** Hurai pautan vless:// kepada medan mentah (bukan outbound Xray) untuk disunting dalam borang. */
+    fun huraiMedanVless(p: String): MedanVless {
+        var r = p.removePrefix("vless://")
+        val nama = dec(r.substringAfter('#', ""))
+        r = r.substringBefore('#')
+        val query = r.substringAfter('?', "")
+        r = r.substringBefore('?').trimEnd('/')
+        val uuid = dec(r.substringBeforeLast('@'))
+        val hp = r.substringAfterLast('@')
+        val host: String; val port: String
+        if (hp.startsWith("[")) { host = hp.substring(1, hp.indexOf(']')); port = hp.substringAfter("]:") }
+        else { host = hp.substringBeforeLast(':'); port = hp.substringAfterLast(':') }
+        val q = query.split('&').filter { it.contains('=') }.associate { dec(it.substringBefore('=')) to dec(it.substringAfter('=')) }
+        val net = (q["type"] ?: "tcp").let { if (it == "splithttp") "xhttp" else it }
+        return MedanVless(
+            nama = nama, uuid = uuid, host = host, port = port,
+            jaringan = net, keselamatan = q["security"] ?: "none",
+            laluan = q["path"] ?: "/", hos = q["host"] ?: "",
+            flow = q["flow"] ?: "", sni = q["sni"] ?: "", fp = q["fp"]?.ifEmpty { "chrome" } ?: "chrome",
+            alpn = q["alpn"] ?: "", pbk = q["pbk"] ?: "", sid = q["sid"] ?: "", spx = q["spx"] ?: "",
+            serviceName = q["serviceName"] ?: "", mod = q["mode"] ?: "auto"
+        )
+    }
+
+    /** Bina semula pautan vless:// daripada medan borang (songsang huraiMedanVless). */
+    fun binaVless(m: MedanVless): String {
+        val uuid = m.uuid.trim(); val host = m.host.trim(); val port = m.port.toIntOrNull() ?: 443
+        if (uuid.isEmpty() || host.isEmpty()) throw tak()
+        val hostPart = if (host.contains(':') && !host.startsWith("[")) "[$host]" else host
+        val q = LinkedHashMap<String, String>()
+        q["encryption"] = "none"; q["type"] = m.jaringan; q["security"] = m.keselamatan
+        if (m.flow.isNotBlank()) q["flow"] = m.flow
+        when (m.jaringan) {
+            "ws", "httpupgrade", "xhttp" -> {
+                q["path"] = m.laluan.ifBlank { "/" }
+                if (m.hos.isNotBlank()) q["host"] = m.hos
+                if (m.jaringan == "xhttp" && m.mod.isNotBlank()) q["mode"] = m.mod
+            }
+            "grpc" -> {
+                if (m.serviceName.isNotBlank()) q["serviceName"] = m.serviceName
+                if (m.mod == "multi") q["mode"] = "multi"
+            }
+        }
+        when (m.keselamatan) {
+            "tls" -> {
+                if (m.sni.isNotBlank()) q["sni"] = m.sni
+                q["fp"] = m.fp.ifBlank { "chrome" }
+                if (m.alpn.isNotBlank()) q["alpn"] = m.alpn
+            }
+            "reality" -> {
+                if (m.sni.isNotBlank()) q["sni"] = m.sni
+                q["fp"] = m.fp.ifBlank { "chrome" }
+                if (m.pbk.isNotBlank()) q["pbk"] = m.pbk
+                if (m.sid.isNotBlank()) q["sid"] = m.sid
+                if (m.spx.isNotBlank()) q["spx"] = m.spx
+            }
+        }
+        val sb = StringBuilder("vless://").append(enc(uuid)).append('@').append(hostPart).append(':').append(port)
+        sb.append('?').append(q.entries.joinToString("&") { "${it.key}=${enc(it.value)}" })
+        if (m.nama.isNotBlank()) sb.append('#').append(enc(m.nama))
+        return sb.toString()
+    }
+
     val skema = listOf("vless://", "vmess://", "trojan://", "ss://", "ssh://")
 
     fun hurai(pautan: String): Hasil {
