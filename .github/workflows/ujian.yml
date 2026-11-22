@@ -32,7 +32,13 @@ jobs:
           KS_PASS: ${{ secrets.KS_PASS }}
         run: gradle assembleRelease --no-daemon --stacktrace -PvCode=${{ github.run_number }} -PvName=1.1.0-ujian.${{ github.run_number }} -PidSuffix=.ujian "-Petiket=VLESS Pro Ujian"
       - name: Simpan APK
-        run: cp app/build/outputs/apk/release/app-release.apk "VLESSPro-Ujian-${{ github.run_number }}.apk"
+        # android.splits.abi hasilkan beberapa APK (universal + ikut senibina); ambil arm64-v8a untuk ujian
+        # (padanan peranti ujian admin). Fallback ke mana-mana *release.apk jika corak nama tak sepadan.
+        run: |
+          OUT=app/build/outputs/apk/release
+          A64=$(ls "$OUT"/*arm64-v8a*.apk 2>/dev/null | head -n1)
+          [ -n "$A64" ] || A64=$(ls "$OUT"/*.apk | head -n1)
+          cp "$A64" "VLESSPro-Ujian-${{ github.run_number }}.apk"
       - uses: actions/upload-artifact@v4
         with:
           name: VLESSPro-Ujian

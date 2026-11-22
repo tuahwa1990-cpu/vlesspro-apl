@@ -14,6 +14,19 @@ android {
         versionName = (project.findProperty("vName") as String?) ?: "0.0.1"
         (project.findProperty("idSuffix") as String?)?.let { applicationIdSuffix = it }
         manifestPlaceholders["etiket"] = (project.findProperty("etiket") as String?) ?: "VLESS Pro"
+        ndk { abiFilters += setOf("arm64-v8a", "armeabi-v7a") }
+    }
+    // APK berasingan ikut senibina CPU telefon (arm64-v8a / armeabi-v7a), + satu APK universal sebagai
+    // sandaran untuk versi apl lama yang belum faham "abi" dalam versi.json (lihat Kemas.kt/tools CI).
+    // Ini mengurangkan saiz muat turun ~44% kerana libxray.so (teras VPN Telefon) tidak lagi digandakan
+    // dua senibina dalam satu fail bagi pengguna yang sudah guna pengemaskini versi baharu.
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a")
+            isUniversalApk = true
+        }
     }
     signingConfigs {
         create("rel") {

@@ -21,11 +21,24 @@ object Kemas {
     fun versiSemasa(ctx: Context): Long =
         PackageInfoCompat.getLongVersionCode(ctx.packageManager.getPackageInfo(ctx.packageName, 0))
 
+    /** Senibina CPU telefon ini, jika disokong oleh APK berasingan (arm64-v8a / armeabi-v7a); null jika tidak
+     * (cth. x86 emulator) — dalam kes itu APK universal (medan rata "apk"/"sha256") digunakan. */
+    private fun abiTelefon(): String? =
+        android.os.Build.SUPPORTED_ABIS.firstOrNull { it == "arm64-v8a" || it == "armeabi-v7a" }
+
+    /** Baca versi.json. Jika ada medan "abi" (APK berasingan ikut senibina) dan telefon ini disokong, guna
+     * fail yang sepadan dengan senibina telefon (lebih kecil); jika tidak, guna APK universal (medan rata). */
     fun terkini(): InfoApl {
         val j = JSONObject(String(Pemasang.muat(BASE + "versi.json")))
         val a = j.optJSONArray("items") ?: JSONArray()
-        return InfoApl(j.getLong("code"), j.getString("name"), j.getString("sha256"), j.getString("apk"),
-            j.optString("date"), j.optLong("size"), j.optString("title"), (0 until a.length()).map { a.getString(it) }, j.optJSONArray("history") ?: JSONArray())
+        var apk = j.getString("apk"); var sha = j.getString("sha256"); var size = j.optLong("size")
+        val abi = abiTelefon()
+        val mAbi = j.optJSONObject("abi")
+        if (abi != null && mAbi != null) mAbi.optJSONObject(abi)?.let {
+            apk = it.getString("apk"); sha = it.getString("sha256"); size = it.optLong("size", size)
+        }
+        return InfoApl(j.getLong("code"), j.getString("name"), sha, apk,
+            j.optString("date"), size, j.optString("title"), (0 until a.length()).map { a.getString(it) }, j.optJSONArray("history") ?: JSONArray())
     }
 
     /** Muat turun APK, semak SHA-256, kemudian buka pemasang Android. Kembali mesej jika perlu kebenaran. */

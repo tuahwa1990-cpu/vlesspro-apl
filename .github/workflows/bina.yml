@@ -34,15 +34,47 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp app/build/outputs/apk/release/app-release.apk "vlesspro-pemasang-1.0.${{ github.run_number }}-B618-65D-AW1000-AW1000Ultra.apk"; cp app/build/outputs/apk/release/app-release.apk VLESSPro-Pemasang.apk
-          sha256sum VLESSPro-Pemasang.apk
+          set -e
+          OUT=app/build/outputs/apk/release
+          ls -la "$OUT"
+          # android.splits.abi (isUniversalApk=true) hasilkan 3 APK: universal + satu per senibina telefon.
+          UNIV=$(ls "$OUT"/*.apk | grep -vE 'arm64-v8a|armeabi-v7a')
+          A64=$(ls "$OUT"/*arm64-v8a*.apk)
+          A32=$(ls "$OUT"/*armeabi-v7a*.apk)
+
           NAMA="vlesspro-pemasang-1.0.${{ github.run_number }}-B618-65D-AW1000-AW1000Ultra.apk"
-          SHA=$(sha256sum "$NAMA" | cut -d' ' -f1)
-          SZ=$(stat -c%s "$NAMA"); TARIKH=$(TZ=Asia/Kuala_Lumpur date +%Y-%m-%d)
-          jq -nc --argjson code "${{ github.run_number }}" --arg name "1.0.${{ github.run_number }}" --arg sha "$SHA" --arg apk "$NAMA" --argjson size "$SZ" --arg date "$TARIKH" --slurpfile n catatan-apl.json '{code:$code,name:$name,sha256:$sha,apk:$apk,size:$size,date:$date,title:$n[0].title,items:$n[0].items,history:$n[0].history}' > versi.json
+          NAMA64="vlesspro-pemasang-1.0.${{ github.run_number }}-arm64-v8a.apk"
+          NAMA32="vlesspro-pemasang-1.0.${{ github.run_number }}-armeabi-v7a.apk"
+          cp "$UNIV" "$NAMA"; cp "$UNIV" VLESSPro-Pemasang.apk
+          cp "$A64" "$NAMA64"; cp "$A64" VLESSPro-Pemasang-arm64-v8a.apk
+          cp "$A32" "$NAMA32"; cp "$A32" VLESSPro-Pemasang-armeabi-v7a.apk
+          sha256sum VLESSPro-Pemasang.apk VLESSPro-Pemasang-arm64-v8a.apk VLESSPro-Pemasang-armeabi-v7a.apk
+
+          SHA=$(sha256sum "$NAMA" | cut -d' ' -f1); SZ=$(stat -c%s "$NAMA")
+          SHA64=$(sha256sum "$NAMA64" | cut -d' ' -f1); SZ64=$(stat -c%s "$NAMA64")
+          SHA32=$(sha256sum "$NAMA32" | cut -d' ' -f1); SZ32=$(stat -c%s "$NAMA32")
+          TARIKH=$(TZ=Asia/Kuala_Lumpur date +%Y-%m-%d)
+          # Medan rata (apk/sha256/size) = APK universal, untuk pengemaskini versi apl LAMA yang belum
+          # faham medan "abi" (keserasian ke belakang). Pengemaskini versi BAHARU (Kemas.kt) baca "abi"
+          # dahulu dan pilih fail yang sepadan dengan senibina telefon (lebih kecil).
+          jq -nc --argjson code "${{ github.run_number }}" --arg name "1.0.${{ github.run_number }}" \
+            --arg sha "$SHA" --arg apk "$NAMA" --argjson size "$SZ" \
+            --arg sha64 "$SHA64" --arg apk64 "$NAMA64" --argjson size64 "$SZ64" \
+            --arg sha32 "$SHA32" --arg apk32 "$NAMA32" --argjson size32 "$SZ32" \
+            --arg date "$TARIKH" --slurpfile n catatan-apl.json \
+            '{code:$code,name:$name,sha256:$sha,apk:$apk,size:$size,date:$date,
+              title:$n[0].title,items:$n[0].items,history:$n[0].history,
+              abi:{"arm64-v8a":{apk:$apk64,sha256:$sha64,size:$size64},"armeabi-v7a":{apk:$apk32,sha256:$sha32,size:$size32}}}' > versi.json
           cat versi.json
           gh release delete terkini --cleanup-tag -y || true
-          gh release create terkini VLESSPro-Pemasang.apk "vlesspro-pemasang-1.0.${{ github.run_number }}-B618-65D-AW1000-AW1000Ultra.apk" versi.json --title "VLESS Pro Pemasang 1.0.${{ github.run_number }}" --notes "Apl untuk memasang dan mengemas kini VLESS Pro pada Huawei B618-65D, AW1000 dan AW1000 Ultra terus dari telefon." --latest
+          gh release create terkini \
+            VLESSPro-Pemasang.apk "$NAMA" \
+            VLESSPro-Pemasang-arm64-v8a.apk "$NAMA64" \
+            VLESSPro-Pemasang-armeabi-v7a.apk "$NAMA32" \
+            versi.json \
+            --title "VLESS Pro Pemasang 1.0.${{ github.run_number }}" \
+            --notes "Apl untuk memasang dan mengemas kini VLESS Pro pada Huawei B618-65D, AW1000 dan AW1000 Ultra terus dari telefon. APK berasingan ikut senibina telefon (arm64-v8a / armeabi-v7a) lebih kecil untuk dimuat turun; APK universal turut disediakan sebagai sandaran." \
+            --latest
           # Pastikan keluaran diterbitkan (bukan draf); jika tidak, pautan "latest" memberi 404 dan kemas kini apl gagal.
           for i in 1 2 3 4 5; do
             sleep 3
