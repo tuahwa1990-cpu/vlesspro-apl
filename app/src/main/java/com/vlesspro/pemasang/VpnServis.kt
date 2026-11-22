@@ -217,10 +217,13 @@ class VpnPerkhidmatan : VpnService() {
         }.start()
     }
 
-    /** Pelayan lain (selain h semasa) yang disimpan, disusun ikut ping terendah. Null jika tiada calon. */
-    private fun pelayanLain(semasa: VlessPautan.Hasil): VlessPautan.Hasil? = try {
+    /** Pelayan lain (selain h semasa dan yang sudah dicuba kitaran ini) yang disimpan dan berlesen untuk
+     * digunakan, disusun ikut ping terendah. Null jika tiada calon. */
+    private fun pelayanLain(semasa: VlessPautan.Hasil, dicuba: Set<String>): VlessPautan.Hasil? = try {
+        val lesen = VpnLesen.berlesen(this)
         val calon = SimpanVpn.semua(this).mapNotNull { p -> try { VlessPautan.hurai(p) } catch (_: Exception) { null } }
-            .filter { it.host != semasa.host || it.port != semasa.port }
+            .filter { it.host + ":" + it.port != semasa.host + ":" + semasa.port && it.host + ":" + it.port !in dicuba }
+            .filter { lesen || !VpnLesen.berbayar(it) }
         if (calon.isEmpty()) null else {
             val ping = VpnAlat.pingSemua(calon)
             val terbaik = ping.filter { it.value >= 0 }.minByOrNull { it.value }?.key
@@ -244,6 +247,7 @@ class VpnPerkhidmatan : VpnService() {
             var h = h0
             var cuba = 0
             var cubaPelayanIni = 0
+            val dicuba = linkedSetOf(h0.host + ":" + h0.port)
             val jumlahPelayan = if (failover) maxOf(1, SimpanVpn.semua(this).size) else 1
             val maksCuba = if (kill) Int.MAX_VALUE else 6 * jumlahPelayan
             while (!tamat) {
@@ -255,12 +259,26 @@ class VpnPerkhidmatan : VpnService() {
                     hasil = h; nama = h.nama
                     memulih = false
                     notif(Bhs.f("Bersambung ke {0}", h.nama))
+                    if (h !== h0) {
+                        // Failover berjaya: jadikan pelayan ini pilihan lalai supaya sambungan akan datang guna yang berfungsi.
+                        val senarai = SimpanVpn.semua(this)
+                        val idx = senarai.indexOfFirst { pt -> try { val x = VlessPautan.hurai(pt); x.host == h.host && x.port == h.port } catch (_: Exception) { false } }
+                        if (idx >= 0) SimpanVpn.setPilih(this, idx)
+                    }
                     VpnKongsi.kemaskini(this)
                     return@Thread
                 } catch (e: Throwable) { catat("Cuba semula " + cuba + " gagal: " + (e.message ?: e.javaClass.simpleName)) }
                 if (failover && cubaPelayanIni >= 3) {
-                    val lain = pelayanLain(h)
-                    if (lain != null) { catat("Failover: cuba pelayan lain — " + lain.nama); h = lain; cubaPelayanIni = 0 }
+                    var lain = pelayanLain(h, dicuba)
+                    if (lain == null && dicuba.size > 1) {
+                        // Satu pusingan penuh pelayan simpanan sudah dicuba — mula semula (mungkin isu sementara sudah reda).
+                        dicuba.clear(); dicuba.add(h.host + ":" + h.port)
+                        lain = pelayanLain(h, dicuba)
+                    }
+                    if (lain != null) {
+                        catat("Failover: cuba pelayan lain — " + lain.nama)
+                        h = lain; cubaPelayanIni = 0; dicuba.add(h.host + ":" + h.port)
+                    }
                 }
                 if (!kill && cuba >= maksCuba) { ralat = Bhs.t("Gagal menyambung semula."); berhenti(); return@Thread }
                 var t = 0
