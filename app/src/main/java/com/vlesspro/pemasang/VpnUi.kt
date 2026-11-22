@@ -145,6 +145,8 @@ private fun SkrinUtama(ke: (String) -> Unit) {
     var ipVpn by remember { mutableStateOf("") }
     var menyemakIp by remember { mutableStateOf(false) }
     var sedangImport by remember { mutableStateOf(false) }
+    var suntingAsal by remember { mutableStateOf<String?>(null) }
+    var suntingTeks by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         var lt = 0L; var ln = 0L; var lm = 0L
@@ -358,6 +360,7 @@ private fun SkrinUtama(ke: (String) -> Unit) {
                     if (!p.startsWith("ssh://")) TextButton({
                         bg { lapor(Modem.tambahNod(p)) }
                     }) { Text("↗", color = Wr.ac, fontSize = 16.sp) }
+                    TextButton({ suntingAsal = p; suntingTeks = p }) { Text("✎", color = Wr.ac, fontSize = 16.sp) }
                     TextButton({
                         SimpanVpn.simpanManual(ctx, manual.filter { it != p })
                         muatSemula()
@@ -389,6 +392,35 @@ private fun SkrinUtama(ke: (String) -> Unit) {
         Text(Bhs.t("Jika WiFi modem anda sudah menjalankan VLESS Pro, matikan salah satu supaya trafik tidak melalui dua lapisan (lebih perlahan)."), color = Wr.mu, fontSize = 12.sp)
         Text(Bhs.f("Apl {0} · Xray {1}", Kemas.namaSemasa(ctx), VpnPerkhidmatan.VERSI_XRAY), color = Wr.mu, fontSize = 11.sp)
         Spacer(Modifier.height(80.dp))
+    }
+    val asalSunting = suntingAsal
+    if (asalSunting != null) {
+        AlertDialog(
+            onDismissRequest = { suntingAsal = null },
+            title = { Text(Bhs.t("Sunting pelayan")) },
+            text = {
+                OutlinedTextField(
+                    value = suntingTeks, onValueChange = { suntingTeks = it },
+                    modifier = Modifier.fillMaxWidth(), minLines = 3, maxLines = 6,
+                    label = { Text(Bhs.t("Pautan pelayan")) }
+                )
+            },
+            confirmButton = {
+                TextButton({
+                    val baharu = suntingTeks.trim()
+                    try {
+                        VlessPautan.hurai(baharu)
+                        val m = manual.toMutableList()
+                        val idx = m.indexOf(asalSunting)
+                        if (idx >= 0) { m[idx] = baharu; SimpanVpn.simpanManual(ctx, m); muatSemula() }
+                        suntingAsal = null
+                    } catch (e: Exception) { St.toast(e.message ?: Bhs.t("Pautan tidak sah.")) }
+                }) { Text(Bhs.t("Simpan"), color = Wr.ac, fontWeight = FontWeight.Bold) }
+            },
+            dismissButton = {
+                TextButton({ suntingAsal = null }) { Text(Bhs.t("Batal"), color = Wr.mu) }
+            }
+        )
     }
 }
 

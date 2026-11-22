@@ -405,6 +405,8 @@
     "Benarkan sijil tidak selamat": "Allow insecure certificate",
     "Alamat, port dan UUID wajib": "Address, port and UUID are required",
     "Pautan tidak sah": "Invalid link",
+    "Sunting pelayan": "Edit server",
+    "Pautan pelayan": "Server link",
     "Profil dikemas kini": "Profile updated",
     "Memulakan semula VLESS Pro sahaja (UI dan xray jika VLESS aktif). VPN asal tidak disentuh dan modem tidak reboot. Anda perlu memasukkan kata laluan VLESS Pro semula selepas itu.": "Restarts VLESS Pro only (UI and xray if VLESS is active). Original VPN is untouched and the modem does not reboot. You will need to enter the VLESS Pro password again afterwards.",
     "VLESS Pro dimulakan semula dan anda perlu log masuk semula. Sambungan terhenti beberapa saat.": "VLESS Pro is restarted and you must log in again. The connection pauses for a few seconds.",
