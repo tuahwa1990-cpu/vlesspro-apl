@@ -423,15 +423,15 @@ private fun SkrinUtama(ke: (String) -> Unit) {
                 (ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(android.content.ClipData.newPlainText("vless-pro", teks))
                 St.toast(Bhs.t("Disalin ke papan klip. Tampal & simpan di Nota/Telegram Saved Messages — tampal semula di sini (butang Tampal) untuk pulihkan bila-bila masa."))
             }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                BtnKecil(Bhs.t("💾 Eksport ke fail"), Modifier.weight(1f)) {
-                    if ((manual + langganan.map { it.first }).joinToString("\n").isBlank()) { St.toast(Bhs.t("Tiada apa untuk dieksport.")); return@BtnKecil }
-                    simpanSandaran.launch("vlesspro-sandaran.txt")
-                }
-                BtnKecil(Bhs.t("📂 Import fail"), Modifier.weight(1f)) { bukaSandaran.launch("text/*") }
-            }
-            Text(Bhs.t("'Import fail' terus ambil fail yang disimpan oleh 'Eksport ke fail' — tiada perlu salin-tampal."), color = Wr.mu, fontSize = 11.sp)
         }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            if (senarai.isNotEmpty()) BtnKecil(Bhs.t("💾 Eksport ke fail"), Modifier.weight(1f)) {
+                if ((manual + langganan.map { it.first }).joinToString("\n").isBlank()) { St.toast(Bhs.t("Tiada apa untuk dieksport.")); return@BtnKecil }
+                simpanSandaran.launch("vlesspro-sandaran.txt")
+            }
+            BtnKecil(Bhs.t("📂 Import fail"), Modifier.weight(1f)) { bukaSandaran.launch("text/*") }
+        }
+        Text(Bhs.t("'Import fail' terus ambil fail yang disimpan oleh 'Eksport ke fail' — tiada perlu salin-tampal."), color = Wr.mu, fontSize = 11.sp)
         if (!VpnLesen.berlesen(ctx)) Text(VpnLesen.nota(), color = Wr.mu, fontSize = 12.sp)
         if (sedangImport) Text(Bhs.t("Mengimport..."), color = Wr.mu, fontSize = 12.sp)
         if (senarai.isEmpty()) {

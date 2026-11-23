@@ -1422,7 +1422,9 @@
     "'Import fail' terus ambil fail yang disimpan oleh 'Eksport ke fail' — tiada perlu salin-tampal.": "'Import file' directly reads the file saved by 'Export to file' — no copy-paste needed.",
     "Eksport/Import terus ke fail (VPN Telefon & Profil modem)": "Direct file export/import (Phone VPN & Modem profiles)",
     "VPN Telefon: butang baharu \"Eksport ke fail\" (simpan sandaran terus sebagai fail .txt) dan \"Import fail\" (pulihkan terus daripada fail itu) — tiada lagi perlu salin-tampal.": "Phone VPN: new \"Export to file\" button (save a backup directly as a .txt file) and \"Import file\" (restore straight from that file) — no more copy-pasting needed.",
-    "Profil (modem): butang baharu \"Eksport ke fail\" yang berpasangan terus dengan \"Import fail\" sedia ada.": "Modem profiles: new \"Export to file\" button that directly pairs with the existing \"Import file\" button."
+    "Profil (modem): butang baharu \"Eksport ke fail\" yang berpasangan terus dengan \"Import fail\" sedia ada.": "Modem profiles: new \"Export to file\" button that directly pairs with the existing \"Import file\" button.",
+    "Pembetulan: butang Import fail hilang bila senarai kosong": "Fix: Import file button disappearing when the list is empty",
+    "VPN Telefon: butang \"Import fail\" kini sentiasa kelihatan walaupun semua pelayan dipadam/senarai kosong — sebelum ini ia tersembunyi sama seperti butang Eksport.": "Phone VPN: the \"Import file\" button is now always visible even after all servers are deleted/the list is empty — previously it was hidden together with the Export button."
   },
   "zh": {
     "Mod VPN": "VPN 模式",

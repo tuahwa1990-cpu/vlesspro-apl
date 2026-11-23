@@ -1,10 +1,18 @@
 {
-  "title": "Eksport/Import terus ke fail (VPN Telefon & Profil modem)",
+  "title": "Pembetulan: butang Import fail hilang bila senarai kosong",
   "items": [
-    "VPN Telefon: butang baharu \"Eksport ke fail\" (simpan sandaran terus sebagai fail .txt) dan \"Import fail\" (pulihkan terus daripada fail itu) — tiada lagi perlu salin-tampal.",
-    "Profil (modem): butang baharu \"Eksport ke fail\" yang berpasangan terus dengan \"Import fail\" sedia ada."
+    "VPN Telefon: butang \"Import fail\" kini sentiasa kelihatan walaupun semua pelayan dipadam/senarai kosong — sebelum ini ia tersembunyi sama seperti butang Eksport."
   ],
   "history": [
+    {
+      "version": "1.0.73",
+      "date": "2026-11-23",
+      "title": "Eksport/Import terus ke fail (VPN Telefon & Profil modem)",
+      "items": [
+        "VPN Telefon: butang baharu \"Eksport ke fail\" (simpan sandaran terus sebagai fail .txt) dan \"Import fail\" (pulihkan terus daripada fail itu) — tiada lagi perlu salin-tampal.",
+        "Profil (modem): butang baharu \"Eksport ke fail\" yang berpasangan terus dengan \"Import fail\" sedia ada."
+      ]
+    },
     {
       "version": "1.0.72",
       "date": "2026-11-23",
