@@ -371,8 +371,15 @@ fun Profil(ke: (String) -> Unit) {
                         ctx.startActivity(Intent.createChooser(i, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                     } }, border = androidx.compose.foundation.BorderStroke(1.dp, Wr.ac)) { Text("Eksport", color = Wr.ac) }
                     OutlinedButton(onClick = { bukaFail() }, border = androidx.compose.foundation.BorderStroke(1.dp, Wr.ac)) { Text("Import fail", color = Wr.ac) }
+                    OutlinedButton(onClick = {
+                        val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val t = cm.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(ctx)?.toString().orEmpty()
+                        if (t.isBlank()) { St.toast(Bhs.t("Papan klip kosong.")); return@OutlinedButton }
+                        bg { lapor(Modem.tambahNod(t)); muat() }
+                    }, border = androidx.compose.foundation.BorderStroke(1.dp, Wr.ac)) { Text(Bhs.t("Import (tampal)"), color = Wr.ac) }
                 }
                 Text("Eksport mengandungi kunci profil anda. Jangan kongsi kepada orang lain.", color = Wr.mu, fontSize = 11.sp)
+                Text(Bhs.t("Guna 'Import (tampal)' untuk pulihkan sandaran yang disalin daripada Eksport atau daripada VPN Telefon."), color = Wr.mu, fontSize = 11.sp)
             }
         }
         Box(Modifier.align(Alignment.BottomEnd).padding(end = 22.dp, bottom = 112.dp).size(58.dp).clip(RoundedCornerShape(20.dp)).background(Wr.grad)

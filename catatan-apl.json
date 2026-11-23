@@ -1,11 +1,19 @@
 {
-  "title": "Profil modem: tapis ikut negara & QR lebih mudah",
+  "title": "Profil modem: import pantas (tampal)",
   "items": [
-    "Profil (modem): senarai profil kini boleh ditapis ikut negara (bendera dikesan automatik daripada nama profil), sama seperti VPN Telefon.",
-    "Profil (modem): cip negara ada butang ⚡ untuk terus guna profil terpantas negara itu sahaja.",
-    "Profil (modem): butang \"QR\" kini terus kelihatan pada setiap kad profil (sebelum ini hanya dalam menu ⋮)."
+    "Profil (modem): butang baharu \"Import (tampal)\" — pulihkan sandaran profil terus daripada papan klip dengan satu ketikan, melengkapkan butang Eksport sedia ada."
   ],
   "history": [
+    {
+      "version": "1.0.71",
+      "date": "2026-11-23",
+      "title": "Profil modem: tapis ikut negara & QR lebih mudah",
+      "items": [
+        "Profil (modem): senarai profil kini boleh ditapis ikut negara (bendera dikesan automatik daripada nama profil), sama seperti VPN Telefon.",
+        "Profil (modem): cip negara ada butang ⚡ untuk terus guna profil terpantas negara itu sahaja.",
+        "Profil (modem): butang \"QR\" kini terus kelihatan pada setiap kad profil (sebelum ini hanya dalam menu ⋮)."
+      ]
+    },
     {
       "version": "1.0.70",
       "date": "2026-11-23",

@@ -1409,7 +1409,11 @@
     "Profil modem: tapis ikut negara & QR lebih mudah": "Modem profiles: filter by country & easier QR",
     "Profil (modem): senarai profil kini boleh ditapis ikut negara (bendera dikesan automatik daripada nama profil), sama seperti VPN Telefon.": "Modem profiles: the profile list can now be filtered by country (flag auto-detected from the profile name), same as Phone VPN.",
     "Profil (modem): cip negara ada butang ⚡ untuk terus guna profil terpantas negara itu sahaja.": "Modem profiles: country chips have a ⚡ button to switch straight to the fastest profile in that country only.",
-    "Profil (modem): butang \"QR\" kini terus kelihatan pada setiap kad profil (sebelum ini hanya dalam menu ⋮).": "Modem profiles: the \"QR\" button is now directly visible on every profile card (previously only in the ⋮ menu)."
+    "Profil (modem): butang \"QR\" kini terus kelihatan pada setiap kad profil (sebelum ini hanya dalam menu ⋮).": "Modem profiles: the \"QR\" button is now directly visible on every profile card (previously only in the ⋮ menu).",
+    "Import (tampal)": "Import (paste)",
+    "Guna 'Import (tampal)' untuk pulihkan sandaran yang disalin daripada Eksport atau daripada VPN Telefon.": "Use 'Import (paste)' to restore a backup copied from Export or from Phone VPN.",
+    "Profil modem: import pantas (tampal)": "Modem profiles: quick import (paste)",
+    "Profil (modem): butang baharu \"Import (tampal)\" — pulihkan sandaran profil terus daripada papan klip dengan satu ketikan, melengkapkan butang Eksport sedia ada.": "Modem profiles: new \"Import (paste)\" button — restore a profile backup straight from the clipboard with one tap, completing the existing Export button."
   },
   "zh": {
     "Mod VPN": "VPN 模式",
