@@ -204,15 +204,21 @@ class VpnPerkhidmatan : VpnService() {
     private fun mulaStatistik() {
         Thread {
             var lt = 0L; var ln = 0L; var lm = 0L
+            var fT = -1L; var fN = -1L; var iter = 0 // rujukan utk himpun statistik harian ~30 saat sekali
             while (!tamat) {
                 try { Thread.sleep(2000) } catch (_: Exception) {}
-                if (tamat) return@Thread
+                if (tamat) continue
                 if (!jalan || memulih) { lm = 0L; continue }
                 val st = try { HevLib.muat(); TProxyService.TProxyGetStats() } catch (_: Throwable) { null }
                 if (st == null || st.size < 4) continue
                 val t = st[3]; val n = st[1]; val now = System.currentTimeMillis()
                 if (lm != 0L && now > lm) notifKelajuan(((t - lt) * 1000 / (now - lm)).coerceAtLeast(0), ((n - ln) * 1000 / (now - lm)).coerceAtLeast(0))
                 lt = t; ln = n; lm = now
+                if (fT < 0L) { fT = t; fN = n }
+                if (++iter >= 15) {
+                    try { StatHarian.tambah(applicationContext, (t - fT).coerceAtLeast(0), (n - fN).coerceAtLeast(0)) } catch (_: Throwable) {}
+                    fT = t; fN = n; iter = 0
+                }
             }
         }.start()
     }

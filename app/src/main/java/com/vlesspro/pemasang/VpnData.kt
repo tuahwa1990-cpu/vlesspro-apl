@@ -1,6 +1,7 @@
 package com.vlesspro.pemasang
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import org.json.JSONArray
 import org.json.JSONObject
@@ -8,6 +9,9 @@ import java.net.HttpURLConnection
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /** Senarai pelayan Fungsi 2 disimpan dalam telefon sahaja: pautan manual + pautan daripada langganan. */
 object SimpanVpn {
@@ -247,6 +251,81 @@ object VpnImport {
         val jum = tambah + sub
         return if (jum > 0) Bhs.f("{0} pelayan ditambah.", jum.toString()) else ralat.ifEmpty { Bhs.t("Tiada pelayan baharu.") }
     }
+}
+
+/** Jadual automatik sambung/putus VPN Telefon ikut waktu (setiap hari, waktu tempatan telefon). */
+object VpnJadual {
+    private fun p(ctx: Context) = ctx.getSharedPreferences("vp", Context.MODE_PRIVATE)
+    fun aktif(ctx: Context) = p(ctx).getBoolean("vpn_jadual", false)
+    fun hidup(ctx: Context) = p(ctx).getString("vpn_jadual_on", "08:00") ?: "08:00"
+    fun mati(ctx: Context) = p(ctx).getString("vpn_jadual_off", "23:00") ?: "23:00"
+
+    fun simpan(ctx: Context, aktifBaru: Boolean, on: String, off: String) {
+        p(ctx).edit().putBoolean("vpn_jadual", aktifBaru).putString("vpn_jadual_on", on).putString("vpn_jadual_off", off).apply()
+        jadual(ctx)
+    }
+    private fun pi(ctx: Context, aksi: String): android.app.PendingIntent {
+        val i = Intent(ctx, VpnJadualPenerima::class.java).setAction(aksi)
+        return android.app.PendingIntent.getBroadcast(ctx, if (aksi == VpnJadualPenerima.ON) 101 else 102, i,
+            android.app.PendingIntent.FLAG_IMMUTABLE or android.app.PendingIntent.FLAG_UPDATE_CURRENT)
+    }
+    private fun masaSeterusnya(hhmm: String): Long {
+        val bhg = hhmm.split(":")
+        val h = bhg.getOrNull(0)?.toIntOrNull() ?: 8
+        val m = bhg.getOrNull(1)?.toIntOrNull() ?: 0
+        val c = java.util.Calendar.getInstance()
+        c.set(java.util.Calendar.HOUR_OF_DAY, h); c.set(java.util.Calendar.MINUTE, m)
+        c.set(java.util.Calendar.SECOND, 0); c.set(java.util.Calendar.MILLISECOND, 0)
+        if (c.timeInMillis <= System.currentTimeMillis()) c.add(java.util.Calendar.DAY_OF_YEAR, 1)
+        return c.timeInMillis
+    }
+    /** Susun semula kedua-dua alarm ikut tetapan semasa; buang alarm jika jadual dimatikan. */
+    fun jadual(ctx: Context) {
+        val am = ctx.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+        try { am.cancel(pi(ctx, VpnJadualPenerima.ON)) } catch (_: Exception) {}
+        try { am.cancel(pi(ctx, VpnJadualPenerima.OFF)) } catch (_: Exception) {}
+        if (!aktif(ctx)) return
+        try { am.setRepeating(android.app.AlarmManager.RTC_WAKEUP, masaSeterusnya(hidup(ctx)), android.app.AlarmManager.INTERVAL_DAY, pi(ctx, VpnJadualPenerima.ON)) } catch (_: Exception) {}
+        try { am.setRepeating(android.app.AlarmManager.RTC_WAKEUP, masaSeterusnya(mati(ctx)), android.app.AlarmManager.INTERVAL_DAY, pi(ctx, VpnJadualPenerima.OFF)) } catch (_: Exception) {}
+    }
+}
+
+/** Rekod penggunaan data VPN Telefon ikut hari (untuk statistik harian/bulanan), disimpan 60 hari terakhir. */
+object StatHarian {
+    private fun p(ctx: Context) = ctx.getSharedPreferences("vp", Context.MODE_PRIVATE)
+    private fun fmt(t: Long) = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(t))
+
+    /** Tambah bacaan tambahan (delta) turun/naik ke rekod hari ini. */
+    fun tambah(ctx: Context, turun: Long, naik: Long) {
+        if (turun <= 0L && naik <= 0L) return
+        val k = fmt(System.currentTimeMillis())
+        val o = try { JSONObject(p(ctx).getString("vpn_stat_harian", "{}") ?: "{}") } catch (_: Exception) { JSONObject() }
+        val e = o.optJSONObject(k) ?: JSONObject().also { o.put(k, it) }
+        e.put("t", e.optLong("t", 0L) + turun)
+        e.put("n", e.optLong("n", 0L) + naik)
+        val had = System.currentTimeMillis() - 60L * 24 * 3600 * 1000
+        val kunci = o.keys().asSequence().toList()
+        for (kk in kunci) {
+            val masa = try { SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(kk)?.time } catch (_: Exception) { null }
+            if (masa != null && masa < had) o.remove(kk)
+        }
+        p(ctx).edit().putString("vpn_stat_harian", o.toString()).apply()
+    }
+
+    data class Hari(val tarikh: String, val turun: Long, val naik: Long)
+    fun semua(ctx: Context): List<Hari> {
+        val o = try { JSONObject(p(ctx).getString("vpn_stat_harian", "{}") ?: "{}") } catch (_: Exception) { JSONObject() }
+        return o.keys().asSequence().map { k ->
+            val e = o.optJSONObject(k)
+            Hari(k, e?.optLong("t", 0L) ?: 0L, e?.optLong("n", 0L) ?: 0L)
+        }.sortedByDescending { it.tarikh }.toList()
+    }
+    fun jumlah(hari: List<Hari>) = hari.sumOf { it.turun } to hari.sumOf { it.naik }
+    fun bulanIni(ctx: Context): List<Hari> {
+        val b = SimpleDateFormat("yyyy-MM", Locale.US).format(Date())
+        return semua(ctx).filter { it.tarikh.startsWith(b) }
+    }
+    fun hariIni(ctx: Context) = semua(ctx).firstOrNull { it.tarikh == fmt(System.currentTimeMillis()) }
 }
 
 /** Laporan ringkas untuk sokongan: tiada pautan, kata laluan, UUID atau domain. */

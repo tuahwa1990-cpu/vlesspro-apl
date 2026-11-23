@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,6 +26,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
@@ -178,6 +180,7 @@ private fun SkrinUtama(ke: (String) -> Unit) {
         infoNegara.distinctBy { it.kod }.sortedBy { it.nama }
     }
     var negaraTapis by remember { mutableStateOf<String?>(null) }
+    var qrTunjuk by remember { mutableStateOf<Pair<String, android.graphics.Bitmap?>?>(null) }
     fun muatSemula() {
         senarai = SimpanVpn.semua(ctx); manual = SimpanVpn.manual(ctx); langganan = SimpanVpn.langganan(ctx)
         pilih = SimpanVpn.pilih(ctx); ping = emptyMap()
@@ -237,6 +240,19 @@ private fun SkrinUtama(ke: (String) -> Unit) {
                 if (b != null) { pilih = b; SimpanVpn.setPilih(ctx, b); St.toast(Bhs.f("Dipilih: {0}", hasil[b]?.nama ?: "")) }
                 else St.toast(Bhs.t("Semua pelayan gagal dihubungi."))
             }
+            mengujiPing = false
+        }
+    }
+    /** Uji ping semua pelayan dalam satu negara sahaja, terus sambung ke yang terpantas (gaya "pilih lokasi" VPN komersial). */
+    fun ujiPingNegara(kod: String) {
+        if (mengujiPing) return
+        mengujiPing = true
+        skop.launch {
+            val m = withContext(Dispatchers.IO) { VpnAlat.pingSemua(hasil) }
+            ping = ping + m
+            val b = m.filter { it.value >= 0 && infoNegara.getOrNull(it.key)?.kod == kod }.minByOrNull { it.value }?.key
+            if (b != null) { St.toast(Bhs.f("Menyambung ke {0}...", hasil[b]?.nama ?: "")); aktifkan(b) }
+            else St.toast(Bhs.t("Semua pelayan negara ini gagal dihubungi."))
             mengujiPing = false
         }
     }
@@ -309,6 +325,17 @@ private fun SkrinUtama(ke: (String) -> Unit) {
                 }
             }
             KadWr {
+                val statHariIni = remember(jalan) { StatHarian.hariIni(ctx) }
+                val statBulan = remember(jalan) { StatHarian.jumlah(StatHarian.bulanIni(ctx)) }
+                Text(Bhs.t("Penggunaan data"), color = Wr.tx, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(8.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    Angka(Bhs.t("Hari ini"), saizB((statHariIni?.turun ?: 0L) + (statHariIni?.naik ?: 0L)), Modifier.weight(1f))
+                    Angka(Bhs.t("Bulan ini"), saizB(statBulan.first + statBulan.second), Modifier.weight(1f))
+                }
+                Text(Bhs.t("Dikemas kini ~30 saat sekali semasa bersambung; disimpan 60 hari terakhir."), color = Wr.mu, fontSize = 11.sp, modifier = Modifier.padding(top = 6.dp))
+            }
+            KadWr {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(Bhs.t("Ping sebenar"), color = Wr.tx, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                     if (pingS > 0) Text("$pingS ms", color = if (pingS < 300) Wr.ac else Wr.wn, fontWeight = FontWeight.Bold)
@@ -348,13 +375,19 @@ private fun SkrinUtama(ke: (String) -> Unit) {
                 kumpulanNegara.forEach { neg ->
                     val kiraan = infoNegara.count { it.kod == neg.kod }
                     val aktif = negaraTapis == neg.kod
-                    Box(
+                    Row(
                         Modifier.clip(RoundedCornerShape(50)).background(if (aktif) Wr.ac.copy(alpha = 0.22f) else Wr.kad)
                             .border(1.dp, if (aktif) Wr.ac else Wr.garis, RoundedCornerShape(50))
-                            .clickable { negaraTapis = if (aktif) null else neg.kod }.padding(horizontal = 14.dp, vertical = 8.dp)
-                    ) { Text("${neg.bendera} ${neg.nama} ($kiraan)", color = if (aktif) Wr.ac else Wr.tx, fontSize = 13.sp, fontWeight = FontWeight.Bold) }
+                            .clickable { negaraTapis = if (aktif) null else neg.kod },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("${neg.bendera} ${neg.nama} ($kiraan)", color = if (aktif) Wr.ac else Wr.tx, fontSize = 13.sp, fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(start = 14.dp, top = 8.dp, bottom = 8.dp, end = 6.dp))
+                        Text("⚡", fontSize = 14.sp, modifier = Modifier.clickable { ujiPingNegara(neg.kod) }.padding(start = 2.dp, end = 12.dp, top = 8.dp, bottom = 8.dp))
+                    }
                 }
             }
+            Text(Bhs.t("Tekan ⚡ pada cip negara untuk terus sambung ke pelayan terpantas negara itu."), color = Wr.mu, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             BtnKecil(Bhs.t("Tampal"), Modifier.weight(1f)) { tampal() }
@@ -365,6 +398,14 @@ private fun SkrinUtama(ke: (String) -> Unit) {
             }
             BtnKecil((if (VpnLesen.berlesen(ctx)) "" else "🔒 ") + Bhs.t("Imej QR"), Modifier.weight(1f)) { if (VpnLesen.berlesen(ctx)) galeri.launch("image/*") else St.toast(VpnLesen.mesej("Imej QR")) }
             BtnKecil((if (VpnLesen.berlesen(ctx)) "" else "🔒 ") + "+ SSH", Modifier.weight(1f)) { if (VpnLesen.berlesen(ctx)) ke("ssh") else St.toast(VpnLesen.mesej("SSH")) }
+        }
+        if (senarai.isNotEmpty()) {
+            BtnKecil(Bhs.t("📤 Eksport semua pelayan (sandaran)"), Modifier.fillMaxWidth()) {
+                val teks = (manual + langganan.map { it.first }).joinToString("\n")
+                if (teks.isBlank()) { St.toast(Bhs.t("Tiada apa untuk dieksport.")); return@BtnKecil }
+                (ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(android.content.ClipData.newPlainText("vless-pro", teks))
+                St.toast(Bhs.t("Disalin ke papan klip. Tampal & simpan di Nota/Telegram Saved Messages — tampal semula di sini (butang Tampal) untuk pulihkan bila-bila masa."))
+            }
         }
         if (!VpnLesen.berlesen(ctx)) Text(VpnLesen.nota(), color = Wr.mu, fontSize = 12.sp)
         if (sedangImport) Text(Bhs.t("Mengimport..."), color = Wr.mu, fontSize = 12.sp)
@@ -410,6 +451,12 @@ private fun SkrinUtama(ke: (String) -> Unit) {
                     TextButton({ aktifkan(i) }, contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)) {
                         Text("▶ " + Bhs.t("Aktifkan"), color = Color(0xFF4ADE80), fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
+                    TextButton({
+                        val b = try { ProfilAlat.qr(p) } catch (_: Exception) { null }
+                        if (b == null) St.toast(Bhs.t("Pautan terlalu panjang untuk kod QR.")) else qrTunjuk = (h?.nama ?: p.take(30)) to b
+                    }, contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)) {
+                        Text("▣ " + Bhs.t("QR"), color = Wr.wn, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                    }
                     if (p in manual) {
                         if (!p.startsWith("ssh://")) TextButton({
                             bg { lapor(Modem.tambahNod(p)) }
@@ -452,6 +499,16 @@ private fun SkrinUtama(ke: (String) -> Unit) {
         Text(Bhs.t("Jika WiFi modem anda sudah menjalankan VLESS Pro, matikan salah satu supaya trafik tidak melalui dua lapisan (lebih perlahan)."), color = Wr.mu, fontSize = 12.sp)
         Text(Bhs.f("Apl {0} · Xray {1}", Kemas.namaSemasa(ctx), VpnPerkhidmatan.VERSI_XRAY), color = Wr.mu, fontSize = 11.sp)
         Spacer(Modifier.height(80.dp))
+    }
+    qrTunjuk?.let { (namaQr, bmp) ->
+        AlertDialog(onDismissRequest = { qrTunjuk = null }, containerColor = Wr.kad, title = { Text(namaQr, color = Wr.tx, maxLines = 1) },
+            text = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                    if (bmp != null) Image(bmp.asImageBitmap(), contentDescription = null, modifier = Modifier.size(260.dp).background(Color.White))
+                    Text(Bhs.t("Imbas kod ini pada peranti lain (App → Imbas QR) untuk tambah pelayan ini. Jangan tunjukkan kepada orang lain."), color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+                }
+            },
+            confirmButton = { TextButton(onClick = { qrTunjuk = null }) { Text(Bhs.t("Tutup"), color = Wr.ac) } })
     }
     val asalSunting = suntingAsal
     if (asalSunting != null) {
@@ -497,6 +554,9 @@ private fun SkrinTetapan(kembali: () -> Unit) {
     var rIklan by remember { mutableStateOf(VpnTetapan.routingIklan(ctx)) }
     var dns by remember { mutableStateOf(VpnTetapan.dns(ctx)) }
     var dnsSendiri by remember { mutableStateOf(false) }
+    var jAktif by remember { mutableStateOf(VpnJadual.aktif(ctx)) }
+    var jOn by remember { mutableStateOf(VpnJadual.hidup(ctx)) }
+    var jOff by remember { mutableStateOf(VpnJadual.mati(ctx)) }
     val dnsPilihan = listOf("" to Bhs.t("Lalai (1.1.1.1, 8.8.8.8)"), "1.1.1.1" to "Cloudflare (1.1.1.1)", "8.8.8.8" to "Google (8.8.8.8)",
         "9.9.9.9" to "Quad9 (9.9.9.9)", "208.67.222.222" to "OpenDNS (208.67.222.222)", "94.140.14.14" to "AdGuard (94.140.14.14)")
     LaunchedEffect(Unit) { dnsSendiri = dns.isNotEmpty() && dnsPilihan.none { it.first == dns } }
@@ -516,6 +576,25 @@ private fun SkrinTetapan(kembali: () -> Unit) {
         Text(Bhs.t("Memerlukan kebenaran VPN diberi sekali dan apl tidak dihentikan paksa."), color = Wr.mu, fontSize = 12.sp)
         Suis(Bhs.t("Pilih pelayan terpantas semasa sambung"), cepat) { cepat = it; VpnTetapan.set(ctx, "vpn_terpantas", it) }
         Text(Bhs.t("Menguji ping semua pelayan dan memilih yang terendah setiap kali menyambung."), color = Wr.mu, fontSize = 12.sp)
+        Spacer(Modifier.height(10.dp))
+        Text(Bhs.t("Jadual automatik"), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        Suis(Bhs.t("Sambung/putus automatik ikut waktu"), jAktif) { v -> jAktif = v; VpnJadual.simpan(ctx, v, jOn, jOff) }
+        if (jAktif) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(jOn, { jOn = it }, singleLine = true, modifier = Modifier.weight(1f),
+                    label = { Text(Bhs.t("Sambung (HH:mm)")) }, colors = medan())
+                OutlinedTextField(jOff, { jOff = it }, singleLine = true, modifier = Modifier.weight(1f),
+                    label = { Text(Bhs.t("Putus (HH:mm)")) }, colors = medan())
+            }
+            Btn(Bhs.t("Simpan waktu jadual"), utama = false) {
+                val rx = Regex("^([01]?\\d|2[0-3]):[0-5]\\d$")
+                if (!rx.matches(jOn.trim()) || !rx.matches(jOff.trim())) { St.toast(Bhs.t("Format waktu tidak sah. Guna format HH:mm (cth 23:00).")); return@Btn }
+                jOn = jOn.trim(); jOff = jOff.trim()
+                VpnJadual.simpan(ctx, jAktif, jOn, jOff)
+                St.toast(Bhs.t("Jadual disimpan."))
+            }
+            Text(Bhs.f("VPN akan cuba sambung automatik pukul {0} dan putus pukul {1} setiap hari.", jOn, jOff), color = Wr.mu, fontSize = 11.sp)
+        }
         Spacer(Modifier.height(10.dp))
         Text(Bhs.t("Penghalaan (Routing)"), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 14.sp)
         Suis(Bhs.t("Pintas rangkaian tempatan (LAN)"), rLan) { rLan = it; VpnTetapan.set(ctx, "vpn_routing_lan", it) }

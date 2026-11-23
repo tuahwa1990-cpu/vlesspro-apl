@@ -101,9 +101,23 @@ class VpnWidget : AppWidgetProvider() {
 /** Sambung automatik selepas telefon dihidupkan (jika dihidupkan dalam Tetapan). */
 class VpnBoot : BroadcastReceiver() {
     override fun onReceive(ctx: Context, i: Intent) {
-        if (i.action != Intent.ACTION_BOOT_COMPLETED || !VpnTetapan.boot(ctx)) return
+        if (i.action != Intent.ACTION_BOOT_COMPLETED) return
+        try { VpnJadual.jadual(ctx) } catch (_: Throwable) {} // alarm jadual hilang lepas reboot, susun semula
+        if (!VpnTetapan.boot(ctx)) return
         if (VpnService.prepare(ctx) != null) return
         try { VpnKongsi.mula(ctx, true) } catch (_: Throwable) {}
+    }
+}
+
+/** Jadual automatik sambung/putus VPN Telefon ikut waktu (lihat VpnJadual di VpnData.kt). */
+class VpnJadualPenerima : BroadcastReceiver() {
+    companion object { const val ON = "com.vlesspro.pemasang.JADUAL_ON"; const val OFF = "com.vlesspro.pemasang.JADUAL_OFF" }
+    override fun onReceive(ctx: Context, i: Intent) {
+        if (!VpnJadual.aktif(ctx)) return
+        when (i.action) {
+            ON -> if (VpnService.prepare(ctx) == null) try { VpnKongsi.mula(ctx) } catch (_: Throwable) {}
+            OFF -> VpnPerkhidmatan.henti(ctx)
+        }
     }
 }
 
