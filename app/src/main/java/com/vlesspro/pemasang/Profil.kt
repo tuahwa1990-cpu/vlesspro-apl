@@ -175,6 +175,19 @@ fun Profil(ke: (String) -> Unit) {
         St.toast(if (ok) Bhs.f("Dipilih: {0} ({1} ms)", St.nod.getOrNull(terbaik.index)?.nama.orEmpty(), terbaik.value.toString()) else m)
         St.nod = Modem.nodes()
     }
+    val infoNegara = remember(St.nod) { St.nod.map { Negara.kesan(it.nama) } }
+    val kumpulanNegara = remember(infoNegara) { infoNegara.distinctBy { it.kod }.sortedBy { it.nama } }
+    var negaraTapis by remember { mutableStateOf<String?>(null) }
+    fun ujiDanPilihTerpantasNegara(kod: String) = bg {
+        St.toast(Bhs.t("Menguji profil negara ini ..."))
+        val r = Modem.ping()
+        St.ping = r.mapIndexed { i, v -> i to v }.toMap()
+        val terbaik = r.withIndex().filter { it.value > 0 && infoNegara.getOrNull(it.index)?.kod == kod }.minByOrNull { it.value }
+        if (terbaik == null) { St.toast(Bhs.t("Tiada profil negara ini yang boleh dihubungi.")); return@bg }
+        val (ok, m) = Modem.pilihNod(terbaik.index)
+        St.toast(if (ok) Bhs.f("Dipilih: {0} ({1} ms)", St.nod.getOrNull(terbaik.index)?.nama.orEmpty(), terbaik.value.toString()) else m)
+        St.nod = Modem.nodes()
+    }
 
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 140.dp),
@@ -225,18 +238,46 @@ fun Profil(ke: (String) -> Unit) {
                 FilterChip(susun, { susun = !susun }, label = { Text("Laju dahulu", fontSize = 12.sp) })
             }
 
+            // Penapis negara (dikesan daripada nama profil)
+            if (kumpulanNegara.size > 1) {
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val semuaAktif = negaraTapis == null
+                    Box(
+                        Modifier.clip(RoundedCornerShape(50)).background(if (semuaAktif) Wr.ac.copy(alpha = 0.22f) else Wr.kad)
+                            .border(1.dp, if (semuaAktif) Wr.ac else Wr.garis, RoundedCornerShape(50))
+                            .clickable { negaraTapis = null }.padding(horizontal = 14.dp, vertical = 8.dp)
+                    ) { Text("🌐 Semua (${St.nod.size})", color = if (semuaAktif) Wr.ac else Wr.tx, fontSize = 13.sp, fontWeight = FontWeight.Bold) }
+                    kumpulanNegara.forEach { neg ->
+                        val kiraan = infoNegara.count { it.kod == neg.kod }
+                        val aktif = negaraTapis == neg.kod
+                        Row(
+                            Modifier.clip(RoundedCornerShape(50)).background(if (aktif) Wr.ac.copy(alpha = 0.22f) else Wr.kad)
+                                .border(1.dp, if (aktif) Wr.ac else Wr.garis, RoundedCornerShape(50))
+                                .clickable { negaraTapis = if (aktif) null else neg.kod },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("${neg.bendera} ${neg.nama} ($kiraan)", color = if (aktif) Wr.ac else Wr.tx, fontSize = 13.sp, fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(start = 14.dp, top = 8.dp, bottom = 8.dp, end = 6.dp))
+                            Text("⚡", fontSize = 14.sp, modifier = Modifier.clickable { ujiDanPilihTerpantasNegara(neg.kod) }.padding(start = 2.dp, end = 12.dp, top = 8.dp, bottom = 8.dp))
+                        }
+                    }
+                }
+                Text("Tekan ⚡ pada cip negara untuk terus guna profil terpantas negara itu.", color = Wr.mu, fontSize = 11.sp)
+            }
+
             if (St.nod.isEmpty()) {
                 KadWr { Text("Belum ada profil. Tekan + untuk menambah pautan vless://, vmess://, trojan://, ss:// atau WireGuard.", color = Wr.mu) }
             }
             var senarai = St.nod.filter { n ->
                 when (tapis) { "" -> true; "*" -> n.id in fav; else -> ProfilMeta.tag(ctx, n.id) == tapis }
-            }
+            }.filter { n -> negaraTapis == null || infoNegara.getOrNull(n.i)?.kod == negaraTapis }
             senarai = if (susun) senarai.sortedBy { n -> St.ping[n.i]?.takeIf { it > 0 } ?: Int.MAX_VALUE }
                       else senarai.sortedByDescending { it.id in fav }
             senarai.forEach { n ->
                 val ms = St.ping[n.i]
                 val tag = ProfilMeta.tag(ctx, n.id)
                 val pakai = guna?.optJSONObject(n.id)
+                val neg = infoNegara.getOrNull(n.i) ?: Negara.LAIN
                 KadWr {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(Modifier.size(44.dp).clip(CircleShape).background(if (n.pilih) Wr.grad else Brush.linearGradient(listOf(Wr.garis, Wr.garis))),
@@ -245,7 +286,7 @@ fun Profil(ke: (String) -> Unit) {
                         }
                         Spacer(Modifier.width(12.dp))
                         Column(Modifier.weight(1f)) {
-                            Text((if (n.id in fav) "⭐ " else "") + n.nama, color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 16.sp, maxLines = 1)
+                            Text((if (n.id in fav) "⭐ " else "") + (if (neg != Negara.LAIN) neg.bendera + " " else "") + n.nama, color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 16.sp, maxLines = 1)
                             Text("${n.host}:${n.port} · ${n.net} · ${n.sec}", color = Wr.mu, fontSize = 12.sp, maxLines = 1)
                             if (tag.isNotEmpty() || pakai != null) {
                                 val d = if (pakai != null) "↓ " + fB(pakai.optDouble("rx")) + "  ↑ " + fB(pakai.optDouble("tx")) else ""
@@ -285,6 +326,13 @@ fun Profil(ke: (String) -> Unit) {
                         }
                         TextButton(onClick = { bg { edit = n to Modem.obj("/api/node/link?i=${n.i}").optString("link") } }, contentPadding = PaddingValues(0.dp)) {
                             Text(Bhs.t("Edit"), color = Wr.ac, fontSize = 13.sp)
+                        }
+                        TextButton(onClick = { bg {
+                            val l = Modem.obj("/api/node/link?i=${n.i}").optString("link")
+                            val b = ProfilAlat.qr(l)
+                            if (b == null) { St.toast(Bhs.t("Pautan terlalu panjang untuk kod QR. Guna Salin pautan.")) } else { qrDlg = n to b }
+                        } }, contentPadding = PaddingValues(0.dp)) {
+                            Text("▣ " + Bhs.t("QR"), color = Wr.wn, fontSize = 13.sp)
                         }
                         TextButton(onClick = { padam = n }, contentPadding = PaddingValues(0.dp)) {
                             Text(Bhs.t("Hapus"), color = Wr.bad, fontSize = 13.sp)

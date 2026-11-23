@@ -1,13 +1,23 @@
 {
-  "title": "VPN Telefon: Sandaran, QR, jadual & statistik",
+  "title": "Profil modem: tapis ikut negara & QR lebih mudah",
   "items": [
-    "VPN Telefon: eksport semua pelayan sebagai sandaran (salin ke papan klip, tampal semula bila-bila masa untuk pulihkan) — berguna bila tukar telefon atau pasang semula apl.",
-    "VPN Telefon: jana semula kod QR untuk mana-mana pelayan sendiri, senang kongsi/pindah ke peranti lain.",
-    "VPN Telefon: jadual automatik sambung/putus ikut waktu (Tetapan VPN).",
-    "VPN Telefon: statistik penggunaan data hari ini dan bulan ini (bukan sekadar sesi semasa).",
-    "VPN Telefon: cip negara kini ada butang ⚡ untuk terus sambung ke pelayan terpantas negara itu sahaja."
+    "Profil (modem): senarai profil kini boleh ditapis ikut negara (bendera dikesan automatik daripada nama profil), sama seperti VPN Telefon.",
+    "Profil (modem): cip negara ada butang ⚡ untuk terus guna profil terpantas negara itu sahaja.",
+    "Profil (modem): butang \"QR\" kini terus kelihatan pada setiap kad profil (sebelum ini hanya dalam menu ⋮)."
   ],
   "history": [
+    {
+      "version": "1.0.70",
+      "date": "2026-11-23",
+      "title": "VPN Telefon: Sandaran, QR, jadual & statistik",
+      "items": [
+        "VPN Telefon: eksport semua pelayan sebagai sandaran (salin ke papan klip, tampal semula bila-bila masa untuk pulihkan) — berguna bila tukar telefon atau pasang semula apl.",
+        "VPN Telefon: jana semula kod QR untuk mana-mana pelayan sendiri, senang kongsi/pindah ke peranti lain.",
+        "VPN Telefon: jadual automatik sambung/putus ikut waktu (Tetapan VPN).",
+        "VPN Telefon: statistik penggunaan data hari ini dan bulan ini (bukan sekadar sesi semasa).",
+        "VPN Telefon: cip negara kini ada butang ⚡ untuk terus sambung ke pelayan terpantas negara itu sahaja."
+      ]
+    },
     {
       "version": "1.0.69",
       "date": "2026-11-23",

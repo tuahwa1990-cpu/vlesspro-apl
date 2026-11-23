@@ -1402,7 +1402,14 @@
     "VPN Telefon: jana semula kod QR untuk mana-mana pelayan sendiri, senang kongsi/pindah ke peranti lain.": "Phone VPN: generate a QR code for any of your own servers, easy to share/move to another device.",
     "VPN Telefon: jadual automatik sambung/putus ikut waktu (Tetapan VPN).": "Phone VPN: automatic connect/disconnect schedule by time (VPN Settings).",
     "VPN Telefon: statistik penggunaan data hari ini dan bulan ini (bukan sekadar sesi semasa).": "Phone VPN: data usage stats for today and this month (not just the current session).",
-    "VPN Telefon: cip negara kini ada butang ⚡ untuk terus sambung ke pelayan terpantas negara itu sahaja.": "Phone VPN: country chips now have a ⚡ button to connect straight to the fastest server in that country only."
+    "VPN Telefon: cip negara kini ada butang ⚡ untuk terus sambung ke pelayan terpantas negara itu sahaja.": "Phone VPN: country chips now have a ⚡ button to connect straight to the fastest server in that country only.",
+    "Menguji profil negara ini ...": "Testing this country's profiles ...",
+    "Tiada profil negara ini yang boleh dihubungi.": "No profiles in this country could be reached.",
+    "Tekan ⚡ pada cip negara untuk terus guna profil terpantas negara itu.": "Tap ⚡ on a country chip to switch straight to the fastest profile in that country.",
+    "Profil modem: tapis ikut negara & QR lebih mudah": "Modem profiles: filter by country & easier QR",
+    "Profil (modem): senarai profil kini boleh ditapis ikut negara (bendera dikesan automatik daripada nama profil), sama seperti VPN Telefon.": "Modem profiles: the profile list can now be filtered by country (flag auto-detected from the profile name), same as Phone VPN.",
+    "Profil (modem): cip negara ada butang ⚡ untuk terus guna profil terpantas negara itu sahaja.": "Modem profiles: country chips have a ⚡ button to switch straight to the fastest profile in that country only.",
+    "Profil (modem): butang \"QR\" kini terus kelihatan pada setiap kad profil (sebelum ini hanya dalam menu ⋮).": "Modem profiles: the \"QR\" button is now directly visible on every profile card (previously only in the ⋮ menu)."
   },
   "zh": {
     "Mod VPN": "VPN 模式",
