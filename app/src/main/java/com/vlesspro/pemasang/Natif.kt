@@ -359,6 +359,33 @@ fun AppNatif() {
     val pref = remember { ctx.getSharedPreferences("vp", Context.MODE_PRIVATE) }
     var tahap by remember { mutableStateOf("mula") } // mula | setup | utama | pasang
     var ralatSetup by remember { mutableStateOf("") }
+    var apaBaharu by remember { mutableStateOf<InfoApl?>(null) }
+
+    /** Lepas apl dikemas kini (via pemasang APK luar), tunjuk "apa baharu" sekali sahaja bila dibuka semula --
+     * pengganti kepada "log masuk semula" yang tiada pada apl ini (tiada sesi web untuk disegarkan). */
+    LaunchedEffect(tahap) {
+        if (tahap != "utama") return@LaunchedEffect
+        withContext(Dispatchers.IO) {
+            try {
+                val semasaKod = Kemas.versiSemasa(ctx)
+                val dilihat = pref.getLong("versi_dilihat_apl", 0L)
+                if (dilihat >= semasaKod) return@withContext
+                val t = Kemas.terkini()
+                val namaSemasa = Kemas.namaSemasa(ctx)
+                val nota: InfoApl? = if (t.code == semasaKod) t else {
+                    (0 until t.history.length()).map { t.history.getJSONObject(it) }
+                        .firstOrNull { it.optString("version") == namaSemasa }
+                        ?.let { o ->
+                            val its = o.optJSONArray("items") ?: org.json.JSONArray()
+                            InfoApl(semasaKod, namaSemasa, "", "", o.optString("date"), 0, o.optString("title"),
+                                (0 until its.length()).map { its.getString(it) })
+                        }
+                }
+                if (nota != null) apaBaharu = nota
+                pref.edit().putLong("versi_dilihat_apl", semasaKod).apply()
+            } catch (_: Exception) {}
+        }
+    }
 
     LaunchedEffect(Unit) {
         val ip = pref.getString("ip", null)
@@ -402,6 +429,21 @@ fun AppNatif() {
                 .background(Wr.kad2).padding(horizontal = 18.dp, vertical = 11.dp)) {
                 Text(St.mesej, color = Wr.tx, fontSize = 14.sp)
             }
+        }
+        apaBaharu?.let { k ->
+            AlertDialog(
+                onDismissRequest = { apaBaharu = null },
+                containerColor = Wr.kad,
+                title = { Text("✨ " + Bhs.t("Apl dikemas kini ke") + " v" + k.name, color = Wr.tx, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
+                text = {
+                    Column(Modifier.heightIn(max = 380.dp).verticalScroll(rememberScrollState())) {
+                        if (k.title.isNotEmpty()) Text(k.title, color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.padding(bottom = 8.dp))
+                        k.items.forEach { Text("•  " + Bhs.t(it), color = Wr.mu, fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp)) }
+                        if (k.title.isEmpty() && k.items.isEmpty()) Text(Bhs.t("Pembaikan dan penambahbaikan dalaman."), color = Wr.mu, fontSize = 13.sp)
+                    }
+                },
+                confirmButton = { TextButton(onClick = { apaBaharu = null }) { Text("Tutup", color = Wr.ac) } }
+            )
         }
     }
     }

@@ -1,9 +1,17 @@
 {
-  "title": "Pembetulan: butang Import fail hilang bila senarai kosong",
+  "title": "Apl: Papar \"apa baharu\" automatik lepas kemas kini",
   "items": [
-    "VPN Telefon: butang \"Import fail\" kini sentiasa kelihatan walaupun semua pelayan dipadam/senarai kosong — sebelum ini ia tersembunyi sama seperti butang Eksport."
+    "Apl kini papar nota keluaran (apa baharu) secara automatik sekali sahaja bila dibuka selepas dikemas kini -- tiada perlu buka Lagi > Kemas kini sendiri."
   ],
   "history": [
+    {
+      "version": "1.0.74",
+      "date": "2026-11-23",
+      "title": "Pembetulan: butang Import fail hilang bila senarai kosong",
+      "items": [
+        "VPN Telefon: butang \"Import fail\" kini sentiasa kelihatan walaupun semua pelayan dipadam/senarai kosong — sebelum ini ia tersembunyi sama seperti butang Eksport."
+      ]
+    },
     {
       "version": "1.0.73",
       "date": "2026-11-23",

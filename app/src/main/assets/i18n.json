@@ -1424,7 +1424,11 @@
     "VPN Telefon: butang baharu \"Eksport ke fail\" (simpan sandaran terus sebagai fail .txt) dan \"Import fail\" (pulihkan terus daripada fail itu) — tiada lagi perlu salin-tampal.": "Phone VPN: new \"Export to file\" button (save a backup directly as a .txt file) and \"Import file\" (restore straight from that file) — no more copy-pasting needed.",
     "Profil (modem): butang baharu \"Eksport ke fail\" yang berpasangan terus dengan \"Import fail\" sedia ada.": "Modem profiles: new \"Export to file\" button that directly pairs with the existing \"Import file\" button.",
     "Pembetulan: butang Import fail hilang bila senarai kosong": "Fix: Import file button disappearing when the list is empty",
-    "VPN Telefon: butang \"Import fail\" kini sentiasa kelihatan walaupun semua pelayan dipadam/senarai kosong — sebelum ini ia tersembunyi sama seperti butang Eksport.": "Phone VPN: the \"Import file\" button is now always visible even after all servers are deleted/the list is empty — previously it was hidden together with the Export button."
+    "VPN Telefon: butang \"Import fail\" kini sentiasa kelihatan walaupun semua pelayan dipadam/senarai kosong — sebelum ini ia tersembunyi sama seperti butang Eksport.": "Phone VPN: the \"Import file\" button is now always visible even after all servers are deleted/the list is empty — previously it was hidden together with the Export button.",
+    "Apl dikemas kini ke": "App updated to",
+    "Pembaikan dan penambahbaikan dalaman.": "Bug fixes and internal improvements.",
+    "Apl: Papar \"apa baharu\" automatik lepas kemas kini": "App: Auto-show \"what's new\" after an update",
+    "Apl kini papar nota keluaran (apa baharu) secara automatik sekali sahaja bila dibuka selepas dikemas kini -- tiada perlu buka Lagi > Kemas kini sendiri.": "The app now shows its release notes (what's new) automatically, once, the first time it opens after an update -- no need to open More > Update yourself."
   },
   "zh": {
     "Mod VPN": "VPN 模式",
