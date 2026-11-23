@@ -11,6 +11,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -171,6 +173,11 @@ private fun SkrinUtama(ke: (String) -> Unit) {
     }
 
     val hasil = senarai.map { p -> try { VlessPautan.hurai(p) } catch (_: Exception) { null } }
+    val infoNegara = remember(senarai, hasil) { senarai.indices.map { i -> Negara.kesan(hasil.getOrNull(i)?.nama ?: senarai.getOrNull(i)) } }
+    val kumpulanNegara = remember(infoNegara) {
+        infoNegara.distinctBy { it.kod }.sortedBy { it.nama }
+    }
+    var negaraTapis by remember { mutableStateOf<String?>(null) }
     fun muatSemula() {
         senarai = SimpanVpn.semua(ctx); manual = SimpanVpn.manual(ctx); langganan = SimpanVpn.langganan(ctx)
         pilih = SimpanVpn.pilih(ctx); ping = emptyMap()
@@ -330,6 +337,25 @@ private fun SkrinUtama(ke: (String) -> Unit) {
                 TextButton({ ujiPing(true) }, enabled = !mengujiPing) { Text(Bhs.t("Terpantas"), color = Wr.ac, fontWeight = FontWeight.Bold) }
             }
         }
+        if (kumpulanNegara.size > 1) {
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                val semuaAktif = negaraTapis == null
+                Box(
+                    Modifier.clip(RoundedCornerShape(50)).background(if (semuaAktif) Wr.ac.copy(alpha = 0.22f) else Wr.kad)
+                        .border(1.dp, if (semuaAktif) Wr.ac else Wr.garis, RoundedCornerShape(50))
+                        .clickable { negaraTapis = null }.padding(horizontal = 14.dp, vertical = 8.dp)
+                ) { Text("🌐 " + Bhs.t("Semua") + " (${senarai.size})", color = if (semuaAktif) Wr.ac else Wr.tx, fontSize = 13.sp, fontWeight = FontWeight.Bold) }
+                kumpulanNegara.forEach { neg ->
+                    val kiraan = infoNegara.count { it.kod == neg.kod }
+                    val aktif = negaraTapis == neg.kod
+                    Box(
+                        Modifier.clip(RoundedCornerShape(50)).background(if (aktif) Wr.ac.copy(alpha = 0.22f) else Wr.kad)
+                            .border(1.dp, if (aktif) Wr.ac else Wr.garis, RoundedCornerShape(50))
+                            .clickable { negaraTapis = if (aktif) null else neg.kod }.padding(horizontal = 14.dp, vertical = 8.dp)
+                    ) { Text("${neg.bendera} ${neg.nama} ($kiraan)", color = if (aktif) Wr.ac else Wr.tx, fontSize = 13.sp, fontWeight = FontWeight.Bold) }
+                }
+            }
+        }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             BtnKecil(Bhs.t("Tampal"), Modifier.weight(1f)) { tampal() }
             BtnKecil((if (VpnLesen.berlesen(ctx)) "" else "🔒 ") + Bhs.t("Imbas QR"), Modifier.weight(1f)) {
@@ -351,7 +377,10 @@ private fun SkrinUtama(ke: (String) -> Unit) {
                 TextButton({ ke("panduan") }) { Text(Bhs.t("Lihat panduan penuh"), color = Wr.ac, fontWeight = FontWeight.Bold) }
             }
         }
+        val adaPadanDenganTapis = negaraTapis == null || infoNegara.any { it.kod == negaraTapis }
         senarai.forEachIndexed { i, p ->
+            val neg = infoNegara.getOrNull(i) ?: Negara.LAIN
+            if (adaPadanDenganTapis && negaraTapis != null && neg.kod != negaraTapis) return@forEachIndexed
             val h = hasil.getOrNull(i)
             val dipilih = i == pilih
             val wj = warnaJenis(h?.jenis ?: "")
@@ -366,7 +395,7 @@ private fun SkrinUtama(ke: (String) -> Unit) {
                     Box(Modifier.width(4.dp).height(34.dp).clip(RoundedCornerShape(50)).background(wj))
                     Spacer(Modifier.width(10.dp))
                     Column(Modifier.weight(1f)) {
-                        Text(h?.nama ?: p.take(30), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 15.sp, maxLines = 2)
+                        Text((if (neg != Negara.LAIN) neg.bendera + " " else "") + (h?.nama ?: p.take(30)), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 15.sp, maxLines = 2)
                         Spacer(Modifier.height(4.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                             if (h != null) CipVpn(h.ringkas, wj)

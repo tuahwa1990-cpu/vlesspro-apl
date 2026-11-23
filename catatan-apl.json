@@ -1,10 +1,19 @@
 {
-  "title": "VPN Telefon: Tambah baik senarai pelayan",
+  "title": "VPN Telefon: Tapis pelayan ikut negara",
   "items": [
-    "VPN Telefon: setiap pelayan kini ada butang '▶ Aktifkan' — tekan sekali untuk terus pilih dan sambung VPN telefon dengan pelayan itu, tanpa perlu guna butang kuasa berasingan.",
-    "VPN Telefon: butang hantar pelayan ke modem kini berlabel jelas '📡 Modem' supaya mudah difahami fungsinya."
+    "VPN Telefon: senarai pelayan kini dikumpul dan boleh ditapis ikut negara (bendera dikesan automatik daripada nama pelayan) — gaya pilih lokasi seperti apl VPN komersial.",
+    "VPN Telefon: cip 'Semua' dan cip setiap negara dipaparkan di atas senarai pelayan untuk tukar paparan dengan cepat."
   ],
   "history": [
+    {
+      "version": "1.0.68",
+      "date": "2026-11-23",
+      "title": "VPN Telefon: Tambah baik senarai pelayan",
+      "items": [
+        "VPN Telefon: setiap pelayan kini ada butang '▶ Aktifkan' — tekan sekali untuk terus pilih dan sambung VPN telefon dengan pelayan itu, tanpa perlu guna butang kuasa berasingan.",
+        "VPN Telefon: butang hantar pelayan ke modem kini berlabel jelas '📡 Modem' supaya mudah difahami fungsinya."
+      ]
+    },
     {
       "version": "1.0.67",
       "date": "2026-11-22",

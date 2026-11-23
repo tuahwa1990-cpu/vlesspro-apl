@@ -1374,7 +1374,10 @@
     "Tekan '📡 Modem' untuk menghantar pelayan itu ke modem (perlu disambung ke WiFi modem). Tekan '▶ Aktifkan' untuk terus sambung VPN telefon menggunakan pelayan itu.": "Tap '📡 Modem' to send that server to the modem (the phone must be on the modem WiFi). Tap '▶ Activate' to connect the phone VPN using that server right away.",
     "VPN Telefon: Tambah baik senarai pelayan": "Phone VPN: Server list improvements",
     "VPN Telefon: setiap pelayan kini ada butang '▶ Aktifkan' — tekan sekali untuk terus pilih dan sambung VPN telefon dengan pelayan itu, tanpa perlu guna butang kuasa berasingan.": "Phone VPN: every server now has an '▶ Activate' button — tap once to select and connect the phone VPN with that server right away, no separate power button needed.",
-    "VPN Telefon: butang hantar pelayan ke modem kini berlabel jelas '📡 Modem' supaya mudah difahami fungsinya.": "Phone VPN: the button that sends a server to the modem is now clearly labelled '📡 Modem' so its purpose is easy to understand."
+    "VPN Telefon: butang hantar pelayan ke modem kini berlabel jelas '📡 Modem' supaya mudah difahami fungsinya.": "Phone VPN: the button that sends a server to the modem is now clearly labelled '📡 Modem' so its purpose is easy to understand.",
+    "VPN Telefon: Tapis pelayan ikut negara": "Phone VPN: Filter servers by country",
+    "VPN Telefon: senarai pelayan kini dikumpul dan boleh ditapis ikut negara (bendera dikesan automatik daripada nama pelayan) — gaya pilih lokasi seperti apl VPN komersial.": "Phone VPN: the server list is now grouped and filterable by country (flag auto-detected from the server name) — a location-picker feel like commercial VPN apps.",
+    "VPN Telefon: cip 'Semua' dan cip setiap negara dipaparkan di atas senarai pelayan untuk tukar paparan dengan cepat.": "Phone VPN: an 'All' chip and a chip per country appear above the server list to switch the view quickly."
   },
   "zh": {
     "Mod VPN": "VPN 模式",
