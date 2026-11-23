@@ -1413,7 +1413,16 @@
     "Import (tampal)": "Import (paste)",
     "Guna 'Import (tampal)' untuk pulihkan sandaran yang disalin daripada Eksport atau daripada VPN Telefon.": "Use 'Import (paste)' to restore a backup copied from Export or from Phone VPN.",
     "Profil modem: import pantas (tampal)": "Modem profiles: quick import (paste)",
-    "Profil (modem): butang baharu \"Import (tampal)\" — pulihkan sandaran profil terus daripada papan klip dengan satu ketikan, melengkapkan butang Eksport sedia ada.": "Modem profiles: new \"Import (paste)\" button — restore a profile backup straight from the clipboard with one tap, completing the existing Export button."
+    "Profil (modem): butang baharu \"Import (tampal)\" — pulihkan sandaran profil terus daripada papan klip dengan satu ketikan, melengkapkan butang Eksport sedia ada.": "Modem profiles: new \"Import (paste)\" button — restore a profile backup straight from the clipboard with one tap, completing the existing Export button.",
+    "Fail sandaran disimpan.": "Backup file saved.",
+    "Gagal menyimpan fail.": "Failed to save the file.",
+    "Fail kosong atau tidak dapat dibaca.": "File is empty or could not be read.",
+    "💾 Eksport ke fail": "💾 Export to file",
+    "📂 Import fail": "📂 Import file",
+    "'Import fail' terus ambil fail yang disimpan oleh 'Eksport ke fail' — tiada perlu salin-tampal.": "'Import file' directly reads the file saved by 'Export to file' — no copy-paste needed.",
+    "Eksport/Import terus ke fail (VPN Telefon & Profil modem)": "Direct file export/import (Phone VPN & Modem profiles)",
+    "VPN Telefon: butang baharu \"Eksport ke fail\" (simpan sandaran terus sebagai fail .txt) dan \"Import fail\" (pulihkan terus daripada fail itu) — tiada lagi perlu salin-tampal.": "Phone VPN: new \"Export to file\" button (save a backup directly as a .txt file) and \"Import file\" (restore straight from that file) — no more copy-pasting needed.",
+    "Profil (modem): butang baharu \"Eksport ke fail\" yang berpasangan terus dengan \"Import fail\" sedia ada.": "Modem profiles: new \"Export to file\" button that directly pairs with the existing \"Import file\" button."
   },
   "zh": {
     "Mod VPN": "VPN 模式",

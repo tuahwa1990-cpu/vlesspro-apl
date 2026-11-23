@@ -8,3 +8,4 @@ VLESS Pro VPN
 + SSH
 Kill switch
 Pilih terpantas: pelayan 
+text/*

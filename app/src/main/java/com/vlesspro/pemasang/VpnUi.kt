@@ -204,6 +204,23 @@ private fun SkrinUtama(ke: (String) -> Unit) {
             if (t == null) St.toast(Bhs.t("Kod QR tidak ditemui dalam gambar.")) else masuk(t)
         }
     }
+    val simpanSandaran = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { u ->
+        if (u != null) bg {
+            val teks = (manual + langganan.map { it.first }).joinToString("\n")
+            try {
+                ctx.contentResolver.openOutputStream(u)?.use { it.write(teks.toByteArray()) }
+                St.toast(Bhs.t("Fail sandaran disimpan."))
+            } catch (e: Exception) { St.toast(e.message ?: Bhs.t("Gagal menyimpan fail.")) }
+        }
+    }
+    val bukaSandaran = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { u ->
+        if (u != null) skop.launch {
+            val t = withContext(Dispatchers.IO) {
+                try { ctx.contentResolver.openInputStream(u)?.bufferedReader()?.use { it.readText().take(200000) } } catch (_: Exception) { null }
+            }.orEmpty()
+            if (t.isBlank()) St.toast(Bhs.t("Fail kosong atau tidak dapat dibaca.")) else masuk(t)
+        }
+    }
     fun togol() {
         if (jalan || sibuk) { VpnPerkhidmatan.henti(ctx); return }
         if (senarai.isEmpty()) { St.toast(Bhs.t("Tambah pelayan dahulu.")); return }
@@ -406,6 +423,14 @@ private fun SkrinUtama(ke: (String) -> Unit) {
                 (ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(android.content.ClipData.newPlainText("vless-pro", teks))
                 St.toast(Bhs.t("Disalin ke papan klip. Tampal & simpan di Nota/Telegram Saved Messages — tampal semula di sini (butang Tampal) untuk pulihkan bila-bila masa."))
             }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                BtnKecil(Bhs.t("💾 Eksport ke fail"), Modifier.weight(1f)) {
+                    if ((manual + langganan.map { it.first }).joinToString("\n").isBlank()) { St.toast(Bhs.t("Tiada apa untuk dieksport.")); return@BtnKecil }
+                    simpanSandaran.launch("vlesspro-sandaran.txt")
+                }
+                BtnKecil(Bhs.t("📂 Import fail"), Modifier.weight(1f)) { bukaSandaran.launch("text/*") }
+            }
+            Text(Bhs.t("'Import fail' terus ambil fail yang disimpan oleh 'Eksport ke fail' — tiada perlu salin-tampal."), color = Wr.mu, fontSize = 11.sp)
         }
         if (!VpnLesen.berlesen(ctx)) Text(VpnLesen.nota(), color = Wr.mu, fontSize = 12.sp)
         if (sedangImport) Text(Bhs.t("Mengimport..."), color = Wr.mu, fontSize = 12.sp)

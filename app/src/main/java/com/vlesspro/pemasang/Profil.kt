@@ -164,6 +164,16 @@ fun Profil(ke: (String) -> Unit) {
     }
 
     fun bukaFail() = pilihFail.launch("text/*")
+    val simpanFail = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { u ->
+        if (u != null) bg {
+            val links = St.nod.map { Modem.obj("/api/node/link?i=${it.i}").optString("link") }.filter { it.isNotEmpty() }
+            if (links.isEmpty()) { St.toast(Bhs.t("Tiada profil untuk dieksport.")); return@bg }
+            try {
+                ctx.contentResolver.openOutputStream(u)?.use { it.write(links.joinToString("\n").toByteArray()) }
+                St.toast(Bhs.t("Fail sandaran disimpan."))
+            } catch (e: Exception) { St.toast(e.message ?: Bhs.t("Gagal menyimpan fail.")) }
+        }
+    }
 
     fun ujiDanPilihTerpantas() = bg {
         St.toast(Bhs.t("Menguji semua profil ..."))
@@ -370,6 +380,7 @@ fun Profil(ke: (String) -> Unit) {
                         val i = Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, links.joinToString("\n")); putExtra(Intent.EXTRA_SUBJECT, "VLESS Pro profil") }
                         ctx.startActivity(Intent.createChooser(i, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                     } }, border = androidx.compose.foundation.BorderStroke(1.dp, Wr.ac)) { Text("Eksport", color = Wr.ac) }
+                    OutlinedButton(onClick = { simpanFail.launch("vlesspro-sandaran.txt") }, border = androidx.compose.foundation.BorderStroke(1.dp, Wr.ac)) { Text(Bhs.t("💾 Eksport ke fail"), color = Wr.ac) }
                     OutlinedButton(onClick = { bukaFail() }, border = androidx.compose.foundation.BorderStroke(1.dp, Wr.ac)) { Text("Import fail", color = Wr.ac) }
                     OutlinedButton(onClick = {
                         val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -379,6 +390,7 @@ fun Profil(ke: (String) -> Unit) {
                     }, border = androidx.compose.foundation.BorderStroke(1.dp, Wr.ac)) { Text(Bhs.t("Import (tampal)"), color = Wr.ac) }
                 }
                 Text("Eksport mengandungi kunci profil anda. Jangan kongsi kepada orang lain.", color = Wr.mu, fontSize = 11.sp)
+                Text(Bhs.t("'Import fail' terus ambil fail yang disimpan oleh 'Eksport ke fail' — tiada perlu salin-tampal."), color = Wr.mu, fontSize = 11.sp)
                 Text(Bhs.t("Guna 'Import (tampal)' untuk pulihkan sandaran yang disalin daripada Eksport atau daripada VPN Telefon."), color = Wr.mu, fontSize = 11.sp)
             }
         }
