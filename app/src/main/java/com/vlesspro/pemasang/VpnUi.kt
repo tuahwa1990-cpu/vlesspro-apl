@@ -495,7 +495,7 @@ private fun SkrinUtama(ke: (String) -> Unit) {
                         TextButton({
                             SimpanVpn.simpanManual(ctx, manual.filter { it != p })
                             muatSemula()
-                        }, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp)) { Text("✕", color = Wr.mu, fontSize = 16.sp) }
+                        }, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp)) { Text("🗑", color = Wr.bad, fontSize = 17.sp, fontWeight = FontWeight.Bold) }
                     }
                 }
             }
@@ -514,7 +514,7 @@ private fun SkrinUtama(ke: (String) -> Unit) {
                             Text(try { java.net.URL(u).host } catch (_: Exception) { u.take(30) }, color = Wr.tx, fontWeight = FontWeight.Bold)
                             Text(Bhs.f("{0} pelayan", l.size.toString()), color = Wr.mu, fontSize = 12.sp)
                         }
-                        TextButton({ SimpanVpn.simpanLangganan(ctx, langganan.filter { it.first != u }); muatSemula() }) { Text("✕", color = Wr.mu, fontSize = 16.sp) }
+                        TextButton({ SimpanVpn.simpanLangganan(ctx, langganan.filter { it.first != u }); muatSemula() }) { Text("🗑", color = Wr.bad, fontSize = 17.sp, fontWeight = FontWeight.Bold) }
                     }
                 }
             }

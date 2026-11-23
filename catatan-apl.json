@@ -1,9 +1,17 @@
 {
-  "title": "Apl: Papar \"apa baharu\" automatik lepas kemas kini",
+  "title": "Pembetulan: butang padam pelayan tak kelihatan",
   "items": [
-    "Apl kini papar nota keluaran (apa baharu) secara automatik sekali sahaja bila dibuka selepas dikemas kini -- tiada perlu buka Lagi > Kemas kini sendiri."
+    "VPN Telefon: butang padam pada setiap kad pelayan dan langganan ditukar daripada \"✕\" kelabu malap kepada ikon tong sampah 🗑 berwarna merah supaya mudah dilihat pada latar gelap."
   ],
   "history": [
+    {
+      "version": "1.0.75",
+      "date": "2026-11-23",
+      "title": "Apl: Papar \"apa baharu\" automatik lepas kemas kini",
+      "items": [
+        "Apl kini papar nota keluaran (apa baharu) secara automatik sekali sahaja bila dibuka selepas dikemas kini -- tiada perlu buka Lagi > Kemas kini sendiri."
+      ]
+    },
     {
       "version": "1.0.74",
       "date": "2026-11-23",
