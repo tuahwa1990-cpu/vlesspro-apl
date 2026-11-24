@@ -1046,7 +1046,6 @@
     "SNI (kosong = tanpa SSL/TLS)": "SNI (empty = no SSL/TLS)",
     "Payload (kosong = tiada)": "Payload (empty = none)",
     "Isi payload WebSocket": "Fill WebSocket payload",
-    "Payload menyokong [crlf], [host], [port]. SNI diisi untuk SSH melalui SSL/TLS. Isi kedua-duanya untuk SSL + payload.": "Payload supports [crlf], [host], [port]. Fill SNI for SSH over SSL/TLS. Fill both for SSL + payload.",
     "Isi hos dan pengguna.": "Enter host and user.",
     "Pelayan SSH disimpan.": "SSH server saved.",
     "Per-apl": "Per-app",
@@ -1430,7 +1429,11 @@
     "Apl: Papar \"apa baharu\" automatik lepas kemas kini": "App: Auto-show \"what's new\" after an update",
     "Apl kini papar nota keluaran (apa baharu) secara automatik sekali sahaja bila dibuka selepas dikemas kini -- tiada perlu buka Lagi > Kemas kini sendiri.": "The app now shows its release notes (what's new) automatically, once, the first time it opens after an update -- no need to open More > Update yourself.",
     "Pembetulan: butang padam pelayan tak kelihatan": "Fix: delete-server button was invisible",
-    "VPN Telefon: butang padam pada setiap kad pelayan dan langganan ditukar daripada \"✕\" kelabu malap kepada ikon tong sampah 🗑 berwarna merah supaya mudah dilihat pada latar gelap.": "Phone VPN: the delete button on each server and subscription card was changed from a faint grey \"✕\" to a red 🗑 trash icon so it is easy to see on the dark background."
+    "VPN Telefon: butang padam pada setiap kad pelayan dan langganan ditukar daripada \"✕\" kelabu malap kepada ikon tong sampah 🗑 berwarna merah supaya mudah dilihat pada latar gelap.": "Phone VPN: the delete button on each server and subscription card was changed from a faint grey \"✕\" to a red 🗑 trash icon so it is easy to see on the dark background.",
+    "Payload menyokong [crlf], [host], [port], [host_port], [ua] dan [split] (hantar berasingan). Proksi: sambung ke hos:port ini dahulu (bug host), [host] dalam payload kekal pelayan SSH sebenar. SNI diisi untuk SSH melalui SSL/TLS.": "Payload supports [crlf], [host], [port], [host_port], [ua] and [split] (sent separately). Proxy: connect to this host:port first (bug host); [host] in the payload stays the real SSH server. Fill SNI for SSH over SSL/TLS.",
+    "VPN Telefon: profil SSH kini sokong proksi depan": "Phone VPN: SSH profiles now support a front proxy",
+    "VPN Telefon: borang Tambah SSH kini ada medan \"Proksi hos:port\" (pilihan) — sambung ke proksi/bug host dahulu sebelum ke pelayan SSH sebenar, sama seperti Profil (modem).": "Phone VPN: the Add SSH form now has a \"Proxy host:port\" field (optional) — connect to a proxy/bug host first before the real SSH server, same as Profile (modem).",
+    "VPN Telefon: payload SSH kini sokong penanda [host_port], [ua] dan [split] (hantar beberapa bahagian berasingan), sepadan sepenuhnya dengan format Profil (modem).": "Phone VPN: SSH payload now supports the [host_port], [ua] and [split] tags (send several parts separately), fully matching the Profile (modem) format."
   },
   "zh": {
     "Mod VPN": "VPN 模式",
@@ -2134,7 +2137,8 @@
     "Hari tetapan semula (1-28)": "重置日 (1-28)",
     "Tetapkan semula pengiraan": "重置计数",
     "Pasang suis boot (hidup sendiri selepas modem dimulakan semula)": "安装启动开关（调制解调器重启后自动运行）",
-    "Fail sedia. Pemasang Android dibuka.": "应用已就绪，正在打开 Android 安装程序。"
+    "Fail sedia. Pemasang Android dibuka.": "应用已就绪，正在打开 Android 安装程序。",
+    "Payload menyokong [crlf], [host], [port], [host_port], [ua] dan [split] (hantar berasingan). Proksi: sambung ke hos:port ini dahulu (bug host), [host] dalam payload kekal pelayan SSH sebenar. SNI diisi untuk SSH melalui SSL/TLS.": "载荷支持 [crlf]、[host]、[port]、[host_port]、[ua] 和 [split](分开发送)。代理:先连接此主机:端口(bug host),载荷中的 [host] 仍是真正的 SSH 服务器。填写 SNI 可让 SSH 经由 SSL/TLS。"
   },
   "ta": {
     "Mod VPN": "VPN முறை",
@@ -2628,6 +2632,7 @@
     "Lesen luput": "உரிமம் காலாவதி",
     "Tiada lesen": "உரிமம் இல்லை",
     "Edit": "திருத்து",
-    "‹ Kembali": "‹ பின்"
+    "‹ Kembali": "‹ பின்",
+    "Payload menyokong [crlf], [host], [port], [host_port], [ua] dan [split] (hantar berasingan). Proksi: sambung ke hos:port ini dahulu (bug host), [host] dalam payload kekal pelayan SSH sebenar. SNI diisi untuk SSH melalui SSL/TLS.": "பேலோட் [crlf], [host], [port], [host_port], [ua] மற்றும் [split] (தனித்தனியாக அனுப்பப்படும்) ஆகியவற்றை ஆதரிக்கிறது. ப்ராக்ஸி: முதலில் இந்த host:port உடன் இணைக்கவும் (bug host); பேலோட்டில் உள்ள [host] உண்மையான SSH சேவையகமாகவே இருக்கும். SSL/TLS வழியாக SSH செய்ய SNI ஐ நிரப்பவும்."
   }
 }

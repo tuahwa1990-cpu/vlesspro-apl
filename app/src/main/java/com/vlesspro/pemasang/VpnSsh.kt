@@ -16,8 +16,9 @@ import javax.net.ssl.SSLSocket
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
-/** Profil SSH: SNI diisi = bungkus TLS; payload diisi = hantar payload HTTP/WebSocket sebelum SSH. */
-class SshProfil(val nama: String, val host: String, val port: Int, val pengguna: String, val kata: String, val sni: String, val payload: String)
+/** Profil SSH: SNI diisi = bungkus TLS; payload diisi = hantar payload HTTP/WebSocket sebelum SSH.
+ *  proxy (pilihan) = sambung TCP ke hos:port ini dahulu (teknik proksi depan/bug host), SNI dan [host] dalam payload tetap merujuk pelayan SSH sebenar. */
+class SshProfil(val nama: String, val host: String, val port: Int, val pengguna: String, val kata: String, val sni: String, val payload: String, val proxy: String = "")
 
 object SshPautan {
     private fun dec(s: String) = try { URLDecoder.decode(s.replace("+", "%2B"), "UTF-8") } catch (_: Exception) { s }
@@ -27,6 +28,7 @@ object SshPautan {
         val q = buildList {
             if (p.sni.isNotBlank()) add("sni=" + e(p.sni))
             if (p.payload.isNotBlank()) add("payload=" + e(p.payload))
+            if (p.proxy.isNotBlank()) add("proxy=" + e(p.proxy))
         }.joinToString("&")
         return "ssh://" + e(p.pengguna) + ":" + e(p.kata) + "@" + p.host + ":" + p.port + (if (q.isNotEmpty()) "?$q" else "") + "#" + e(p.nama)
     }
@@ -45,24 +47,37 @@ object SshPautan {
         val kata = dec(ui.substringAfter(':', ""))
         if (host.isEmpty() || pengguna.isEmpty()) throw IllegalArgumentException(Bhs.t("Pautan tidak sah."))
         val q = query.split('&').filter { it.contains('=') }.associate { dec(it.substringBefore('=')) to dec(it.substringAfter('=')) }
-        return SshProfil(nama.ifEmpty { "$host:$port" }, host, port, pengguna, kata, q["sni"].orEmpty(), q["payload"].orEmpty())
+        return SshProfil(nama.ifEmpty { "$host:$port" }, host, port, pengguna, kata, q["sni"].orEmpty(), q["payload"].orEmpty(), q["proxy"].orEmpty())
     }
 
     const val PAYLOAD_WS = "GET / HTTP/1.1[crlf]Host: [host][crlf]Upgrade: websocket[crlf][crlf]"
 }
 
-/** Cipta soket ke pelayan SSH: TCP biasa, TLS (SNI), dan/atau payload HTTP sebelum protokol SSH bermula. */
+/** Cipta soket ke pelayan SSH: TCP biasa (atau melalui proksi depan), TLS (SNI), dan/atau payload HTTP sebelum protokol SSH bermula. */
 class SshKilang(private val p: SshProfil) : com.jcraft.jsch.SocketFactory {
-    private fun payload(): String = p.payload
-        .replace("[crlf]", "\r\n").replace("[lf]", "\n").replace("[cr]", "\r")
-        .replace("\\r\\n", "\r\n").replace("\\n", "\n")
-        .replace("[host]", p.host).replace("[port]", p.port.toString())
-        .replace("[protocol]", "HTTP/1.1").replace("[ssh]", p.host + ":" + p.port)
+    /** Pisah payload kepada bahagian mengikut [split]/[delay_split] (gaya HTTP Custom/Injector), penanda digantikan guna hos:port PELAYAN SSH sebenar (bukan proksi). */
+    private fun bahagianPayload(): List<String> {
+        val hp = p.host + ":" + p.port
+        val diganti = p.payload
+            .replace("[crlf]", "\r\n").replace("[CRLF]", "\r\n").replace("[cr]", "\r").replace("[lf]", "\n")
+            .replace("\\r\\n", "\r\n").replace("\\n", "\n").replace("\\r", "\r")
+            .replace("[host_port]", hp).replace("[host]", p.host).replace("[port]", p.port.toString())
+            .replace("[protocol]", "HTTP/1.1")
+            .replace("[ua]", "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36")
+            .replace("[raw]", "CONNECT $hp HTTP/1.1").replace("[ssh]", hp)
+        return diganti.replace("[delay_split]", "[split]").split("[split]").filter { it.isNotEmpty() }
+    }
 
     override fun createSocket(host: String, port: Int): Socket {
         var s = Socket()
         s.tcpNoDelay = true
-        s.connect(InetSocketAddress(p.host, p.port), 10000)
+        // Proksi depan (pilihan): sambung TCP ke sini dahulu; SNI dan penanda [host]/[port] dalam payload tetap merujuk pelayan SSH sebenar (p.host/p.port).
+        val sasaran = if (p.proxy.isNotBlank()) {
+            val prx = p.proxy.trim().trim('[', ']').let { if (':' in it) it else "$it:${p.port}" }
+            val h = prx.substringBeforeLast(':'); val pt = prx.substringAfterLast(':').toIntOrNull() ?: p.port
+            h to pt
+        } else p.host to p.port
+        s.connect(InetSocketAddress(sasaran.first, sasaran.second), 10000)
         s.soTimeout = 12000
         if (p.sni.isNotBlank()) {
             val semua = arrayOf<TrustManager>(object : X509TrustManager {
@@ -71,13 +86,17 @@ class SshKilang(private val p: SshProfil) : com.jcraft.jsch.SocketFactory {
                 override fun getAcceptedIssuers(): Array<java.security.cert.X509Certificate> = emptyArray()
             })
             val ctx = SSLContext.getInstance("TLS"); ctx.init(null, semua, null)
-            val ss = ctx.socketFactory.createSocket(s, p.sni, p.port, true) as SSLSocket
+            val ss = ctx.socketFactory.createSocket(s, p.sni, sasaran.second, true) as SSLSocket
             try { val pr = ss.sslParameters; pr.serverNames = listOf(SNIHostName(p.sni)); ss.sslParameters = pr } catch (_: Exception) {}
             ss.startHandshake()
             s = ss
         }
         if (p.payload.isNotBlank()) {
-            s.getOutputStream().apply { write(payload().toByteArray(Charsets.ISO_8859_1)); flush() }
+            val keluar = s.getOutputStream()
+            bahagianPayload().forEachIndexed { i, bahagian ->
+                if (i > 0) Thread.sleep(200)
+                keluar.write(bahagian.toByteArray(Charsets.ISO_8859_1)); keluar.flush()
+            }
             // Baca balasan HTTP sehingga baris kosong, bait demi bait supaya tajuk SSH tidak terbaca sama.
             val i = s.getInputStream()
             val b = StringBuilder()

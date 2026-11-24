@@ -1,9 +1,18 @@
 {
-  "title": "Pembetulan: butang padam pelayan tak kelihatan",
+  "title": "VPN Telefon: profil SSH kini sokong proksi depan",
   "items": [
-    "VPN Telefon: butang padam pada setiap kad pelayan dan langganan ditukar daripada \"✕\" kelabu malap kepada ikon tong sampah 🗑 berwarna merah supaya mudah dilihat pada latar gelap."
+    "VPN Telefon: borang Tambah SSH kini ada medan \"Proksi hos:port\" (pilihan) — sambung ke proksi/bug host dahulu sebelum ke pelayan SSH sebenar, sama seperti Profil (modem).",
+    "VPN Telefon: payload SSH kini sokong penanda [host_port], [ua] dan [split] (hantar beberapa bahagian berasingan), sepadan sepenuhnya dengan format Profil (modem)."
   ],
   "history": [
+    {
+      "version": "1.0.76",
+      "date": "2026-11-23",
+      "title": "Pembetulan: butang padam pelayan tak kelihatan",
+      "items": [
+        "VPN Telefon: butang padam pada setiap kad pelayan dan langganan ditukar daripada \"✕\" kelabu malap kepada ikon tong sampah 🗑 berwarna merah supaya mudah dilihat pada latar gelap."
+      ]
+    },
     {
       "version": "1.0.75",
       "date": "2026-11-23",

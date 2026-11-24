@@ -740,6 +740,7 @@ private fun SkrinSsh(kembali: () -> Unit) {
     var kata by remember { mutableStateOf("") }
     var sni by remember { mutableStateOf("") }
     var payload by remember { mutableStateOf("") }
+    var proksi by remember { mutableStateOf("") }
     @Composable fun medanTeks(label: String, nilai: String, ubah: (String) -> Unit, rahsia: Boolean = false) {
         OutlinedTextField(value = nilai, onValueChange = ubah, singleLine = true, colors = medan(), label = { Text(label) },
             visualTransformation = if (rahsia) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
@@ -755,10 +756,11 @@ private fun SkrinSsh(kembali: () -> Unit) {
         medanTeks(Bhs.t("SNI (kosong = tanpa SSL/TLS)"), sni, { sni = it.trim() })
         medanTeks(Bhs.t("Payload (kosong = tiada)"), payload, { payload = it })
         BtnKecil(Bhs.t("Isi payload WebSocket"), Modifier.fillMaxWidth()) { payload = SshPautan.PAYLOAD_WS }
-        Text(Bhs.t("Payload menyokong [crlf], [host], [port]. SNI diisi untuk SSH melalui SSL/TLS. Isi kedua-duanya untuk SSL + payload."), color = Wr.mu, fontSize = 12.sp)
+        medanTeks(Bhs.t("Proksi hos:port (pilihan)"), proksi, { proksi = it.trim() })
+        Text(Bhs.t("Payload menyokong [crlf], [host], [port], [host_port], [ua] dan [split] (hantar berasingan). Proksi: sambung ke hos:port ini dahulu (bug host), [host] dalam payload kekal pelayan SSH sebenar. SNI diisi untuk SSH melalui SSL/TLS."), color = Wr.mu, fontSize = 12.sp)
         Btn(Bhs.t("Simpan")) {
             if (host.isBlank() || pengguna.isBlank()) { St.toast(Bhs.t("Isi hos dan pengguna.")); return@Btn }
-            val p = SshProfil(nama.ifBlank { host }, host, port.toIntOrNull() ?: 22, pengguna, kata, sni, payload)
+            val p = SshProfil(nama.ifBlank { host }, host, port.toIntOrNull() ?: 22, pengguna, kata, sni, payload, proksi)
             val m = SimpanVpn.manual(ctx).toMutableList(); m.add(SshPautan.bina(p)); SimpanVpn.simpanManual(ctx, m)
             St.toast(Bhs.t("Pelayan SSH disimpan.")); kembali()
         }
