@@ -1433,7 +1433,14 @@
     "Payload menyokong [crlf], [host], [port], [host_port], [ua] dan [split] (hantar berasingan). Proksi: sambung ke hos:port ini dahulu (bug host), [host] dalam payload kekal pelayan SSH sebenar. SNI diisi untuk SSH melalui SSL/TLS.": "Payload supports [crlf], [host], [port], [host_port], [ua] and [split] (sent separately). Proxy: connect to this host:port first (bug host); [host] in the payload stays the real SSH server. Fill SNI for SSH over SSL/TLS.",
     "VPN Telefon: profil SSH kini sokong proksi depan": "Phone VPN: SSH profiles now support a front proxy",
     "VPN Telefon: borang Tambah SSH kini ada medan \"Proksi hos:port\" (pilihan) — sambung ke proksi/bug host dahulu sebelum ke pelayan SSH sebenar, sama seperti Profil (modem).": "Phone VPN: the Add SSH form now has a \"Proxy host:port\" field (optional) — connect to a proxy/bug host first before the real SSH server, same as Profile (modem).",
-    "VPN Telefon: payload SSH kini sokong penanda [host_port], [ua] dan [split] (hantar beberapa bahagian berasingan), sepadan sepenuhnya dengan format Profil (modem).": "Phone VPN: SSH payload now supports the [host_port], [ua] and [split] tags (send several parts separately), fully matching the Profile (modem) format."
+    "VPN Telefon: payload SSH kini sokong penanda [host_port], [ua] dan [split] (hantar beberapa bahagian berasingan), sepadan sepenuhnya dengan format Profil (modem).": "Phone VPN: SSH payload now supports the [host_port], [ua] and [split] tags (send several parts separately), fully matching the Profile (modem) format.",
+    "Balasan HTTP terlalu panjang.": "The HTTP reply is too long.",
+    "Badan HTTP tidak lengkap.": "The HTTP body is incomplete.",
+    "Badan HTTP (chunked) tidak sah.": "The HTTP (chunked) body is invalid.",
+    "Balasan pelayan bukan HTTP.": "The server's reply is not HTTP.",
+    "Pelayan menolak payload": "The server rejected the payload",
+    "Pembetulan: sambungan SSH (proksi + payload berbahagian)": "Fix: SSH connection (proxy + split payload)",
+    "VPN Telefon: nod SSH yang guna proksi depan dan payload berbahagian ([split]) kadang gagal sambung dengan ralat dalaman — kini dibaiki.": "Phone VPN: SSH nodes using a front proxy and split payload ([split]) sometimes failed to connect with an internal error — now fixed."
   },
   "zh": {
     "Mod VPN": "VPN 模式",
@@ -2138,7 +2145,12 @@
     "Tetapkan semula pengiraan": "重置计数",
     "Pasang suis boot (hidup sendiri selepas modem dimulakan semula)": "安装启动开关（调制解调器重启后自动运行）",
     "Fail sedia. Pemasang Android dibuka.": "应用已就绪，正在打开 Android 安装程序。",
-    "Payload menyokong [crlf], [host], [port], [host_port], [ua] dan [split] (hantar berasingan). Proksi: sambung ke hos:port ini dahulu (bug host), [host] dalam payload kekal pelayan SSH sebenar. SNI diisi untuk SSH melalui SSL/TLS.": "载荷支持 [crlf]、[host]、[port]、[host_port]、[ua] 和 [split](分开发送)。代理:先连接此主机:端口(bug host),载荷中的 [host] 仍是真正的 SSH 服务器。填写 SNI 可让 SSH 经由 SSL/TLS。"
+    "Payload menyokong [crlf], [host], [port], [host_port], [ua] dan [split] (hantar berasingan). Proksi: sambung ke hos:port ini dahulu (bug host), [host] dalam payload kekal pelayan SSH sebenar. SNI diisi untuk SSH melalui SSL/TLS.": "载荷支持 [crlf]、[host]、[port]、[host_port]、[ua] 和 [split](分开发送)。代理:先连接此主机:端口(bug host),载荷中的 [host] 仍是真正的 SSH 服务器。填写 SNI 可让 SSH 经由 SSL/TLS。",
+    "Balasan HTTP terlalu panjang.": "HTTP 回复过长。",
+    "Badan HTTP tidak lengkap.": "HTTP 正文不完整。",
+    "Badan HTTP (chunked) tidak sah.": "HTTP（分块）正文无效。",
+    "Balasan pelayan bukan HTTP.": "服务器的回复不是 HTTP。",
+    "Pelayan menolak payload": "服务器拒绝了该 payload"
   },
   "ta": {
     "Mod VPN": "VPN முறை",
@@ -2633,6 +2645,11 @@
     "Tiada lesen": "உரிமம் இல்லை",
     "Edit": "திருத்து",
     "‹ Kembali": "‹ பின்",
-    "Payload menyokong [crlf], [host], [port], [host_port], [ua] dan [split] (hantar berasingan). Proksi: sambung ke hos:port ini dahulu (bug host), [host] dalam payload kekal pelayan SSH sebenar. SNI diisi untuk SSH melalui SSL/TLS.": "பேலோட் [crlf], [host], [port], [host_port], [ua] மற்றும் [split] (தனித்தனியாக அனுப்பப்படும்) ஆகியவற்றை ஆதரிக்கிறது. ப்ராக்ஸி: முதலில் இந்த host:port உடன் இணைக்கவும் (bug host); பேலோட்டில் உள்ள [host] உண்மையான SSH சேவையகமாகவே இருக்கும். SSL/TLS வழியாக SSH செய்ய SNI ஐ நிரப்பவும்."
+    "Payload menyokong [crlf], [host], [port], [host_port], [ua] dan [split] (hantar berasingan). Proksi: sambung ke hos:port ini dahulu (bug host), [host] dalam payload kekal pelayan SSH sebenar. SNI diisi untuk SSH melalui SSL/TLS.": "பேலோட் [crlf], [host], [port], [host_port], [ua] மற்றும் [split] (தனித்தனியாக அனுப்பப்படும்) ஆகியவற்றை ஆதரிக்கிறது. ப்ராக்ஸி: முதலில் இந்த host:port உடன் இணைக்கவும் (bug host); பேலோட்டில் உள்ள [host] உண்மையான SSH சேவையகமாகவே இருக்கும். SSL/TLS வழியாக SSH செய்ய SNI ஐ நிரப்பவும்.",
+    "Balasan HTTP terlalu panjang.": "HTTP பதில் மிக நீளமானது.",
+    "Badan HTTP tidak lengkap.": "HTTP உடல் முழுமையடையவில்லை.",
+    "Badan HTTP (chunked) tidak sah.": "HTTP (chunked) உடல் தவறானது.",
+    "Balasan pelayan bukan HTTP.": "சேவையகத்தின் பதில் HTTP அல்ல.",
+    "Pelayan menolak payload": "சேவையகம் payload-ஐ நிராகரித்தது"
   }
 }

@@ -93,21 +93,75 @@ class SshKilang(private val p: SshProfil) : com.jcraft.jsch.SocketFactory {
         }
         if (p.payload.isNotBlank()) {
             val keluar = s.getOutputStream()
-            bahagianPayload().forEachIndexed { i, bahagian ->
+            val bahagian = bahagianPayload()
+            bahagian.forEachIndexed { i, b2 ->
                 if (i > 0) Thread.sleep(200)
-                keluar.write(bahagian.toByteArray(Charsets.ISO_8859_1)); keluar.flush()
+                keluar.write(b2.toByteArray(Charsets.ISO_8859_1)); keluar.flush()
             }
-            // Baca balasan HTTP sehingga baris kosong, bait demi bait supaya tajuk SSH tidak terbaca sama.
-            val i = s.getInputStream()
-            val b = StringBuilder()
-            while (b.length < 8192 && !b.endsWith("\r\n\r\n") && !b.endsWith("\n\n")) {
-                val c = i.read()
-                if (c < 0) throw java.io.IOException(Bhs.t("Pelayan menutup sambungan selepas payload."))
-                b.append(c.toChar())
-            }
+            bacaBalasanHttp(s.getInputStream(), bahagian.size)
         }
         s.soTimeout = 0
         return s
+    }
+
+    /**
+     * Baca `bilangan` blok balasan HTTP (satu bagi setiap bahagian payload yang dihantar, cth. umpan + upgrade sebenar).
+     * Badan setiap balasan (ikut Content-Length atau chunked) dihabiskan supaya tidak tertinggal dalam aliran dan
+     * tersalah anggap sebagai data SSH mentah (punca ralat seperti "overflow reading version string").
+     */
+    private fun bacaBalasanHttp(input: InputStream, bilangan: Int) {
+        fun bacaBaris(): String {
+            val b = StringBuilder()
+            while (true) {
+                val c = input.read()
+                if (c < 0) throw java.io.IOException(Bhs.t("Pelayan menutup sambungan selepas payload."))
+                b.append(c.toChar())
+                if (c == '\n'.code) return b.toString()
+                if (b.length > 8192) throw java.io.IOException(Bhs.t("Balasan HTTP terlalu panjang."))
+            }
+        }
+        fun langkau(n: Long) {
+            var baki = n
+            val penimbal = ByteArray(4096)
+            while (baki > 0) {
+                val bc = input.read(penimbal, 0, minOf(penimbal.size.toLong(), baki).toInt())
+                if (bc < 0) throw java.io.IOException(Bhs.t("Badan HTTP tidak lengkap."))
+                baki -= bc
+            }
+        }
+        fun langkauBerpecah() {
+            while (true) {
+                val saizBaris = bacaBaris().trim().substringBefore(';').trim()
+                val saiz = saizBaris.toLongOrNull(16) ?: throw java.io.IOException(Bhs.t("Badan HTTP (chunked) tidak sah."))
+                if (saiz == 0L) {
+                    while (bacaBaris().trim().isNotEmpty()) { /* baris trailer */ }
+                    return
+                }
+                langkau(saiz)
+                bacaBaris() // CRLF selepas data chunk
+            }
+        }
+        var i = 0
+        val n = if (bilangan < 1) 1 else bilangan
+        while (i < n) {
+            val baris = bacaBaris()
+            val medan = baris.trim().split(Regex("\\s+"))
+            if (medan.size < 2 || !medan[0].startsWith("HTTP/")) throw java.io.IOException(Bhs.t("Balasan pelayan bukan HTTP."))
+            val kod = medan[1].toIntOrNull() ?: 0
+            var panjang = -1L
+            var berpecah = false
+            while (true) {
+                val h = bacaBaris()
+                if (h.trim().isEmpty()) break
+                val hl = h.lowercase()
+                if (hl.startsWith("content-length:")) panjang = h.substringAfter(':').trim().toLongOrNull() ?: -1L
+                else if (hl.startsWith("transfer-encoding:") && hl.contains("chunked")) berpecah = true
+            }
+            if (kod != 101 && (kod < 200 || kod > 299)) throw java.io.IOException(Bhs.t("Pelayan menolak payload") + " (HTTP $kod)")
+            if (kod == 101) return // Peralihan protokol — tiada badan; baki aliran ialah data mentah terowong.
+            if (berpecah) langkauBerpecah() else if (panjang > 0) langkau(panjang)
+            i++
+        }
     }
     override fun getInputStream(socket: Socket): InputStream = socket.getInputStream()
     override fun getOutputStream(socket: Socket): OutputStream = socket.getOutputStream()

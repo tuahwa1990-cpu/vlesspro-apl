@@ -1,10 +1,19 @@
 {
-  "title": "VPN Telefon: profil SSH kini sokong proksi depan",
+  "title": "Pembetulan: sambungan SSH (proksi + payload berbahagian)",
   "items": [
-    "VPN Telefon: borang Tambah SSH kini ada medan \"Proksi hos:port\" (pilihan) — sambung ke proksi/bug host dahulu sebelum ke pelayan SSH sebenar, sama seperti Profil (modem).",
-    "VPN Telefon: payload SSH kini sokong penanda [host_port], [ua] dan [split] (hantar beberapa bahagian berasingan), sepadan sepenuhnya dengan format Profil (modem)."
+    "VPN Telefon: nod SSH yang guna proksi depan dan payload berbahagian ([split]) kadang gagal sambung dengan ralat dalaman — kini dibaiki.",
+    "Penambahbaikan dalaman. Semua fungsi sama."
   ],
   "history": [
+    {
+      "version": "1.0.77",
+      "date": "2026-11-24",
+      "title": "VPN Telefon: profil SSH kini sokong proksi depan",
+      "items": [
+        "VPN Telefon: borang Tambah SSH kini ada medan \"Proksi hos:port\" (pilihan) — sambung ke proksi/bug host dahulu sebelum ke pelayan SSH sebenar, sama seperti Profil (modem).",
+        "VPN Telefon: payload SSH kini sokong penanda [host_port], [ua] dan [split] (hantar beberapa bahagian berasingan), sepadan sepenuhnya dengan format Profil (modem)."
+      ]
+    },
     {
       "version": "1.0.76",
       "date": "2026-11-23",
