@@ -12,6 +12,16 @@ import java.net.URL
 class SalahKata : Exception("Kata laluan salah")
 class TiadaSambungan(m: String, sebab: Throwable? = null) : Exception(m, sebab)
 
+/** Alamat IP get-away (router/modem) rangkaian WiFi semasa telefon, jika ada. */
+fun gatewayIp(ctx: android.content.Context): String? {
+    return try {
+        val cm = ctx.getSystemService(android.content.Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
+        val net = cm.activeNetwork ?: return null
+        val lp = cm.getLinkProperties(net) ?: return null
+        lp.routes.firstOrNull { it.isDefaultRoute && it.gateway != null }?.gateway?.hostAddress
+    } catch (_: Exception) { null }
+}
+
 data class Nod(val i: Int, val nama: String, val host: String, val port: Int, val net: String, val sec: String, val pilih: Boolean, val id: String = "", val src: String = "")
 
 /** Klien API modem (VLESS Pro, port 8990). Pengesahan: Basic dengan kata laluan panel. */

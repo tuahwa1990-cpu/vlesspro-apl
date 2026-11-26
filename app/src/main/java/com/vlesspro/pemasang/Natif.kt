@@ -451,6 +451,7 @@ fun AppNatif() {
 
 @Composable
 fun Setup(pref: android.content.SharedPreferences, ralat0: String, siap: () -> Unit, pasang: () -> Unit, vpn: () -> Unit) {
+    val ctxCari = LocalContext.current
     var ip by remember { mutableStateOf(pref.getString("ip", "192.168.8.1") ?: "192.168.8.1") }
     var ps by remember { mutableStateOf("") }
     var baru by remember { mutableStateOf("") }
@@ -470,7 +471,9 @@ fun Setup(pref: android.content.SharedPreferences, ralat0: String, siap: () -> U
             OutlinedButton(onClick = {
                 sibuk = true; ralat = "Mencari modem ..."
                 bg {
-                    val h = Modem.kesan(listOf("192.168.8.1", "192.168.1.1"))
+                    val gw = gatewayIp(ctxCari)
+                    val senarai = (listOfNotNull(gw) + listOf("192.168.8.1", "192.168.1.1", "192.168.2.1")).distinct()
+                    val h = Modem.kesan(senarai)
                     if (h != null) { ip = h; ralat = "Modem dijumpai: $h" } else ralat = "Modem tidak dijumpai. Sambung telefon ke WiFi modem."
                     sibuk = false
                 }

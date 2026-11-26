@@ -1494,7 +1494,10 @@
     "Ciri baharu: Notifikasi, Jadual, Isyarat, TTL/NSS, Tukar SIM": "New features: Notifications, Schedule, Signal, TTL/NSS, SIM Switch",
     "Feature Plus kini ada 5 ciri baharu terus dalam apl: Notifikasi Telegram, Jadual Kunci Band, Isyarat & Sel, Mod TTL/NSS, dan Tukar SIM.": "Feature Plus now has 5 new features directly in the app: Telegram Notifications, Band Lock Schedule, Signal & Cell, TTL/NSS Mode, and SIM Switch.",
     "Ciri-ciri ini buat masa ini hanya tersedia pada unit AW1000 yang guna modem USB (qmodem/Quectel).": "These features are currently only available on AW1000 units with a USB modem (qmodem/Quectel).",
-    "Perlu kemas kini firmware modem (Web/Chrome) ke v1.1.96 ke atas.": "Requires modem firmware (Web/Chrome) v1.1.96 or later."
+    "Perlu kemas kini firmware modem (Web/Chrome) ke v1.1.96 ke atas.": "Requires modem firmware (Web/Chrome) v1.1.96 or later.",
+    "Baiki: Cari modem automatik": "Fix: Automatic modem detection",
+    "\"Cari modem automatik\" kini turut cuba alamat get-away WiFi telefon anda sendiri — bukan hanya 192.168.8.1 / 192.168.1.1 seperti sebelum ini.": "\"Find modem automatically\" now also tries your phone's WiFi gateway address — not just 192.168.8.1 / 192.168.1.1 as before.",
+    "Membetulkan isu modem tidak dijumpai pada unit yang alamat IP panelnya berbeza (cth 192.168.2.1).": "Fixes modem-not-found issue on units whose panel IP address differs (e.g. 192.168.2.1)."
   },
   "zh": {
     "Mod VPN": "VPN 模式",
