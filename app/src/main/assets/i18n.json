@@ -1500,7 +1500,9 @@
     "Membetulkan isu modem tidak dijumpai pada unit yang alamat IP panelnya berbeza (cth 192.168.2.1).": "Fixes modem-not-found issue on units whose panel IP address differs (e.g. 192.168.2.1).",
     "Isyarat Semasa": "Current Signal",
     "Kunci Band kini papar Isyarat Semasa terus": "Lock Band now shows Current Signal directly",
-    "Skrin Kunci Band kini turut papar Isyarat Semasa (RSRP/SINR/RSRQ/Jalur), dikemas kini setiap 5 saat — mudah pantau kesan kunci band tanpa tukar skrin.": "The Lock Band screen now also shows Current Signal (RSRP/SINR/RSRQ/Band), updated every 5 seconds — easily monitor the effect of band locking without switching screens."
+    "Skrin Kunci Band kini turut papar Isyarat Semasa (RSRP/SINR/RSRQ/Jalur), dikemas kini setiap 5 saat — mudah pantau kesan kunci band tanpa tukar skrin.": "The Lock Band screen now also shows Current Signal (RSRP/SINR/RSRQ/Band), updated every 5 seconds — easily monitor the effect of band locking without switching screens.",
+    "Paparan isyarat kini gaya gauge bulat": "Signal display now uses circular gauges",
+    "Isyarat Semasa (dalam Kunci Band dan skrin Isyarat & Sel) kini dipaparkan sebagai gauge bulat berwarna, lebih mudah dibaca sekali pandang.": "Current Signal (in Lock Band and the Signal & Cell screen) is now shown as colored circular gauges, easier to read at a glance."
   },
   "zh": {
     "Mod VPN": "VPN 模式",
