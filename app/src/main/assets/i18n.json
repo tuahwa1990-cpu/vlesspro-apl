@@ -1458,7 +1458,11 @@
     "Ciri baharu: Kunci Band (AW1000 dan AW1000 Ultra)": "New feature: Band Lock (AW1000 and AW1000 Ultra)",
     "Feature Plus: Kunci Band baharu — kunci rangkaian pada band 5G, 4G atau 3G tertentu, ikut band yang disokong modem anda sendiri.": "Feature Plus: new Band Lock — lock the network to a specific 5G, 4G or 3G band, according to what your modem supports.",
     "Buka Kunci (Automatik) tersedia untuk kembali kepada pemilihan band automatik bila-bila masa.": "Unlock (Automatic) is available to return to automatic band selection at any time.",
-    "Ciri ini tersedia pada AW1000 dan AW1000 Ultra sahaja buat masa ini.": "This feature is available on AW1000 and AW1000 Ultra only for now."
+    "Ciri ini tersedia pada AW1000 dan AW1000 Ultra sahaja buat masa ini.": "This feature is available on AW1000 and AW1000 Ultra only for now.",
+    "Kunci Band kini disokong pada lebih banyak unit AW1000": "Band Lock now supported on more AW1000 units",
+    "Kunci Band kini berfungsi pada unit AW1000 yang guna modem USB sebenar (cth Quectel, pakej qmodem) — sebelum ini sesetengah unit melaporkan \"tidak disokong\".": "Band Lock now works on AW1000 units with a real USB modem (e.g. Quectel, qmodem package) — some units previously reported \"not supported\".",
+    "Perlu kemas kini firmware modem (Web/Chrome) ke v1.1.94 ke atas untuk unit sebegini.": "Requires modem firmware (Web/Chrome) v1.1.94 or later for such units.",
+    "Cara guna sama seperti sebelum ini.": "Usage is the same as before."
   },
   "zh": {
     "Mod VPN": "VPN 模式",
