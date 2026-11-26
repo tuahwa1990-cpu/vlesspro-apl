@@ -399,6 +399,51 @@ private fun parseBand(s: String?): List<Int> {
     return s.split("/").mapNotNull { it.filter { c -> c.isDigit() }.toIntOrNull() }.filter { it != 0 }
 }
 
+// ───────────── Gauge isyarat (dikongsi SubBandlock & SubSignal) ─────────────
+private fun sigQualCls(key: String, v: String): String {
+    val n = v.toDoubleOrNull() ?: return ""
+    return when (key) {
+        "RSRP" -> if (n >= -90) "ok" else if (n >= -105) "wn" else "bad"
+        "RSRQ" -> if (n >= -10) "ok" else if (n >= -15) "wn" else "bad"
+        "SINR", "SNR" -> if (n >= 13) "ok" else if (n >= 0) "wn" else "bad"
+        "RSSI" -> if (n >= -75) "ok" else if (n >= -95) "wn" else "bad"
+        else -> ""
+    }
+}
+private fun sigColorCls(cls: String): Color = when (cls) { "ok" -> Wr.ok; "wn" -> Wr.wn; "bad" -> Wr.bad; else -> Wr.ac2 }
+private fun sigPctOf(key: String, v: String): Float? {
+    val n = v.toDoubleOrNull() ?: return null
+    val r = when (key) {
+        "RSRP" -> -130.0 to -60.0
+        "RSRQ" -> -20.0 to -3.0
+        "SINR", "SNR" -> -10.0 to 30.0
+        "RSSI" -> -110.0 to -50.0
+        else -> return null
+    }
+    return ((n - r.first) / (r.second - r.first)).coerceIn(0.0, 1.0).toFloat()
+}
+
+@Composable
+private fun SigGauge(label: String, value: String, unit: String, pct: Float, color: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(76.dp)) {
+        Box(Modifier.size(64.dp), contentAlignment = Alignment.Center) {
+            androidx.compose.foundation.Canvas(Modifier.fillMaxSize()) {
+                val stroke = 7.dp.toPx()
+                drawArc(color = Color.White.copy(alpha = 0.12f), startAngle = -90f, sweepAngle = 360f, useCenter = false,
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(stroke, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+                drawArc(color = color, startAngle = -90f, sweepAngle = 360f * pct, useCenter = false,
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(stroke, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(value, color = color, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                if (unit.isNotEmpty()) Text(unit, color = Wr.mu, fontSize = 9.sp)
+            }
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(label, color = Wr.mu, fontSize = 10.sp, maxLines = 1)
+    }
+}
+
 @Composable
 fun SubBandlock() {
     var q by remember { mutableStateOf<JSONObject?>(null) }
@@ -410,16 +455,6 @@ fun SubBandlock() {
     }
     LaunchedEffect(Unit) {
         while (true) { try { sig = withContext(Dispatchers.IO) { Modem.obj("/api/signal") } } catch (_: Exception) {}; delay(5000) }
-    }
-    fun sigKualiti(key: String, v: String): Color {
-        val n = v.toDoubleOrNull() ?: return Wr.mu
-        return when (key) {
-            "RSRP" -> if (n >= -90) Wr.ok else if (n >= -105) Wr.wn else Wr.bad
-            "RSRQ" -> if (n >= -10) Wr.ok else if (n >= -15) Wr.wn else Wr.bad
-            "SINR", "SNR" -> if (n >= 13) Wr.ok else if (n >= 0) Wr.wn else Wr.bad
-            "RSSI" -> if (n >= -75) Wr.ok else if (n >= -95) Wr.wn else Wr.bad
-            else -> Wr.mu
-        }
     }
     Halaman {
         Judul("Kunci Band")
@@ -435,14 +470,29 @@ fun SubBandlock() {
                             Spacer(Modifier.height(if (gi == 0) 4.dp else 10.dp))
                             Text("Sel " + (gi + 1), color = Wr.mu, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
+                        val gaugeItems = mutableListOf<@Composable () -> Unit>()
                         for (j in 0 until g.length()) {
                             val it = g.getJSONObject(j)
                             val value = it.optString("value")
                             if (value.isEmpty()) continue
                             val key = it.optString("key")
-                            Row(Modifier.fillMaxWidth().padding(vertical = 3.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text(it.optString("full_name").ifEmpty { key }, color = Wr.mu, fontSize = 13.sp)
-                                Text(value + (it.optString("unit").let { u -> if (u.isNotEmpty()) " $u" else "" }), color = sigKualiti(key, value), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            val unit = it.optString("unit")
+                            val label = it.optString("full_name").ifEmpty { key }
+                            val pct = sigPctOf(key, value)
+                            if (pct != null) {
+                                val color = sigColorCls(sigQualCls(key, value))
+                                gaugeItems.add { SigGauge(label, value, unit, pct, color) }
+                            } else {
+                                Row(Modifier.fillMaxWidth().padding(vertical = 3.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text(label, color = Wr.mu, fontSize = 13.sp)
+                                    Text(value + (unit.let { u -> if (u.isNotEmpty()) " $u" else "" }), color = Wr.mu, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                }
+                            }
+                        }
+                        if (gaugeItems.isNotEmpty()) {
+                            Spacer(Modifier.height(6.dp))
+                            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                gaugeItems.forEach { it() }
                             }
                         }
                     }
@@ -647,16 +697,6 @@ fun SubSignal() {
     LaunchedEffect(Unit) {
         while (true) { try { q = withContext(Dispatchers.IO) { Modem.obj("/api/signal") } } catch (_: Exception) {}; delay(5000) }
     }
-    fun kualiti(key: String, v: String): Color {
-        val n = v.toDoubleOrNull() ?: return Wr.mu
-        return when (key) {
-            "RSRP" -> if (n >= -90) Wr.ok else if (n >= -105) Wr.wn else Wr.bad
-            "RSRQ" -> if (n >= -10) Wr.ok else if (n >= -15) Wr.wn else Wr.bad
-            "SINR", "SNR" -> if (n >= 13) Wr.ok else if (n >= 0) Wr.wn else Wr.bad
-            "RSSI" -> if (n >= -75) Wr.ok else if (n >= -95) Wr.wn else Wr.bad
-            else -> Wr.mu
-        }
-    }
     Halaman {
         Judul("Isyarat & Sel")
         val v = q
@@ -670,15 +710,29 @@ fun SubSignal() {
                 val g = groups.getJSONArray(i)
                 KadWr {
                     Text("Sel " + (i + 1), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(6.dp))
+                    val gaugeItems = mutableListOf<@Composable () -> Unit>()
                     for (j in 0 until g.length()) {
                         val it = g.getJSONObject(j)
                         val value = it.optString("value")
                         if (value.isEmpty()) continue
                         val key = it.optString("key")
-                        Row(Modifier.fillMaxWidth().padding(vertical = 3.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(it.optString("full_name").ifEmpty { key }, color = Wr.mu, fontSize = 13.sp)
-                            Text(value + (it.optString("unit").let { u -> if (u.isNotEmpty()) " $u" else "" }), color = kualiti(key, value), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        val unit = it.optString("unit")
+                        val label = it.optString("full_name").ifEmpty { key }
+                        val pct = sigPctOf(key, value)
+                        if (pct != null) {
+                            val color = sigColorCls(sigQualCls(key, value))
+                            gaugeItems.add { SigGauge(label, value, unit, pct, color) }
+                        } else {
+                            Row(Modifier.fillMaxWidth().padding(vertical = 3.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(label, color = Wr.mu, fontSize = 13.sp)
+                                Text(value + (unit.let { u -> if (u.isNotEmpty()) " $u" else "" }), color = Wr.mu, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            }
+                        }
+                    }
+                    if (gaugeItems.isNotEmpty()) {
+                        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            gaugeItems.forEach { it() }
                         }
                     }
                 }
