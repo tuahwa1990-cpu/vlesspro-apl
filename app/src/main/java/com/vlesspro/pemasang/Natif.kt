@@ -1101,7 +1101,7 @@ fun Lagi(pref: android.content.SharedPreferences, buka: (String) -> Unit) {
 }
 
 // Halaman dalam Feature Plus kembali ke senarai Feature Plus; yang lain kembali ke Lagi.
-fun indukSub(id: String?): String? = if (id in setOf("sqm", "adblock", "dev", "kuota", "wan", "failover")) "plus" else null
+fun indukSub(id: String?): String? = if (id in setOf("sqm", "adblock", "dev", "kuota", "wan", "failover", "bandlock")) "plus" else null
 
 @Composable
 fun Sub(id: String, pref: android.content.SharedPreferences, keluar: () -> Unit, ke: (String) -> Unit, tutup: () -> Unit) {
@@ -1129,6 +1129,7 @@ fun Sub(id: String, pref: android.content.SharedPreferences, keluar: () -> Unit,
                 "kuota" -> SubKuota()
                 "wan" -> SubWan()
                 "failover" -> SubFailover()
+                "bandlock" -> SubBandlock()
                 "laluan" -> SubLaluan()
                 "kumpulan" -> SubKumpulan()
                 "langganan" -> SubLangganan()

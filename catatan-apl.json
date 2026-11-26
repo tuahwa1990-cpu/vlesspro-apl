@@ -1,10 +1,21 @@
 {
-  "title": "Pembetulan: sambungan SSH (proksi + payload berbahagian)",
+  "title": "Ciri baharu: Kunci Band (AW1000 dan AW1000 Ultra)",
   "items": [
-    "VPN Telefon: nod SSH yang guna proksi depan dan payload berbahagian ([split]) kadang gagal sambung dengan ralat dalaman — kini dibaiki.",
+    "Feature Plus: Kunci Band baharu — kunci rangkaian pada band 5G, 4G atau 3G tertentu, ikut band yang disokong modem anda sendiri.",
+    "Buka Kunci (Automatik) tersedia untuk kembali kepada pemilihan band automatik bila-bila masa.",
+    "Ciri ini tersedia pada AW1000 dan AW1000 Ultra sahaja buat masa ini.",
     "Penambahbaikan dalaman. Semua fungsi sama."
   ],
   "history": [
+    {
+      "version": "1.0.78",
+      "date": "2026-11-24",
+      "title": "Pembetulan: sambungan SSH (proksi + payload berbahagian)",
+      "items": [
+        "VPN Telefon: nod SSH yang guna proksi depan dan payload berbahagian ([split]) kadang gagal sambung dengan ralat dalaman — kini dibaiki.",
+        "Penambahbaikan dalaman. Semua fungsi sama."
+      ]
+    },
     {
       "version": "1.0.77",
       "date": "2026-11-24",

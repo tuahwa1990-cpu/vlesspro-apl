@@ -67,6 +67,7 @@ fun SubPlus(ke: (String) -> Unit) {
         Triple("kuota", "Kuota", "Had data bulanan"),
         Triple("wan", "Tukar IP WAN", "Dapatkan IP baharu"),
         Triple("failover", "Failover", "Tukar nod automatik"),
+        Triple("bandlock", "Kunci Band", "Kunci band 5G/4G/3G"),
     )
     Halaman {
         Judul("Feature Plus")
@@ -375,6 +376,100 @@ fun SubFailover() {
                 }.start()
             }, modifier = Modifier.fillMaxWidth()) { Text("Hantar diagnosis failover", color = Wr.ac) }
             Text("Menyalin status failover, kelayakan setiap nod dan rekod penuh tukar nod, bersama maklumat am apl dan modem.", color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp))
+        }
+    }
+}
+
+// ───────────── Kunci Band ─────────────
+private data class GrupBand(val rat: String, val judul: String, val cur: String, val sup: String)
+private val grupBand = listOf(
+    GrupBand("5", "Band 5G NR", "current_nr_band", "support_nr_band"),
+    GrupBand("4", "Band 4G LTE", "current_lte_band", "support_lte_band"),
+    GrupBand("3", "Band 3G UMTS", "current_umts_band", "support_umts_band"),
+)
+private fun bandLabel(rat: String, b: Int) = (if (rat == "5") "n" else "B") + b
+private fun parseBand(s: String?): List<Int> {
+    if (s.isNullOrEmpty() || s == "0") return emptyList()
+    return s.split("/").mapNotNull { it.filter { c -> c.isDigit() }.toIntOrNull() }.filter { it != 0 }
+}
+
+@Composable
+fun SubBandlock() {
+    var q by remember { mutableStateOf<JSONObject?>(null) }
+    var cek by remember { mutableStateOf(0) }
+    val pilihan = remember { mutableStateMapOf<String, Set<Int>>() }
+    LaunchedEffect(cek) {
+        withContext(Dispatchers.IO) { try { q = Modem.obj("/api/bandlock") } catch (_: Exception) {} }
+    }
+    Halaman {
+        Judul("Kunci Band")
+        val v = q
+        when {
+            v == null -> KadWr { Text("Memuatkan...", color = Wr.mu) }
+            !v.optBoolean("supported") -> KadWr { Text("Ciri ini belum disokong pada modem ini.", color = Wr.wn) }
+            v.optString("err").isNotEmpty() -> KadWr { Text(v.optString("err"), color = Wr.bad) }
+            else -> {
+                val data = try { JSONObject(v.optString("raw").ifEmpty { "{}" }) } catch (_: Exception) { JSONObject() }
+                val stored = v.optString("stored")
+                val storedMap = remember(stored) {
+                    stored.split(";").filter { it.isNotBlank() }.mapNotNull {
+                        val kv = it.split(",")
+                        if (kv.size == 2) kv[0] to kv[1].split("/").mapNotNull { b -> b.toIntOrNull() }.toSet() else null
+                    }.toMap()
+                }
+                grupBand.forEach { g ->
+                    if (!pilihan.containsKey(g.rat)) {
+                        val cur = parseBand(data.optString(g.cur))
+                        pilihan[g.rat] = storedMap[g.rat] ?: cur.toSet()
+                    }
+                }
+                KadWr {
+                    Text("Pilih sekurang-kurangnya satu band bagi setiap jenis yang disokong, atau tekan Buka Kunci untuk kembali automatik.", color = Wr.mu, fontSize = 12.sp)
+                    grupBand.forEach { g ->
+                        val sup = parseBand(data.optString(g.sup))
+                        val cur = parseBand(data.optString(g.cur))
+                        Spacer(Modifier.height(10.dp))
+                        Text(g.judul, color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        if (sup.isEmpty()) {
+                            Text("Tiada band disokong untuk jenis ini.", color = Wr.mu, fontSize = 12.sp)
+                        } else {
+                            sup.chunked(4).forEach { baris ->
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    baris.forEach { b ->
+                                        val dipilih = pilihan[g.rat]?.contains(b) == true
+                                        Row(Modifier.clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
+                                            .background(if (dipilih) Wr.ac.copy(alpha = 0.22f) else Wr.kad2)
+                                            .border(1.dp, if (dipilih) Wr.ac else Wr.garis, androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
+                                            .clickable {
+                                                val s = pilihan[g.rat].orEmpty().toMutableSet()
+                                                if (s.contains(b)) s.remove(b) else s.add(b)
+                                                pilihan[g.rat] = s
+                                            }.padding(horizontal = 10.dp, vertical = 6.dp)) {
+                                            Text(bandLabel(g.rat, b), color = Wr.tx, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (cur.isNotEmpty()) Text("Semasa:" + " " + cur.joinToString(", ") { bandLabel(g.rat, it) }, color = Wr.mu, fontSize = 12.sp)
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Btn("Terapkan Kunci Band") {
+                        val arg = grupBand.mapNotNull { g ->
+                            val s = pilihan[g.rat].orEmpty()
+                            if (s.isEmpty()) null else g.rat + "," + s.sorted().joinToString("/")
+                        }.joinToString(";")
+                        if (arg.isEmpty()) { St.toast(Bhs.t("Pilih sekurang-kurangnya satu band")); return@Btn }
+                        bg { lapor(Modem.tindak("/api/bandlock/set", JSONObject().put("arg", arg).toString())); cek++ }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Btn("Buka Kunci (Automatik)", utama = false) {
+                        bg { lapor(Modem.tindak("/api/bandlock/set", JSONObject().put("arg", "").toString())); cek++ }
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    Text("Radio modem akan dimulakan semula (~6 saat) selepas kunci band ditukar. Internet terputus seketika.", color = Wr.mu, fontSize = 12.sp)
+                }
+            }
         }
     }
 }
