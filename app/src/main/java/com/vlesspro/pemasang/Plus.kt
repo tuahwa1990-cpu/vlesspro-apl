@@ -454,7 +454,7 @@ fun SubBandlock() {
         withContext(Dispatchers.IO) { try { q = Modem.obj("/api/bandlock") } catch (_: Exception) {} }
     }
     LaunchedEffect(Unit) {
-        while (true) { try { sig = withContext(Dispatchers.IO) { Modem.obj("/api/signal") } } catch (_: Exception) {}; delay(5000) }
+        while (true) { try { sig = withContext(Dispatchers.IO) { Modem.obj("/api/signal") } } catch (_: Exception) {}; delay(2000) }
     }
     Halaman {
         Judul("Kunci Band")
@@ -695,7 +695,7 @@ fun SubBandSched() {
 fun SubSignal() {
     var q by remember { mutableStateOf<JSONObject?>(null) }
     LaunchedEffect(Unit) {
-        while (true) { try { q = withContext(Dispatchers.IO) { Modem.obj("/api/signal") } } catch (_: Exception) {}; delay(5000) }
+        while (true) { try { q = withContext(Dispatchers.IO) { Modem.obj("/api/signal") } } catch (_: Exception) {}; delay(2000) }
     }
     Halaman {
         Judul("Isyarat & Sel")

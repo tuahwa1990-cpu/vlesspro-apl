@@ -1502,7 +1502,10 @@
     "Kunci Band kini papar Isyarat Semasa terus": "Lock Band now shows Current Signal directly",
     "Skrin Kunci Band kini turut papar Isyarat Semasa (RSRP/SINR/RSRQ/Jalur), dikemas kini setiap 5 saat — mudah pantau kesan kunci band tanpa tukar skrin.": "The Lock Band screen now also shows Current Signal (RSRP/SINR/RSRQ/Band), updated every 5 seconds — easily monitor the effect of band locking without switching screens.",
     "Paparan isyarat kini gaya gauge bulat": "Signal display now uses circular gauges",
-    "Isyarat Semasa (dalam Kunci Band dan skrin Isyarat & Sel) kini dipaparkan sebagai gauge bulat berwarna, lebih mudah dibaca sekali pandang.": "Current Signal (in Lock Band and the Signal & Cell screen) is now shown as colored circular gauges, easier to read at a glance."
+    "Isyarat Semasa (dalam Kunci Band dan skrin Isyarat & Sel) kini dipaparkan sebagai gauge bulat berwarna, lebih mudah dibaca sekali pandang.": "Current Signal (in Lock Band and the Signal & Cell screen) is now shown as colored circular gauges, easier to read at a glance.",
+    "Isyarat Semasa kini betul-betul masa nyata": "Current Signal is now truly real-time",
+    "Betulkan isu Isyarat Semasa (AW1000 Ultra) yang nampak lambat/beku — kini sentiasa segar setiap kemas kini, sesuai dipantau sambil gerakkan modem cari lokasi isyarat terbaik.": "Fixed Current Signal (AW1000 Ultra) appearing slow/frozen — it's now always fresh on every update, suitable for monitoring while moving the modem to find the best signal spot.",
+    "Dikemas kini setiap 2 saat (dahulu 5 saat) untuk paparan lebih responsif.": "Now updates every 2 seconds (previously 5 seconds) for a more responsive display."
   },
   "zh": {
     "Mod VPN": "VPN 模式",
