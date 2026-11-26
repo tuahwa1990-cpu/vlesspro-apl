@@ -1,12 +1,23 @@
 {
-  "title": "Kunci Band kini disokong pada lebih banyak unit AW1000",
+  "title": "Ciri baharu: Notifikasi, Jadual, Isyarat, TTL/NSS, Tukar SIM",
   "items": [
-    "Kunci Band kini berfungsi pada unit AW1000 yang guna modem USB sebenar (cth Quectel, pakej qmodem) — sebelum ini sesetengah unit melaporkan \"tidak disokong\".",
-    "Perlu kemas kini firmware modem (Web/Chrome) ke v1.1.94 ke atas untuk unit sebegini.",
-    "Cara guna sama seperti sebelum ini.",
+    "Feature Plus kini ada 5 ciri baharu terus dalam apl: Notifikasi Telegram, Jadual Kunci Band, Isyarat & Sel, Mod TTL/NSS, dan Tukar SIM.",
+    "Ciri-ciri ini buat masa ini hanya tersedia pada unit AW1000 yang guna modem USB (qmodem/Quectel).",
+    "Perlu kemas kini firmware modem (Web/Chrome) ke v1.1.96 ke atas.",
     "Penambahbaikan dalaman. Semua fungsi sama."
   ],
   "history": [
+    {
+      "version": "1.0.80",
+      "date": "2026-11-26",
+      "title": "Kunci Band kini disokong pada lebih banyak unit AW1000",
+      "items": [
+        "Kunci Band kini berfungsi pada unit AW1000 yang guna modem USB sebenar (cth Quectel, pakej qmodem) — sebelum ini sesetengah unit melaporkan \"tidak disokong\".",
+        "Perlu kemas kini firmware modem (Web/Chrome) ke v1.1.94 ke atas untuk unit sebegini.",
+        "Cara guna sama seperti sebelum ini.",
+        "Penambahbaikan dalaman. Semua fungsi sama."
+      ]
+    },
     {
       "version": "1.0.79",
       "date": "2026-11-25",

@@ -68,6 +68,11 @@ fun SubPlus(ke: (String) -> Unit) {
         Triple("wan", "Tukar IP WAN", "Dapatkan IP baharu"),
         Triple("failover", "Failover", "Tukar nod automatik"),
         Triple("bandlock", "Kunci Band", "Kunci band 5G/4G/3G"),
+        Triple("notify", "Notifikasi Telegram", "Amaran kuota dan WAN"),
+        Triple("bandsched", "Jadual Kunci Band", "Tukar band automatik"),
+        Triple("signal", "Isyarat & Sel", "RSRP/RSRQ/SINR masa nyata"),
+        Triple("ttl", "Mod TTL/NSS", "Elak pengesanan hotspot"),
+        Triple("simtukar", "Tukar SIM", "Slot SIM 1 dan SIM 2"),
     )
     Halaman {
         Judul("Feature Plus")
@@ -468,6 +473,233 @@ fun SubBandlock() {
                     }
                     Spacer(Modifier.height(10.dp))
                     Text("Radio modem akan dimulakan semula (~6 saat) selepas kunci band ditukar. Internet terputus seketika.", color = Wr.mu, fontSize = 12.sp)
+                }
+            }
+        }
+    }
+}
+
+// ───────────── Notifikasi Telegram ─────────────
+@Composable
+fun SubNotify() {
+    val d = muat { Modem.obj("/api/notify") }
+    var on by remember { mutableStateOf(false) }
+    var tok by remember { mutableStateOf("") }
+    var chat by remember { mutableStateOf("") }
+    var qw by remember { mutableStateOf(false) }
+    var qf by remember { mutableStateOf(false) }
+    var wd by remember { mutableStateOf(false) }
+    var wu by remember { mutableStateOf(false) }
+    var sibuk by remember { mutableStateOf(false) }
+    LaunchedEffect(d.value) { d.value?.optJSONObject("cfg")?.let {
+        on = it.optBoolean("on"); tok = it.optString("bot_token"); chat = it.optString("chat_id")
+        qw = it.optBoolean("quota_warn"); qf = it.optBoolean("quota_full"); wd = it.optBoolean("wan_down"); wu = it.optBoolean("wan_up")
+    } }
+    fun cfg() = JSONObject().put("on", on).put("bot_token", tok.trim()).put("chat_id", chat.trim())
+        .put("quota_warn", qw).put("quota_full", qf).put("wan_down", wd).put("wan_up", wu)
+    Halaman {
+        Judul("Notifikasi Telegram")
+        KadWr {
+            Text("Cipta bot melalui @BotFather di Telegram untuk dapatkan token, dan hantar /start kepada bot itu untuk dapatkan Chat ID anda (cth melalui bot @userinfobot).", color = Wr.mu, fontSize = 13.sp)
+            Suis("Hidupkan notifikasi", on) { on = it }
+            OutlinedTextField(tok, { tok = it }, label = { Text("Token Bot") }, singleLine = true, modifier = Modifier.fillMaxWidth(), colors = medan())
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(chat, { chat = it }, label = { Text("Chat ID") }, singleLine = true, modifier = Modifier.fillMaxWidth(), colors = medan())
+            Spacer(Modifier.height(8.dp))
+            Suis("Kuota hampir habis", qw) { qw = it }
+            Suis("Kuota habis", qf) { qf = it }
+            Suis("WAN terputus", wd) { wd = it }
+            Suis("WAN pulih", wu) { wu = it }
+            Spacer(Modifier.height(8.dp))
+            Btn("Simpan", aktif = !sibuk) { sibuk = true; bg { lapor(Modem.tindak("/api/notify/set", cfg().toString())); sibuk = false } }
+            Spacer(Modifier.height(8.dp))
+            Btn("Hantar Mesej Ujian", utama = false, aktif = !sibuk) { sibuk = true; bg {
+                Modem.tindak("/api/notify/set", cfg().toString()); lapor(Modem.tindak("/api/notify/test")); sibuk = false } }
+        }
+    }
+}
+
+// ───────────── Jadual Kunci Band ─────────────
+@Composable
+fun SubBandSched() {
+    val bl = muat { Modem.obj("/api/bandlock") }
+    var sc by remember { mutableStateOf<JSONObject?>(null) }
+    var cek by remember { mutableStateOf(0) }
+    LaunchedEffect(cek) { withContext(Dispatchers.IO) { try { sc = Modem.obj("/api/bandsched") } catch (_: Exception) {} } }
+    val pilihan = remember { mutableStateMapOf<String, Set<Int>>() }
+    var masa by remember { mutableStateOf("") }
+    var nota by remember { mutableStateOf("") }
+    Halaman {
+        Judul("Jadual Kunci Band")
+        val v = bl.value
+        if (v == null || !v.optBoolean("supported")) KadWr { Text("Ciri kunci band tidak disokong pada modem ini.", color = Wr.wn) }
+        else {
+            val data = try { JSONObject(v.optString("raw").ifEmpty { "{}" }) } catch (_: Exception) { JSONObject() }
+            KadWr {
+                Text("Pilih band, masa (HH:MM), kemudian tekan Tambah. Kosongkan pilihan band untuk jadual buka kunci (automatik).", color = Wr.mu, fontSize = 12.sp)
+                grupBand.forEach { g ->
+                    val sup = parseBand(data.optString(g.sup))
+                    if (sup.isEmpty()) return@forEach
+                    Spacer(Modifier.height(8.dp))
+                    Text(g.judul, color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    sup.chunked(4).forEach { baris ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            baris.forEach { b ->
+                                val dipilih = pilihan[g.rat]?.contains(b) == true
+                                Row(Modifier.clip(RoundedCornerShape(10.dp)).background(if (dipilih) Wr.ac.copy(alpha = 0.22f) else Wr.kad2)
+                                    .border(1.dp, if (dipilih) Wr.ac else Wr.garis, RoundedCornerShape(10.dp))
+                                    .clickable {
+                                        val s = pilihan[g.rat].orEmpty().toMutableSet()
+                                        if (s.contains(b)) s.remove(b) else s.add(b)
+                                        pilihan[g.rat] = s
+                                    }.padding(horizontal = 10.dp, vertical = 6.dp)) {
+                                    Text(bandLabel(g.rat, b), color = Wr.tx, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                                }
+                            }
+                        }
+                    }
+                }
+                Spacer(Modifier.height(10.dp))
+                OutlinedTextField(masa, { masa = it }, label = { Text("Masa (HH:MM)") }, singleLine = true, modifier = Modifier.fillMaxWidth(), colors = medan())
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(nota, { nota = it }, label = { Text("Nota (pilihan)") }, singleLine = true, modifier = Modifier.fillMaxWidth(), colors = medan())
+                Spacer(Modifier.height(8.dp))
+                Btn("+ Tambah Jadual", utama = false) {
+                    if (!Regex("^([01]?[0-9]|2[0-3]):[0-5][0-9]$").matches(masa.trim())) { St.toast("Format masa mesti HH:MM"); return@Btn }
+                    val arg = grupBand.mapNotNull { g -> val s = pilihan[g.rat].orEmpty(); if (s.isEmpty()) null else g.rat + "," + s.sorted().joinToString("/") }.joinToString(";")
+                    val list = (sc?.optJSONArray("list") ?: JSONArray())
+                    val baru = JSONArray(); for (i in 0 until list.length()) baru.put(list.get(i))
+                    baru.put(JSONObject().put("time", masa.trim()).put("arg", arg).put("note", nota.trim()))
+                    bg { lapor(Modem.tindak("/api/bandsched/set", JSONObject().put("list", baru).toString())); cek++ }
+                    masa = ""; nota = ""
+                }
+            }
+            val list = sc?.optJSONArray("list") ?: JSONArray()
+            if (list.length() == 0) KadWr { Text("Tiada jadual lagi.", color = Wr.mu) }
+            for (i in 0 until list.length()) {
+                val e = list.getJSONObject(i)
+                val lbl = e.optString("arg").ifEmpty { null }?.split(";")?.joinToString(" · ") { p ->
+                    val kv = p.split(","); kv.getOrNull(1)?.split("/")?.joinToString(",") { b -> bandLabel(kv[0], b.toIntOrNull() ?: 0) } ?: p
+                } ?: "Buka Kunci (Automatik)"
+                KadWr {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text(e.optString("time") + " — " + lbl, color = Wr.tx, fontWeight = FontWeight.Bold)
+                            if (e.optString("note").isNotEmpty()) Text(e.optString("note"), color = Wr.mu, fontSize = 12.sp)
+                        }
+                        TextButton(onClick = {
+                            val baru = JSONArray(); for (j in 0 until list.length()) if (j != i) baru.put(list.get(j))
+                            bg { lapor(Modem.tindak("/api/bandsched/set", JSONObject().put("list", baru).toString())); cek++ }
+                        }) { Text("✕", color = Wr.bad) }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ───────────── Isyarat & Sel ─────────────
+@Composable
+fun SubSignal() {
+    var q by remember { mutableStateOf<JSONObject?>(null) }
+    LaunchedEffect(Unit) {
+        while (true) { try { q = withContext(Dispatchers.IO) { Modem.obj("/api/signal") } } catch (_: Exception) {}; delay(5000) }
+    }
+    fun kualiti(key: String, v: String): Color {
+        val n = v.toDoubleOrNull() ?: return Wr.mu
+        return when (key) {
+            "RSRP" -> if (n >= -90) Wr.ok else if (n >= -105) Wr.wn else Wr.bad
+            "RSRQ" -> if (n >= -10) Wr.ok else if (n >= -15) Wr.wn else Wr.bad
+            "SINR", "SNR" -> if (n >= 13) Wr.ok else if (n >= 0) Wr.wn else Wr.bad
+            "RSSI" -> if (n >= -75) Wr.ok else if (n >= -95) Wr.wn else Wr.bad
+            else -> Wr.mu
+        }
+    }
+    Halaman {
+        Judul("Isyarat & Sel")
+        val v = q
+        if (v == null) KadWr { Text("Memuatkan...", color = Wr.mu) }
+        else if (!v.optBoolean("supported")) KadWr { Text("Ciri ini belum disokong pada modem ini.", color = Wr.wn) }
+        else if (v.optString("err").isNotEmpty()) KadWr { Text(v.optString("err"), color = Wr.bad) }
+        else {
+            val groups = v.optJSONArray("groups") ?: JSONArray()
+            if (groups.length() == 0) KadWr { Text("Tiada data sel buat masa ini.", color = Wr.mu) }
+            for (i in 0 until groups.length()) {
+                val g = groups.getJSONArray(i)
+                KadWr {
+                    Text("Sel " + (i + 1), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Spacer(Modifier.height(4.dp))
+                    for (j in 0 until g.length()) {
+                        val it = g.getJSONObject(j)
+                        val value = it.optString("value")
+                        if (value.isEmpty()) continue
+                        val key = it.optString("key")
+                        Row(Modifier.fillMaxWidth().padding(vertical = 3.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text(it.optString("full_name").ifEmpty { key }, color = Wr.mu, fontSize = 13.sp)
+                            Text(value + (it.optString("unit").let { u -> if (u.isNotEmpty()) " $u" else "" }), color = kualiti(key, value), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ───────────── Mod TTL/NSS ─────────────
+@Composable
+fun SubTtl() {
+    var q by remember { mutableStateOf<JSONObject?>(null) }
+    var cek by remember { mutableStateOf(0) }
+    var sibuk by remember { mutableStateOf(false) }
+    LaunchedEffect(cek) { withContext(Dispatchers.IO) { try { q = Modem.obj("/api/ttl") } catch (_: Exception) {} } }
+    Halaman {
+        Judul("Mod TTL/NSS")
+        val v = q
+        if (v == null) KadWr { Text("Memuatkan...", color = Wr.mu) }
+        else if (!v.optBoolean("supported")) KadWr { Text("Ciri ini belum disokong pada modem ini.", color = Wr.wn) }
+        else {
+            val mod = v.optString("mode")
+            KadWr {
+                Text("Mod NSS: pecutan perkakasan, lalai, paling laju. Mod VPN/TTL: elak pengesanan perkongsian data (hotspot) oleh telco, mungkin sedikit lebih perlahan.", color = Wr.mu, fontSize = 13.sp)
+                Spacer(Modifier.height(8.dp))
+                Text("Mod semasa: " + when (mod) { "nss" -> "NSS (lalai)"; "vpn" -> "VPN/TTL"; else -> "Tidak diketahui" }, color = Wr.tx, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(10.dp))
+                Btn("Guna Mod NSS (lalai)", aktif = !sibuk) { sibuk = true; bg { lapor(Modem.tindak("/api/ttl/set", "nss")); sibuk = false; cek++ } }
+                Spacer(Modifier.height(8.dp))
+                Btn("Guna Mod VPN/TTL", utama = false, aktif = !sibuk) { sibuk = true; bg { lapor(Modem.tindak("/api/ttl/set", "vpn")); sibuk = false; cek++ } }
+                Spacer(Modifier.height(10.dp))
+                Text("Rangkaian akan terputus seketika (~10 saat) selepas mod ditukar.", color = Wr.mu, fontSize = 12.sp)
+            }
+        }
+    }
+}
+
+// ───────────── Tukar SIM ─────────────
+@Composable
+fun SubSim() {
+    var q by remember { mutableStateOf<JSONObject?>(null) }
+    var cek by remember { mutableStateOf(0) }
+    var sibuk by remember { mutableStateOf(false) }
+    LaunchedEffect(cek) { withContext(Dispatchers.IO) { try { q = Modem.obj("/api/sim") } catch (_: Exception) {} } }
+    Halaman {
+        Judul("Tukar SIM")
+        val v = q
+        if (v == null) KadWr { Text("Memuatkan...", color = Wr.mu) }
+        else if (!v.optBoolean("supported")) KadWr { Text("Ciri ini belum disokong pada modem ini.", color = Wr.wn) }
+        else if (v.optString("err").isNotEmpty()) KadWr { Text(v.optString("err"), color = Wr.bad) }
+        else {
+            val cur = v.optString("current")
+            val slots = v.optJSONArray("slots") ?: JSONArray()
+            KadWr {
+                Text("SIM semasa: SIM $cur. Menukar SIM mungkin memutuskan internet seketika sehingga modem mendaftar semula ke rangkaian.", color = Wr.mu, fontSize = 13.sp)
+                Spacer(Modifier.height(10.dp))
+                for (i in 0 until slots.length()) {
+                    val s = slots.getString(i)
+                    val sama = s == cur
+                    Btn(if (sama) "SIM $s (sedang digunakan)" else "Tukar ke SIM $s", utama = !sama, aktif = !sama && !sibuk) {
+                        sibuk = true; bg { lapor(Modem.tindak("/api/sim/set", s)); sibuk = false; cek++ }
+                    }
+                    Spacer(Modifier.height(8.dp))
                 }
             }
         }
