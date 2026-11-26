@@ -404,11 +404,52 @@ fun SubBandlock() {
     var q by remember { mutableStateOf<JSONObject?>(null) }
     var cek by remember { mutableStateOf(0) }
     val pilihan = remember { mutableStateMapOf<String, Set<Int>>() }
+    var sig by remember { mutableStateOf<JSONObject?>(null) }
     LaunchedEffect(cek) {
         withContext(Dispatchers.IO) { try { q = Modem.obj("/api/bandlock") } catch (_: Exception) {} }
     }
+    LaunchedEffect(Unit) {
+        while (true) { try { sig = withContext(Dispatchers.IO) { Modem.obj("/api/signal") } } catch (_: Exception) {}; delay(5000) }
+    }
+    fun sigKualiti(key: String, v: String): Color {
+        val n = v.toDoubleOrNull() ?: return Wr.mu
+        return when (key) {
+            "RSRP" -> if (n >= -90) Wr.ok else if (n >= -105) Wr.wn else Wr.bad
+            "RSRQ" -> if (n >= -10) Wr.ok else if (n >= -15) Wr.wn else Wr.bad
+            "SINR", "SNR" -> if (n >= 13) Wr.ok else if (n >= 0) Wr.wn else Wr.bad
+            "RSSI" -> if (n >= -75) Wr.ok else if (n >= -95) Wr.wn else Wr.bad
+            else -> Wr.mu
+        }
+    }
     Halaman {
         Judul("Kunci Band")
+        val sv = sig
+        if (sv != null && sv.optBoolean("supported")) {
+            val groups = sv.optJSONArray("groups") ?: JSONArray()
+            if (groups.length() > 0) {
+                KadWr {
+                    Text("Isyarat Semasa", color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    for (gi in 0 until groups.length()) {
+                        val g = groups.getJSONArray(gi)
+                        if (groups.length() > 1) {
+                            Spacer(Modifier.height(if (gi == 0) 4.dp else 10.dp))
+                            Text("Sel " + (gi + 1), color = Wr.mu, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
+                        for (j in 0 until g.length()) {
+                            val it = g.getJSONObject(j)
+                            val value = it.optString("value")
+                            if (value.isEmpty()) continue
+                            val key = it.optString("key")
+                            Row(Modifier.fillMaxWidth().padding(vertical = 3.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(it.optString("full_name").ifEmpty { key }, color = Wr.mu, fontSize = 13.sp)
+                                Text(value + (it.optString("unit").let { u -> if (u.isNotEmpty()) " $u" else "" }), color = sigKualiti(key, value), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            }
+                        }
+                    }
+                }
+                Spacer(Modifier.height(10.dp))
+            }
+        }
         val v = q
         when {
             v == null -> KadWr { Text("Memuatkan...", color = Wr.mu) }

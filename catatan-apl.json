@@ -1,11 +1,20 @@
 {
-  "title": "Baiki: Cari modem automatik",
+  "title": "Kunci Band kini papar Isyarat Semasa terus",
   "items": [
-    "\"Cari modem automatik\" kini turut cuba alamat get-away WiFi telefon anda sendiri — bukan hanya 192.168.8.1 / 192.168.1.1 seperti sebelum ini.",
-    "Membetulkan isu modem tidak dijumpai pada unit yang alamat IP panelnya berbeza (cth 192.168.2.1).",
+    "Skrin Kunci Band kini turut papar Isyarat Semasa (RSRP/SINR/RSRQ/Jalur), dikemas kini setiap 5 saat — mudah pantau kesan kunci band tanpa tukar skrin.",
     "Penambahbaikan dalaman. Semua fungsi sama."
   ],
   "history": [
+    {
+      "version": "1.0.83",
+      "date": "2026-11-26",
+      "title": "Baiki: Cari modem automatik",
+      "items": [
+        "\"Cari modem automatik\" kini turut cuba alamat get-away WiFi telefon anda sendiri — bukan hanya 192.168.8.1 / 192.168.1.1 seperti sebelum ini.",
+        "Membetulkan isu modem tidak dijumpai pada unit yang alamat IP panelnya berbeza (cth 192.168.2.1).",
+        "Penambahbaikan dalaman. Semua fungsi sama."
+      ]
+    },
     {
       "version": "1.0.82",
       "date": "2026-11-26",
