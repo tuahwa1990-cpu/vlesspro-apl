@@ -1514,7 +1514,8 @@
     "Dikemas kini setiap 2 saat (dahulu 5 saat) untuk paparan lebih responsif.": "Now updates every 2 seconds (previously 5 seconds) for a more responsive display.",
     "Isyarat Semasa kini sekelip mata": "Current Signal is now instant",
     "Baca terus daripada binari modem (bukan skrip yang ambil ~2 saat kumpul maklumat lain yang tak berkaitan) — bacaan isyarat sekarang siap dalam masa kurang 1 saat.": "Now reads directly from the modem's own binary (instead of a script that spent ~2 seconds gathering unrelated info) — signal readings now complete in under 1 second.",
-    "Dikemas kini setiap saat (dahulu 2 saat) untuk pantau paling responsif semasa gerakkan modem.": "Now updates every second (previously 2 seconds) for the most responsive monitoring while moving the modem."
+    "Dikemas kini setiap saat (dahulu 2 saat) untuk pantau paling responsif semasa gerakkan modem.": "Now updates every second (previously 2 seconds) for the most responsive monitoring while moving the modem.",
+    "RAM peranti ini terhad — hanya senarai \\\"Hagezi Light\\\" disokong.": "This device’s RAM is limited — only the \"Hagezi Light\" list is supported."
   },
   "zh": {
     "Mod VPN": "VPN 模式",
@@ -2272,7 +2273,8 @@
     "Guna Nilai Ini": "使用此值",
     "Rangkaian akan terputus seketika (~5 saat) selepas ditukar.": "更改后网络将短暂中断（约 5 秒）。",
     "Tukar SIM": "切换 SIM",
-    "Pilih band, masa (HH:MM), kemudian tekan Tambah. Kosongkan pilihan band untuk jadual buka kunci (automatik).": "选择频段和时间（HH:MM），然后点击添加。不选频段即为解锁（自动）计划。"
+    "Pilih band, masa (HH:MM), kemudian tekan Tambah. Kosongkan pilihan band untuk jadual buka kunci (automatik).": "选择频段和时间（HH:MM），然后点击添加。不选频段即为解锁（自动）计划。",
+    "RAM peranti ini terhad — hanya senarai \\\"Hagezi Light\\\" disokong.": "此设备内存有限 — 仅支持 \"Hagezi Light\" 名单。"
   },
   "ta": {
     "Mod VPN": "VPN முறை",
@@ -2820,6 +2822,7 @@
     "Guna Nilai Ini": "இந்த மதிப்பைப் பயன்படுத்து",
     "Rangkaian akan terputus seketika (~5 saat) selepas ditukar.": "மாற்றப்பட்ட பிறகு நெட்வொர்க் சிறிது நேரம் (~5 வினாடிகள்) துண்டிக்கப்படும்.",
     "Tukar SIM": "சிம் மாற்று",
-    "Pilih band, masa (HH:MM), kemudian tekan Tambah. Kosongkan pilihan band untuk jadual buka kunci (automatik).": "பேண்டுகளையும் நேரத்தையும் (HH:MM) தேர்ந்தெடுத்து, சேர் என்பதைத் தட்டவும். பேண்டுகளைத் தேர்வு செய்யாவிட்டால் திறத்தல் (தானியங்கி) அட்டவணையாகும்."
+    "Pilih band, masa (HH:MM), kemudian tekan Tambah. Kosongkan pilihan band untuk jadual buka kunci (automatik).": "பேண்டுகளையும் நேரத்தையும் (HH:MM) தேர்ந்தெடுத்து, சேர் என்பதைத் தட்டவும். பேண்டுகளைத் தேர்வு செய்யாவிட்டால் திறத்தல் (தானியங்கி) அட்டவணையாகும்.",
+    "RAM peranti ini terhad — hanya senarai \\\"Hagezi Light\\\" disokong.": "இந்த சாதனத்தின் RAM வரையறுக்கப்பட்டுள்ளது — \"Hagezi Light\" பட்டியல் மட்டுமே ஆதரிக்கப்படுகிறது."
   }
 }
