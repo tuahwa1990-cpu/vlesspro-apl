@@ -135,12 +135,14 @@ fun SubAdblock() {
     var sen by remember { mutableStateOf(setOf<String>()) }
     var hitam by remember { mutableStateOf("") }
     var putih by remember { mutableStateOf("") }
+    var blokDoh by remember { mutableStateOf(false) }
     LaunchedEffect(d.value) {
         d.value?.optJSONObject("cfg")?.let { c ->
             on = c.optBoolean("on")
             sen = (c.optJSONArray("lists") ?: JSONArray()).let { a -> (0 until a.length()).map { a.getString(it) }.toSet() }
             hitam = (c.optJSONArray("black") ?: JSONArray()).let { a -> (0 until a.length()).joinToString("\n") { a.getString(it) } }
             putih = (c.optJSONArray("white") ?: JSONArray()).let { a -> (0 until a.length()).joinToString("\n") { a.getString(it) } }
+            blokDoh = c.optBoolean("blokDoh")
         }
     }
     fun senarai(t: String) = JSONArray(t.split(Regex("[\\s,]+")).filter { it.isNotBlank() })
@@ -169,7 +171,10 @@ fun SubAdblock() {
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(putih, { putih = it }, label = { Text("Senarai putih (dikecualikan)") }, minLines = 2, modifier = Modifier.fillMaxWidth(), colors = medan())
             Spacer(Modifier.height(10.dp))
-            Btn("Simpan") { bg { lapor(Modem.tindak("/api/adblock", JSONObject().put("on", on).put("lists", JSONArray(sen.toList())).put("black", senarai(hitam)).put("white", senarai(putih)).toString())) } }
+            Suis("Sekat DNS-over-HTTPS/TLS (DoH/DoT)", blokDoh) { blokDoh = it }
+            Text("Tutup laluan pintas: paksa semua peranti guna DNS modem sahaja, supaya peranti yang cuba guna DNS sendiri (cth Chrome \"Secure DNS\", Firefox) tidak dapat mengelak penapisan di atas.",
+                color = Wr.mu, fontSize = 11.sp, modifier = Modifier.padding(bottom = 6.dp))
+            Btn("Simpan") { bg { lapor(Modem.tindak("/api/adblock", JSONObject().put("on", on).put("lists", JSONArray(sen.toList())).put("black", senarai(hitam)).put("white", senarai(putih)).put("blokDoh", blokDoh).toString())) } }
             Spacer(Modifier.height(8.dp))
             Btn("Kemas kini senarai", false) { bg { lapor(Modem.tindak("/api/adblock/update")) } }
         }

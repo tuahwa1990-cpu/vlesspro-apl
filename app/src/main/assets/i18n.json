@@ -1518,7 +1518,9 @@
     "RAM peranti ini terhad — hanya senarai \\\"Hagezi Light\\\" disokong.": "This device’s RAM is limited — only the \"Hagezi Light\" list is supported.",
     "Sekat Iklan (Tanpa Node)": "Ad Blocker (No Node)",
     "Tapis iklan terus pada telefon melalui VPN tempatan — tiada sambungan ke mana-mana pelayan atau modem diperlukan.": "Filters ads directly on the phone via a local VPN — no connection to any server or modem is needed.",
-    "Menghidupkan ini akan memutuskan pelayan semasa.": "Turning this on will disconnect the current server."
+    "Menghidupkan ini akan memutuskan pelayan semasa.": "Turning this on will disconnect the current server.",
+    "Sekat DNS-over-HTTPS/TLS (DoH/DoT)": "Block DNS-over-HTTPS/TLS (DoH/DoT)",
+    "Tutup laluan pintas: paksa semua peranti guna DNS modem sahaja, supaya peranti yang cuba guna DNS sendiri (cth Chrome \\\"Secure DNS\\\", Firefox) tidak dapat mengelak penapisan di atas.": "Closes the bypass: forces every device to use the modem’s own DNS, so a device that tries its own DNS (e.g. Chrome \"Secure DNS\", Firefox) cannot evade the filtering above."
   },
   "zh": {
     "Mod VPN": "VPN 模式",
@@ -2280,7 +2282,9 @@
     "RAM peranti ini terhad — hanya senarai \\\"Hagezi Light\\\" disokong.": "此设备内存有限 — 仅支持 \"Hagezi Light\" 名单。",
     "Sekat Iklan (Tanpa Node)": "广告拦截（无需节点）",
     "Tapis iklan terus pada telefon melalui VPN tempatan — tiada sambungan ke mana-mana pelayan atau modem diperlukan.": "通过本地 VPN 直接在手机上过滤广告 — 无需连接任何服务器或调制解调器。",
-    "Menghidupkan ini akan memutuskan pelayan semasa.": "开启此功能将断开当前服务器。"
+    "Menghidupkan ini akan memutuskan pelayan semasa.": "开启此功能将断开当前服务器。",
+    "Sekat DNS-over-HTTPS/TLS (DoH/DoT)": "屏蔽 DNS-over-HTTPS/TLS（DoH/DoT）",
+    "Tutup laluan pintas: paksa semua peranti guna DNS modem sahaja, supaya peranti yang cuba guna DNS sendiri (cth Chrome \\\"Secure DNS\\\", Firefox) tidak dapat mengelak penapisan di atas.": "关闭绕过漏洞：强制所有设备只使用调制解调器的 DNS，使试图使用自己 DNS（如 Chrome“安全 DNS”、Firefox）的设备无法规避上述过滤。"
   },
   "ta": {
     "Mod VPN": "VPN முறை",
@@ -2832,6 +2836,8 @@
     "RAM peranti ini terhad — hanya senarai \\\"Hagezi Light\\\" disokong.": "இந்த சாதனத்தின் RAM வரையறுக்கப்பட்டுள்ளது — \"Hagezi Light\" பட்டியல் மட்டுமே ஆதரிக்கப்படுகிறது.",
     "Sekat Iklan (Tanpa Node)": "விளம்பர தடுப்பான் (நோட் இல்லாமல்)",
     "Tapis iklan terus pada telefon melalui VPN tempatan — tiada sambungan ke mana-mana pelayan atau modem diperlukan.": "உள்ளூர் VPN மூலம் ரெவ்வில் நேராக விளம்பரங்களை வடிகட்டுகிறது — எந்த சர்வரையையும் மான்வினையையும் இணைக்க தேவையில்லை.",
-    "Menghidupkan ini akan memutuskan pelayan semasa.": "இதனை இயக்கினால் தற்போதைய சர்வர் துணிக்கப்படும்."
+    "Menghidupkan ini akan memutuskan pelayan semasa.": "இதனை இயக்கினால் தற்போதைய சர்வர் துணிக்கப்படும்.",
+    "Sekat DNS-over-HTTPS/TLS (DoH/DoT)": "DNS-over-HTTPS/TLS (DoH/DoT) தடுக்கு",
+    "Tutup laluan pintas: paksa semua peranti guna DNS modem sahaja, supaya peranti yang cuba guna DNS sendiri (cth Chrome \\\"Secure DNS\\\", Firefox) tidak dapat mengelak penapisan di atas.": "பைபாஸ் வழியை மூடுகிறது: எல்லா சாதனங்களும் மான்வினின் சொந்த DNS-ஐ தான் பயன்பட வேண்டும் என கட்டாயப்படுத்துகிறது."
   }
 }
