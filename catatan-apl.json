@@ -1,11 +1,22 @@
 {
-  "title": "Isyarat Semasa kini sekelip mata",
+  "title": "Sekat Iklan kini boleh tanpa pelayan, serta sekat DNS pihak ketiga",
   "items": [
-    "Baca terus daripada binari modem (bukan skrip yang ambil ~2 saat kumpul maklumat lain yang tak berkaitan) — bacaan isyarat sekarang siap dalam masa kurang 1 saat.",
-    "Dikemas kini setiap saat (dahulu 2 saat) untuk pantau paling responsif semasa gerakkan modem.",
+    "Ciri baharu “Sekat Iklan (Tanpa Node)”: sekat iklan terus pada telefon walaupun tiada pelayan VLESS/VMess/SSH disambung — hidupkan sahaja suis, tiada sambungan pelayan diperlukan.",
+    "Ciri baharu “Sekat DNS pihak ketiga (DoH/DoT)”: halang apl yang cuba guna DNS sendiri (cth Chrome “Secure DNS”) daripada mengelak Sekat Iklan — kini ada pada VPN Telefon dan juga kawalan Sekat Iklan pada modem (B618-65D, AW1000, AW1000 Ultra).",
+    "Baiki: Sekat Iklan pada modem dengan RAM terhad kini paksa guna senarai “Hagezi Light” sahaja, supaya tidak gagal akibat kehabisan ingatan.",
     "Penambahbaikan dalaman. Semua fungsi sama."
   ],
   "history": [
+    {
+      "version": "1.0.87 – 1.0.95",
+      "date": "2026-11-26",
+      "title": "Isyarat Semasa kini sekelip mata",
+      "items": [
+        "Baca terus daripada binari modem (bukan skrip yang ambil ~2 saat kumpul maklumat lain yang tak berkaitan) — bacaan isyarat sekarang siap dalam masa kurang 1 saat.",
+        "Dikemas kini setiap saat (dahulu 2 saat) untuk pantau paling responsif semasa gerakkan modem.",
+        "Penambahbaikan dalaman. Semua fungsi sama."
+      ]
+    },
     {
       "version": "1.0.86",
       "date": "2026-11-26",
