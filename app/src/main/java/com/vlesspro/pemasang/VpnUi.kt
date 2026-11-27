@@ -139,6 +139,7 @@ private fun SkrinUtama(ke: (String) -> Unit) {
     var jalan by remember { mutableStateOf(VpnPerkhidmatan.jalan) }
     var sibuk by remember { mutableStateOf(VpnPerkhidmatan.sibuk) }
     var memulih by remember { mutableStateOf(VpnPerkhidmatan.memulih) }
+    var modeLokal by remember { mutableStateOf(VpnPerkhidmatan.modeLokal) }
     var ralat by remember { mutableStateOf("") }
     var tempoh by remember { mutableStateOf(0L) }
     var turun by remember { mutableStateOf(0L) }
@@ -160,7 +161,7 @@ private fun SkrinUtama(ke: (String) -> Unit) {
         var lt = 0L; var ln = 0L; var lm = 0L
         while (true) {
             while (!St.depan) delay(1000)
-            jalan = VpnPerkhidmatan.jalan; sibuk = VpnPerkhidmatan.sibuk; memulih = VpnPerkhidmatan.memulih; ralat = VpnPerkhidmatan.ralat
+            jalan = VpnPerkhidmatan.jalan; sibuk = VpnPerkhidmatan.sibuk; memulih = VpnPerkhidmatan.memulih; ralat = VpnPerkhidmatan.ralat; modeLokal = VpnPerkhidmatan.modeLokal
             if (jalan) {
                 tempoh = System.currentTimeMillis() - VpnPerkhidmatan.masa0
                 val st = withContext(Dispatchers.IO) { VpnPerkhidmatan.statistik() }
@@ -226,6 +227,26 @@ private fun SkrinUtama(ke: (String) -> Unit) {
         if (senarai.isEmpty()) { St.toast(Bhs.t("Tambah pelayan dahulu.")); return }
         val i = VpnService.prepare(ctx)
         if (i != null) minta.launch(i) else sambung()
+    }
+    fun sambungLokal() { VpnPerkhidmatan.mula(ctx, VlessPautan.PAUTAN_LOKAL) }
+    val mintaLokal = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
+        if (r.resultCode == android.app.Activity.RESULT_OK) sambungLokal() else St.toast(Bhs.t("Kebenaran VPN tidak diberi."))
+    }
+    /** Sekat Iklan (Tanpa Node): tiada pelayan diperlukan. Jika pelayan lain sedang aktif, putuskan dahulu. */
+    fun togolLokal() {
+        if (jalan && modeLokal) { VpnPerkhidmatan.henti(ctx); return }
+        if (jalan || sibuk) {
+            skop.launch {
+                VpnPerkhidmatan.henti(ctx)
+                var cubaan = 0
+                while ((VpnPerkhidmatan.jalan || VpnPerkhidmatan.sibuk) && cubaan < 50) { delay(100); cubaan++ }
+                val i = VpnService.prepare(ctx)
+                if (i != null) mintaLokal.launch(i) else sambungLokal()
+            }
+            return
+        }
+        val i = VpnService.prepare(ctx)
+        if (i != null) mintaLokal.launch(i) else sambungLokal()
     }
     /** Pilih pelayan ke-i dan terus sambung dengannya, tukar terus walaupun sedang bersambung ke pelayan lain. */
     fun aktifkan(i: Int) {
@@ -373,6 +394,19 @@ private fun SkrinUtama(ke: (String) -> Unit) {
                     }
                 }
             }
+        }
+        KadWr {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(Bhs.t("Sekat Iklan (Tanpa Node)"), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Text(Bhs.t("Tapis iklan terus pada telefon melalui VPN tempatan — tiada sambungan ke mana-mana pelayan atau modem diperlukan."),
+                        color = Wr.mu, fontSize = 12.sp, modifier = Modifier.padding(top = 2.dp))
+                }
+                Spacer(Modifier.width(8.dp))
+                Switch(checked = jalan && modeLokal, onCheckedChange = { togolLokal() }, enabled = !sibuk,
+                    colors = SwitchDefaults.colors(checkedTrackColor = Wr.ac))
+            }
+            if (jalan && !modeLokal) Text(Bhs.t("Menghidupkan ini akan memutuskan pelayan semasa."), color = Wr.wn, fontSize = 11.sp, modifier = Modifier.padding(top = 6.dp))
         }
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(Bhs.t("Pelayan"), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 17.sp, modifier = Modifier.weight(1f))

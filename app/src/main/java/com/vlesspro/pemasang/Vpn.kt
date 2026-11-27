@@ -189,6 +189,13 @@ object VlessPautan {
         return Hasil(s.nama, out, "SSH", if (s.payload.isNotBlank()) "payload" else "tcp", if (s.sni.isNotBlank()) "tls" else "none", s.host, s.port, s)
     }
 
+    /** VPN tempatan: tiada nod VLESS/VMess langsung — trafik terus ke internet (freedom), hanya
+     * untuk sekat iklan (geosite:category-ads-all) pada peranti, walaupun tiada pelayan disambung. */
+    private fun lokal(): Hasil {
+        val out = JSONObject().put("tag", "proxy").put("protocol", "freedom")
+        return Hasil(Bhs.t("Sekat Iklan (Tanpa Node)"), out, "LOCAL", "direct", "none", "", 0)
+    }
+
     /** Medan boleh sunting bagi satu pautan vless:// (untuk skrin sunting penuh, seperti panel web). */
     class MedanVless(
         var nama: String = "", var uuid: String = "", var host: String = "", var port: String = "443",
@@ -264,11 +271,13 @@ object VlessPautan {
     }
 
     val skema = listOf("vless://", "vmess://", "trojan://", "ss://", "ssh://")
+    const val PAUTAN_LOKAL = "local://adblock"
 
     fun hurai(pautan: String): Hasil {
         val p = pautan.trim()
         try {
             return when {
+                p == PAUTAN_LOKAL -> lokal()
                 p.startsWith("vless://") -> vless(p)
                 p.startsWith("vmess://") -> vmess(p)
                 p.startsWith("trojan://") -> trojan(p)
@@ -307,7 +316,8 @@ object VlessPautan {
             keluar.put(JSONObject().put("tag", "dns-out").put("protocol", "dns"))
             peraturan.put(JSONObject().put("type", "field").put("inboundTag", JSONArray().put("socks")).put("network", "udp").put("port", "53").put("outboundTag", "dns-out"))
         }
-        if (ctx != null && VpnTetapan.routingIklan(ctx)) {
+        // Mod tempatan (tanpa nod) semestinya sekat iklan — itulah sahaja tujuannya.
+        if ((ctx != null && VpnTetapan.routingIklan(ctx)) || h.jenis == "LOCAL") {
             keluar.put(JSONObject().put("tag", "block").put("protocol", "blackhole"))
             // geosite:category-ads-all — senarai penuh (200,000+ domain) dibina ke dalam geosite.dat
             // yang disalin daripada aset (lihat VpnServis.pastikanGeosite), sama seperti v2rayNG.

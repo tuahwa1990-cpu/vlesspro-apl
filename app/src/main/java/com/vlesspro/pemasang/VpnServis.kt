@@ -27,6 +27,8 @@ class VpnPerkhidmatan : VpnService() {
         @Volatile var ralat = ""
         @Volatile var nama = ""
         @Volatile var masa0 = 0L
+        /** True jika sambungan semasa ialah mod tempatan (Sekat Iklan Tanpa Node), bukan pelayan VLESS/VMess/SSH. */
+        @Volatile var modeLokal = false
         const val HENTI = "com.vlesspro.pemasang.VPN_HENTI"
         const val PORT = 10808
         const val PORT_SSH = 10809
@@ -121,7 +123,7 @@ class VpnPerkhidmatan : VpnService() {
         }
         val bin = File(applicationInfo.nativeLibraryDir, "libxray.so")
         if (!bin.exists()) throw RuntimeException(Bhs.t("Teras Xray tiada dalam binaan apl ini."))
-        if (VpnTetapan.routingIklan(this)) pastikanGeosite()
+        if (VpnTetapan.routingIklan(this) || h.jenis == "LOCAL") pastikanGeosite()
         val cfg = File(filesDir, "vpn-xray.json").apply { writeText(VlessPautan.konfig(h, PORT, this@VpnPerkhidmatan)) }
         val pb = ProcessBuilder(bin.path, "run", "-c", cfg.path).redirectErrorStream(true)
         pb.environment()["XRAY_LOCATION_ASSET"] = filesDir.path
@@ -168,6 +170,7 @@ class VpnPerkhidmatan : VpnService() {
         if (!lesen && VpnLesen.berbayar(h)) throw SekatanVpn(VpnLesen.mesej(VpnLesen.nama(h)))
         hasil = h
         nama = h.nama
+        modeLokal = h.jenis == "LOCAL"
         notif(Bhs.f("Menyambung ke {0}", h.nama))
         catat("Menyambung (" + h.ringkas + ")")
         mulaTeras(h)
@@ -382,7 +385,7 @@ class VpnPerkhidmatan : VpnService() {
         try { tun?.close() } catch (_: Exception) {}
         tun = null
         if (jalan) catat("Diputuskan")
-        jalan = false; sibuk = false; memulih = false
+        jalan = false; sibuk = false; memulih = false; modeLokal = false
         stopForeground(true)
         stopSelf()
         VpnKongsi.kemaskini(this)
