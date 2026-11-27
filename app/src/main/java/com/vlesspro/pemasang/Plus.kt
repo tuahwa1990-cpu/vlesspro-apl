@@ -12,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -146,14 +147,21 @@ fun SubAdblock() {
     Halaman {
         Judul("Sekat iklan")
         val v = d.value
+        if (v != null && !v.optBoolean("ram", true)) {
+            KadWr { Text("Tidak disokong: RAM peranti tidak mencukupi.", color = Wr.wn) }
+            return@Halaman
+        }
+        val ramLight = v?.optBoolean("ramLight", false) ?: false
         KadWr {
             Suis("Hidupkan sekat iklan", on) { on = it }
+            if (ramLight) Text("RAM peranti ini terhad — hanya senarai \"Hagezi Light\" disokong.", color = Wr.wn, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp, bottom = 4.dp))
             val lists = v?.optJSONArray("lists")
             if (lists != null) for (i in 0 until lists.length()) {
                 val l = lists.getJSONObject(i)
                 val id = l.optString("id")
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(id in sen, { c -> sen = if (c) sen + id else sen - id }, colors = CheckboxDefaults.colors(checkedColor = Wr.ac))
+                val dis = ramLight && id != "hagezi-light"
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = if (dis) Modifier.alpha(0.4f) else Modifier) {
+                    Checkbox(id in sen, { c -> sen = if (c) sen + id else sen - id }, enabled = !dis, colors = CheckboxDefaults.colors(checkedColor = Wr.ac))
                     Column { Text(l.optString("name"), color = Wr.tx, fontSize = 14.sp); Text(Bhs.f("{0} domain", l.optInt("n")), color = Wr.mu, fontSize = 11.sp) }
                 }
             }
