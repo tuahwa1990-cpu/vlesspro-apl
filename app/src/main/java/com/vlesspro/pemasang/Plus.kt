@@ -747,7 +747,9 @@ fun SubTtl() {
     var q by remember { mutableStateOf<JSONObject?>(null) }
     var cek by remember { mutableStateOf(0) }
     var sibuk by remember { mutableStateOf(false) }
+    var nilaiTtl by remember { mutableStateOf("") }
     LaunchedEffect(cek) { withContext(Dispatchers.IO) { try { q = Modem.obj("/api/ttl") } catch (_: Exception) {} } }
+    LaunchedEffect(q) { q?.optJSONObject("customTtl")?.let { if (nilaiTtl.isEmpty()) nilaiTtl = it.optInt("value", 64).toString() } }
     Halaman {
         Judul("Mod TTL/NSS")
         val v = q
@@ -765,6 +767,24 @@ fun SubTtl() {
                 Btn("Guna Mod VPN/TTL", utama = false, aktif = !sibuk) { sibuk = true; bg { lapor(Modem.tindak("/api/ttl/set", "vpn")); sibuk = false; cek++ } }
                 Spacer(Modifier.height(10.dp))
                 Text("Rangkaian akan terputus seketika (~10 saat) selepas mod ditukar.", color = Wr.mu, fontSize = 12.sp)
+            }
+            val ct = v.optJSONObject("customTtl")
+            if (ct != null && ct.optBoolean("supported")) {
+                Spacer(Modifier.height(10.dp))
+                KadWr {
+                    Text("Nilai TTL Tersendiri", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Wr.tx)
+                    Spacer(Modifier.height(6.dp))
+                    Text("Nilai TTL paket IPv4 (dan had hop IPv6 yang sepadan) dikenakan pada SEMUA trafik, tidak kira mod NSS/VPN di atas. Nilai lalai telefon/PC ialah 64.", color = Wr.mu, fontSize = 13.sp)
+                    Spacer(Modifier.height(8.dp))
+                    Text("Nilai semasa: " + ct.optInt("value", 64), color = Wr.tx, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(nilaiTtl, { nilaiTtl = it }, singleLine = true, label = { Text("Nilai TTL (1-255)") }, modifier = Modifier.fillMaxWidth(), colors = medan(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+                    Spacer(Modifier.height(8.dp))
+                    Btn("Guna Nilai Ini", aktif = !sibuk) { sibuk = true; bg { lapor(Modem.tindak("/api/ttl/custom/set", nilaiTtl)); sibuk = false; cek++ } }
+                    Spacer(Modifier.height(10.dp))
+                    Text("Rangkaian akan terputus seketika (~5 saat) selepas ditukar.", color = Wr.mu, fontSize = 12.sp)
+                }
             }
         }
     }
