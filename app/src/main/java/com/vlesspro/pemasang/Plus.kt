@@ -394,6 +394,7 @@ private val grupBand = listOf(
     GrupBand("3", "Band 3G UMTS", "current_umts_band", "support_umts_band"),
 )
 private fun bandLabel(rat: String, b: Int) = (if (rat == "5") "n" else "B") + b
+private fun ratColor(rat: String): Color = when (rat) { "5" -> Wr.ac2; "4" -> Wr.ac; else -> Wr.mu }
 private fun parseBand(s: String?): List<Int> {
     if (s.isNullOrEmpty() || s == "0") return emptyList()
     return s.split("/").mapNotNull { it.filter { c -> c.isDigit() }.toIntOrNull() }.filter { it != 0 }
@@ -441,6 +442,15 @@ private fun SigGauge(label: String, value: String, unit: String, pct: Float, col
         }
         Spacer(Modifier.height(4.dp))
         Text(label, color = Wr.mu, fontSize = 10.sp, maxLines = 1)
+    }
+}
+
+@Composable
+private fun RatBadge(text: String, color: Color) {
+    Box(Modifier.clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+        .background(color.copy(alpha = 0.18f))
+        .padding(horizontal = 10.dp, vertical = 4.dp)) {
+        Text(text, color = color, fontSize = 12.sp, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -520,13 +530,15 @@ fun SubBandlock() {
                         pilihan[g.rat] = storedMap[g.rat] ?: cur.toSet()
                     }
                 }
-                KadWr {
-                    Text("Pilih sekurang-kurangnya satu band bagi setiap jenis yang disokong, atau tekan Buka Kunci untuk kembali automatik.", color = Wr.mu, fontSize = 12.sp)
-                    grupBand.forEach { g ->
-                        val sup = parseBand(data.optString(g.sup))
-                        val cur = parseBand(data.optString(g.cur))
+                Text("Pilih sekurang-kurangnya satu band bagi setiap jenis yang disokong, atau tekan Buka Kunci untuk kembali automatik.", color = Wr.mu, fontSize = 12.sp)
+                Spacer(Modifier.height(10.dp))
+                grupBand.forEach { g ->
+                    val warna = ratColor(g.rat)
+                    val sup = parseBand(data.optString(g.sup))
+                    val cur = parseBand(data.optString(g.cur))
+                    KadWr {
+                        RatBadge(g.judul, warna)
                         Spacer(Modifier.height(10.dp))
-                        Text(g.judul, color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                         if (sup.isEmpty()) {
                             Text("Tiada band disokong untuk jenis ini.", color = Wr.mu, fontSize = 12.sp)
                         } else {
@@ -535,22 +547,39 @@ fun SubBandlock() {
                                     baris.forEach { b ->
                                         val dipilih = pilihan[g.rat]?.contains(b) == true
                                         Row(Modifier.clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
-                                            .background(if (dipilih) Wr.ac.copy(alpha = 0.22f) else Wr.kad2)
-                                            .border(1.dp, if (dipilih) Wr.ac else Wr.garis, androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
+                                            .background(if (dipilih) warna.copy(alpha = 0.22f) else Wr.kad2)
+                                            .border(1.dp, if (dipilih) warna else Wr.garis, androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
                                             .clickable {
                                                 val s = pilihan[g.rat].orEmpty().toMutableSet()
                                                 if (s.contains(b)) s.remove(b) else s.add(b)
                                                 pilihan[g.rat] = s
                                             }.padding(horizontal = 10.dp, vertical = 6.dp)) {
-                                            Text(bandLabel(g.rat, b), color = Wr.tx, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                                            Text((if (dipilih) "✓ " else "") + bandLabel(g.rat, b), color = if (dipilih) warna else Wr.tx, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                                         }
+                                    }
+                                }
+                                Spacer(Modifier.height(6.dp))
+                            }
+                        }
+                        if (cur.isNotEmpty()) {
+                            Spacer(Modifier.height(2.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                                Text("Semasa:", color = Wr.mu, fontSize = 11.sp)
+                                cur.forEach { b ->
+                                    Box(Modifier.clip(androidx.compose.foundation.shape.RoundedCornerShape(7.dp))
+                                        .background(warna.copy(alpha = 0.12f))
+                                        .border(1.dp, warna.copy(alpha = 0.5f), androidx.compose.foundation.shape.RoundedCornerShape(7.dp))
+                                        .padding(horizontal = 7.dp, vertical = 2.dp)) {
+                                        Text(bandLabel(g.rat, b), color = warna, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                                     }
                                 }
                             }
                         }
-                        if (cur.isNotEmpty()) Text("Semasa:" + " " + cur.joinToString(", ") { bandLabel(g.rat, it) }, color = Wr.mu, fontSize = 12.sp)
                     }
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(10.dp))
+                }
+                KadWr {
                     Btn("Terapkan Kunci Band") {
                         val arg = grupBand.mapNotNull { g ->
                             val s = pilihan[g.rat].orEmpty()
