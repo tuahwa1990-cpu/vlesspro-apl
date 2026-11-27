@@ -1520,7 +1520,9 @@
     "Tapis iklan terus pada telefon melalui VPN tempatan — tiada sambungan ke mana-mana pelayan atau modem diperlukan.": "Filters ads directly on the phone via a local VPN — no connection to any server or modem is needed.",
     "Menghidupkan ini akan memutuskan pelayan semasa.": "Turning this on will disconnect the current server.",
     "Sekat DNS-over-HTTPS/TLS (DoH/DoT)": "Block DNS-over-HTTPS/TLS (DoH/DoT)",
-    "Tutup laluan pintas: paksa semua peranti guna DNS modem sahaja, supaya peranti yang cuba guna DNS sendiri (cth Chrome \\\"Secure DNS\\\", Firefox) tidak dapat mengelak penapisan di atas.": "Closes the bypass: forces every device to use the modem’s own DNS, so a device that tries its own DNS (e.g. Chrome \"Secure DNS\", Firefox) cannot evade the filtering above."
+    "Tutup laluan pintas: paksa semua peranti guna DNS modem sahaja, supaya peranti yang cuba guna DNS sendiri (cth Chrome \\\"Secure DNS\\\", Firefox) tidak dapat mengelak penapisan di atas.": "Closes the bypass: forces every device to use the modem’s own DNS, so a device that tries its own DNS (e.g. Chrome \"Secure DNS\", Firefox) cannot evade the filtering above.",
+    "Sekat DNS pihak ketiga (DoH/DoT)": "Block third-party DNS (DoH/DoT)",
+    "Sekat port 853 (DoT) dan port 443 ke pelayan DoH awam yang diketahui (Cloudflare, Google, dll), supaya apl yang guna DNS sendiri (cth Chrome \\\"Secure DNS\\\") tidak terlepas daripada Sekat iklan asas di atas.": "Blocks port 853 (DoT) and port 443 to known public DoH resolvers (Cloudflare, Google, etc.), so an app using its own DNS (e.g. Chrome \"Secure DNS\") cannot slip past the basic ad blocking above."
   },
   "zh": {
     "Mod VPN": "VPN 模式",
@@ -2284,7 +2286,9 @@
     "Tapis iklan terus pada telefon melalui VPN tempatan — tiada sambungan ke mana-mana pelayan atau modem diperlukan.": "通过本地 VPN 直接在手机上过滤广告 — 无需连接任何服务器或调制解调器。",
     "Menghidupkan ini akan memutuskan pelayan semasa.": "开启此功能将断开当前服务器。",
     "Sekat DNS-over-HTTPS/TLS (DoH/DoT)": "屏蔽 DNS-over-HTTPS/TLS（DoH/DoT）",
-    "Tutup laluan pintas: paksa semua peranti guna DNS modem sahaja, supaya peranti yang cuba guna DNS sendiri (cth Chrome \\\"Secure DNS\\\", Firefox) tidak dapat mengelak penapisan di atas.": "关闭绕过漏洞：强制所有设备只使用调制解调器的 DNS，使试图使用自己 DNS（如 Chrome“安全 DNS”、Firefox）的设备无法规避上述过滤。"
+    "Tutup laluan pintas: paksa semua peranti guna DNS modem sahaja, supaya peranti yang cuba guna DNS sendiri (cth Chrome \\\"Secure DNS\\\", Firefox) tidak dapat mengelak penapisan di atas.": "关闭绕过漏洞：强制所有设备只使用调制解调器的 DNS，使试图使用自己 DNS（如 Chrome“安全 DNS”、Firefox）的设备无法规避上述过滤。",
+    "Sekat DNS pihak ketiga (DoH/DoT)": "屏蔽第三方 DNS（DoH/DoT）",
+    "Sekat port 853 (DoT) dan port 443 ke pelayan DoH awam yang diketahui (Cloudflare, Google, dll), supaya apl yang guna DNS sendiri (cth Chrome \\\"Secure DNS\\\") tidak terlepas daripada Sekat iklan asas di atas.": "屏蔽端口 853（DoT）和通往已知公共 DoH 解析服务器（Cloudflare、Google 等）的端口 443，使使用自己 DNS 的应用（如 Chrome“安全 DNS”）无法绕过上述基本广告屏蔽。"
   },
   "ta": {
     "Mod VPN": "VPN முறை",
@@ -2838,6 +2842,8 @@
     "Tapis iklan terus pada telefon melalui VPN tempatan — tiada sambungan ke mana-mana pelayan atau modem diperlukan.": "உள்ளூர் VPN மூலம் ரெவ்வில் நேராக விளம்பரங்களை வடிகட்டுகிறது — எந்த சர்வரையையும் மான்வினையையும் இணைக்க தேவையில்லை.",
     "Menghidupkan ini akan memutuskan pelayan semasa.": "இதனை இயக்கினால் தற்போதைய சர்வர் துணிக்கப்படும்.",
     "Sekat DNS-over-HTTPS/TLS (DoH/DoT)": "DNS-over-HTTPS/TLS (DoH/DoT) தடுக்கு",
-    "Tutup laluan pintas: paksa semua peranti guna DNS modem sahaja, supaya peranti yang cuba guna DNS sendiri (cth Chrome \\\"Secure DNS\\\", Firefox) tidak dapat mengelak penapisan di atas.": "பைபாஸ் வழியை மூடுகிறது: எல்லா சாதனங்களும் மான்வினின் சொந்த DNS-ஐ தான் பயன்பட வேண்டும் என கட்டாயப்படுத்துகிறது."
+    "Tutup laluan pintas: paksa semua peranti guna DNS modem sahaja, supaya peranti yang cuba guna DNS sendiri (cth Chrome \\\"Secure DNS\\\", Firefox) tidak dapat mengelak penapisan di atas.": "பைபாஸ் வழியை மூடுகிறது: எல்லா சாதனங்களும் மான்வினின் சொந்த DNS-ஐ தான் பயன்பட வேண்டும் என கட்டாயப்படுத்துகிறது.",
+    "Sekat DNS pihak ketiga (DoH/DoT)": "மூன்றாம் தரப்பினர் DNS-ஐ தடு (DoH/DoT)",
+    "Sekat port 853 (DoT) dan port 443 ke pelayan DoH awam yang diketahui (Cloudflare, Google, dll), supaya apl yang guna DNS sendiri (cth Chrome \\\"Secure DNS\\\") tidak terlepas daripada Sekat iklan asas di atas.": "அறியப்பட்ட பொது DoH தீர்வியவைகளுக்கு (Cloudflare, Google, பிற) அறிவுறை 853 (DoT) மற்றும் 443-ஐ தடுகிறது, இதனால் சொந்த DNS-ஐ பயன்படுத்தும் பயன்பாடுகள் (எ.கா. Chrome \"Secure DNS\") மேலே உள்ள அடிப்படை விளம்பர தடுப்பை தவிர்க்க முடியாது."
   }
 }

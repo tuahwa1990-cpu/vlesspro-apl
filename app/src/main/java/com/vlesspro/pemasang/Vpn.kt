@@ -317,11 +317,21 @@ object VlessPautan {
             peraturan.put(JSONObject().put("type", "field").put("inboundTag", JSONArray().put("socks")).put("network", "udp").put("port", "53").put("outboundTag", "dns-out"))
         }
         // Mod tempatan (tanpa nod) semestinya sekat iklan — itulah sahaja tujuannya.
-        if ((ctx != null && VpnTetapan.routingIklan(ctx)) || h.jenis == "LOCAL") {
-            keluar.put(JSONObject().put("tag", "block").put("protocol", "blackhole"))
+        val sekatIklan = (ctx != null && VpnTetapan.routingIklan(ctx)) || h.jenis == "LOCAL"
+        val sekatDoh = (ctx != null && VpnTetapan.routingDoh(ctx)) || h.jenis == "LOCAL"
+        if (sekatIklan || sekatDoh) keluar.put(JSONObject().put("tag", "block").put("protocol", "blackhole"))
+        if (sekatIklan) {
             // geosite:category-ads-all — senarai penuh (200,000+ domain) dibina ke dalam geosite.dat
             // yang disalin daripada aset (lihat VpnServis.pastikanGeosite), sama seperti v2rayNG.
             peraturan.put(JSONObject().put("type", "field").put("domain", JSONArray(listOf("geosite:category-ads-all"))).put("outboundTag", "block"))
+        }
+        if (sekatDoh) {
+            // Tutup laluan pintas Sekat iklan: apl yang guna DNS-over-HTTPS/TLS sendiri (bukan DNS
+            // biasa port 53) tidak nampak oleh peraturan domain di atas. Sekat terus ke IP pelayan DoH
+            // awam yang diketahui (padan senarai dohIPv4/dohIPv6 pada modem, src/adblock.go) serta
+            // port 853 (DoT) sejagat, sentiasa khusus untuk DNS jadi selamat disekat terus.
+            peraturan.put(JSONObject().put("type", "field").put("ip", JSONArray(DOH_IP)).put("port", "443").put("outboundTag", "block"))
+            peraturan.put(JSONObject().put("type", "field").put("port", "853").put("outboundTag", "block"))
         }
         if (ctx != null && VpnTetapan.routingLan(ctx)) {
             peraturan.put(JSONObject().put("type", "field").put("ip", JSONArray(SENARAI_LAN_VPN)).put("outboundTag", "direct"))

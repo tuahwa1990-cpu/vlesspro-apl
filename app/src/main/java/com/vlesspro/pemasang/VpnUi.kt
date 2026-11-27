@@ -611,6 +611,7 @@ private fun SkrinTetapan(kembali: () -> Unit) {
     var failover by remember { mutableStateOf(VpnTetapan.failover(ctx)) }
     var rLan by remember { mutableStateOf(VpnTetapan.routingLan(ctx)) }
     var rIklan by remember { mutableStateOf(VpnTetapan.routingIklan(ctx)) }
+    var rDoh by remember { mutableStateOf(VpnTetapan.routingDoh(ctx)) }
     var dns by remember { mutableStateOf(VpnTetapan.dns(ctx)) }
     var dnsSendiri by remember { mutableStateOf(false) }
     var jAktif by remember { mutableStateOf(VpnJadual.aktif(ctx)) }
@@ -660,6 +661,8 @@ private fun SkrinTetapan(kembali: () -> Unit) {
         Text(Bhs.t("Peranti dalam WiFi/rangkaian tempatan anda (printer, NAS, dll) disambung terus, tidak melalui pelayan VPN."), color = Wr.mu, fontSize = 11.sp)
         Suis(Bhs.t("Sekat iklan asas"), rIklan) { rIklan = it; VpnTetapan.set(ctx, "vpn_routing_iklan", it) }
         Text(Bhs.t("Guna senarai category-ads-all (200,000+ domain iklan/penjejak), sama seperti v2rayNG."), color = Wr.mu, fontSize = 11.sp)
+        Suis(Bhs.t("Sekat DNS pihak ketiga (DoH/DoT)"), rDoh) { rDoh = it; VpnTetapan.set(ctx, "vpn_routing_doh", it) }
+        Text(Bhs.t("Sekat port 853 (DoT) dan port 443 ke pelayan DoH awam yang diketahui (Cloudflare, Google, dll), supaya apl yang guna DNS sendiri (cth Chrome \"Secure DNS\") tidak terlepas daripada Sekat iklan asas di atas."), color = Wr.mu, fontSize = 11.sp)
         Spacer(Modifier.height(10.dp))
         Text(Bhs.t("DNS"), color = Wr.tx, fontWeight = FontWeight.Bold, fontSize = 14.sp)
         Pilihan(Bhs.t("Pelayan DNS"), dnsPilihan + ("__c" to Bhs.t("Lain-lain (taip sendiri)")), if (dnsSendiri) "__c" else dns) { v ->

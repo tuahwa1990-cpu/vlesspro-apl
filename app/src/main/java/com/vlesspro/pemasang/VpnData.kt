@@ -72,6 +72,8 @@ object VpnTetapan {
     fun routingLan(ctx: Context) = p(ctx).getBoolean("vpn_routing_lan", false)
     /** Penghalaan: sekat domain iklan/penjejak biasa. */
     fun routingIklan(ctx: Context) = p(ctx).getBoolean("vpn_routing_iklan", false)
+    /** Penghalaan: sekat DNS-over-HTTPS/TLS pihak ketiga (tutup laluan pintas Sekat iklan). */
+    fun routingDoh(ctx: Context) = p(ctx).getBoolean("vpn_routing_doh", false)
     /** DNS tersuai (senarai IP dipisah koma); kosong = lalai (1.1.1.1, 8.8.8.8). */
     fun dns(ctx: Context) = p(ctx).getString("vpn_dns", "") ?: ""
     fun setDns(ctx: Context, v: String) { p(ctx).edit().putString("vpn_dns", v).apply() }
@@ -81,6 +83,21 @@ object VpnTetapan {
 val SENARAI_LAN_VPN = listOf(
     "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/8", "169.254.0.0/16",
     "224.0.0.0/4", "fc00::/7", "fe80::/10", "::1/128",
+)
+
+/** IP pelayan DoH awam yang diketahui, untuk peraturan "Sekat DNS pihak ketiga" (padan senarai
+ * dohIPv4/dohIPv6 pada modem, vless-pro-b618/src/adblock.go, supaya tingkah laku serupa). */
+val DOH_IP = listOf(
+    "1.1.1.1", "1.0.0.1", // Cloudflare
+    "8.8.8.8", "8.8.4.4", // Google
+    "9.9.9.9", "149.112.112.112", // Quad9
+    "208.67.222.222", "208.67.220.220", // OpenDNS
+    "94.140.14.14", "94.140.15.15", // AdGuard DNS
+    "185.228.168.9", "185.228.169.9", // CleanBrowsing
+    "76.76.2.0", "76.76.10.0", // Control D
+    "2606:4700:4700::1111", "2606:4700:4700::1001", // Cloudflare (IPv6)
+    "2001:4860:4860::8888", "2001:4860:4860::8844", // Google (IPv6)
+    "2620:fe::fe", "2620:fe::9", // Quad9 (IPv6)
 )
 
 class SekatanVpn(m: String) : RuntimeException(m)
